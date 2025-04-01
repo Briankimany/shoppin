@@ -1,0 +1,79 @@
+{% extends "shop/base2.html" %}
+
+{% block title %}Vendor Products{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/products.css') }}">
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/shop/products.js') }}"></script>
+{% endblock %}
+{% block content %}
+<div class="ecommerce-container">
+    <!-- Category Navigation -->
+    <div class="category-nav">
+        <div class="category-scroll">
+            {% for category in categories %}
+            <button class="category-btn {% if loop.first %}active{% endif %}" 
+                    data-category="{{ category.id }}">
+                {{ category.name }}
+            </button>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Products by Category -->
+    <div class="products-by-category">
+        {% for category in categories %}
+        <section class="product-category {% if loop.first %}active{% endif %}" 
+                 id="category-{{ category.id }}">
+            <h2 class="category-title">{{ category.name }}</h2>
+            <div class="product-grid">
+                {% for product in category.products %}
+                <div class="product-card">
+                    <a href="{{ url_for('shop.specific_product', product_id=product.id) }}" class="product-link"></a>
+                    
+            
+
+                    <div class="product-image-container">
+                        <img src="{{ product.image_url }}" alt="{{ product.name }}" 
+                             class="standard-product-image">
+                    </div>
+                    
+                    <!-- Product Info -->
+                    <div class="product-info">
+                        <h3 class="product-name">{{ product.name }}</h3>
+                        <div class="price-container">
+                            <span class="current-price">${{ "%.2f"|format(product.price) }}</span>
+                            {% if product.original_price %}
+                            <span class="original-price">${{ "%.2f"|format(product.original_price) }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="product-actions">
+                            <div class="quantity-selector">
+                                <button class="qty-btn minus">-</button>
+                                <input type="number" class="quantity-input" 
+                                       id="quantity-{{ product.id }}" value="1" min="1">
+                                <button class="qty-btn plus">+</button>
+                            </div>
+                            <button class="add-to-cart-btn" 
+                                    data-product-id="{{ product.id }}">
+                                <i class="bi bi-cart-plus"></i> Add
+                            </button>
+                        </div>
+                    </div>
+                    
+               
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Cart Notification -->
+<div id="cart-notification" class="cart-notification">
+    <span id="notification-message"></span>
+</div>
+{% endblock %}

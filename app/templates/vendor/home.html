@@ -1,0 +1,43 @@
+{% extends "vendor/base2.html" %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/vendor/home.css') }}">
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/vendor/home.js') }}"></script>
+{% endblock %}
+
+
+{% block content %}
+<div class="hero">
+    <div class="hero-content">
+        <h1>Expand Your Business Online with Ease</h1>
+        <p>Join our platform and take your business to the next level. List your products and reach more customers in just a few clicks.</p>
+        <div class="action-buttons">
+            <a href="{{ url_for('vendor.login') }}" class="btn btn-primary">Login</a>
+            <a href="{{ url_for('vendor.register') }}" class="btn btn-secondary">Register</a>
+        </div>
+    </div>
+</div>
+
+<div class="features">
+    <h2>Why Choose Us?</h2>
+    <div class="feature-grid">
+        <div class="feature-item">
+            <h3>Fast Setup</h3>
+            <p>List your business and start selling in minutes.</p>
+        </div>
+        <div class="feature-item">
+            <h3>Secure Transactions</h3>
+            <p>All payments are securely processed for your peace of mind.</p>
+        </div>
+        <div class="feature-item">
+            <h3>Wider Reach</h3>
+            <p>Expand your customer base beyond your local area.</p>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,98 @@
+
+    /* Scoped dashboard styles */
+    .vendor-dashboard-content {
+        --dashboard-primary: #4361ee;
+        --dashboard-primary-light: #eef2ff;
+        --dashboard-text: #1e293b;
+        --dashboard-text-light: #64748b;
+        --dashboard-border: #e2e8f0;
+        --dashboard-success: #10b981;
+        --dashboard-warning: #f59e0b;
+        --dashboard-danger: #ef4444;
+    }
+
+    .vendor-dashboard-content .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .vendor-dashboard-content .dashboard-grid {
+        display: grid;
+        gap: 1.25rem;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+
+    .vendor-dashboard-content .metric-card,
+    .vendor-dashboard-content .chart-card,
+    .vendor-dashboard-content .orders-card,
+    .vendor-dashboard-content .alert-card {
+        background: white;
+        border-radius: 8px;
+        border: 1px solid var(--dashboard-border);
+        padding: 1.25rem;
+    }
+
+    /* Progress Bar Styles */
+.vendor-dashboard-content .stock-progress-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.vendor-dashboard-content .stock-progress {
+    flex-grow: 1;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.vendor-dashboard-content .progress-bar {
+    height: 100%;
+    transition: width 0.5s ease;
+}
+
+.vendor-dashboard-content .stock-value {
+    font-size: 0.8rem;
+    color: var(--dashboard-text-light);
+}
+
+/* Inventory Breakdown Styles */
+.vendor-dashboard-content .inventory-breakdown {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.vendor-dashboard-content .inventory-item {
+    background: var(--dashboard-primary-light);
+    padding: 0.5rem;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.vendor-dashboard-content .inventory-label {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--dashboard-text-light);
+}
+
+.vendor-dashboard-content .inventory-value {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+/* Products Card Specific */
+.vendor-dashboard-content .products-card {
+    position: relative;
+}
+
+.vendor-dashboard-content .products-card .metric-value {
+    font-size: 2rem;
+    margin: 0.25rem 0;
+}
+

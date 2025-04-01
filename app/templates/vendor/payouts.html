@@ -1,0 +1,130 @@
+{% extends "vendor/base2.html" %}
+
+{% block title %}Withdraw Funds{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/vendor/payout.css') }}">
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/vendor/payout.js') }}"></script>
+{% endblock %}
+
+
+{% block content %}
+<div class="vendor-dashboard-content">
+    <header class="dashboard-header">
+        <h1>Withdraw Funds</h1>
+    </header>
+
+    <div class="withdrawal-container">
+        <!-- Balance Summary Card -->
+        <div class="balance-card dashboard-card">
+            <div class="card-header">
+                <i class="fas fa-wallet"></i>
+                <h3>Account Balance</h3>
+            </div>
+            <div class="card-content">
+                <div class="balance-metric">
+                    <span class="metric-label">Available Balance</span>
+                    <span class="metric-value">${{ "%.2f"|format(vendor_balance.available) }}</span>
+                </div>
+                <div class="balance-metric">
+                    <span class="metric-label">Pending Withdrawals</span>
+                    <span class="metric-value">${{ "%.2f"|format(vendor_balance.pending) }}</span>
+                </div>
+                <div class="balance-metric">
+                    <span class="metric-label">Total Earned</span>
+                    <span class="metric-value">${{ "%.2f"|format(vendor_balance.total) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Withdrawal Form -->
+        <div class="withdrawal-form dashboard-card">
+            <div class="card-header">
+                <i class="fas fa-money-bill-wave"></i>
+                <h3>Request Withdrawal</h3>
+            </div>
+            <div class="card-content">
+                <form method="POST" action="{{ url_for('vendor.process_withdrawal') }}">
+                    <div class="form-group">
+                        <label for="amount">Withdrawal Amount ($)</label>
+                        <div class="input-group">
+                            <span class="input-prefix">$</span>
+                            <input type="number" 
+                                   id="amount" 
+                                   name="amount" 
+                                   min="10" 
+                                   max="{{ vendor_balance.available }}" 
+                                   step="0.01" 
+                                   placeholder="0.00"
+                                   required>
+                        </div>
+                        <small class="form-note">Minimum withdrawal: $10.00</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="method">Payment Method</label>
+                        <select id="method" name="method" required>
+                            <option value="">Select payment method</option>
+                            <option value="paypal">PayPal</option>
+                            <option value="bank_transfer">Bank Transfer</option>
+                            <option value="venmo">Venmo</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="account-details" style="display: none;">
+                        <label for="account_info">Account Details</label>
+                        <input type="text" 
+                               id="account_info" 
+                               name="account_info" 
+                               placeholder="Enter email or account number">
+                    </div>
+
+                    <button type="submit" class="submit-button">
+                        <i class="fas fa-paper-plane"></i> Request Withdrawal
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Recent Withdrawals -->
+        <div class="transactions-card dashboard-card">
+            <div class="card-header">
+                <i class="fas fa-history"></i>
+                <h3>Recent Withdrawals</h3>
+                <a href="{{ url_for('vendor.withdrawal_history') }}" class="card-link">
+                    View All <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            <div class="card-content">
+                {% if withdrawals %}
+                <div class="transactions-list">
+                    {% for withdrawal in withdrawals %}
+                    <div class="transaction-item {{ withdrawal.status }}">
+                        <div class="transaction-meta">
+                            <span class="transaction-id">#{{ withdrawal.id }}</span>
+                            <span class="transaction-date">{{ withdrawal.request_date }}</span>
+                        </div>
+                        <div class="transaction-details">
+                            <span class="transaction-amount">${{ "%.2f"|format(withdrawal.amount) }}</span>
+                            <span class="transaction-method">{{ withdrawal.method }}</span>
+                            <span class="transaction-status">{{ withdrawal.status }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <p>No withdrawal history yet</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

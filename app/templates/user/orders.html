@@ -1,0 +1,142 @@
+{% extends 'shop/base2.html' %}
+
+{% block title %}Order History{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/user/order2.js') }}"></script>
+{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/user/orders.css') }}">
+{% endblock %}
+
+
+{% block content %}
+<div class="order-history-container">
+    <div class="order-history-header">
+        <h2><i class="fas fa-history"></i> Order History</h2>
+        <div class="order-filter">
+            <label for="status-filter">Filter by status:</label>
+            <select id="status-filter" class="status-filter">
+                <option value="all">All Orders</option>
+                <option value="pending">Pending</option>
+                <option value="paid">Completed</option>
+                <option value="cancelled">Cancelled</option>
+            </select>
+        </div>
+    </div>
+
+    {% if orders %}
+    <div class="orders-card">
+        <div class="table-responsive">
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Date</th>
+                        <th>Phone</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Payment</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr class="order-row" data-status="{{ order.status }}">
+                        <td>#{{ order.id }}</td>
+                        <td>{{ order.created_at.strftime('%b %d, %Y') }}</td>
+                        <td>{{ order.phone_number }}</td>
+                        <td>${{ "%.2f" | format(order.total_amount) }}</td>
+                        <td>
+                            <span class="status-badge {{ order.status }}">
+                                {{ order.status.capitalize() }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="payment-badge {{ order.payment_type }}">
+                                {% if order.payment_type == "pre-delivery" %}
+                                <i class="fas fa-credit-card"></i> Pre-Paid
+                                {% else %}
+                                <i class="fas fa-truck"></i> On Delivery
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="inspect-btn" data-order-id="{{ order.id }}">
+                                <i class="fas fa-search"></i> Details
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div id="order-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Order #<span id="modal-order-id"></span></h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="order-summary">
+                    <div class="summary-item">
+                        <span class="summary-label">Date:</span>
+                        <span id="order-date" class="summary-value"></span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Status:</span>
+                        <span id="order-status" class="summary-value"></span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Payment:</span>
+                        <span id="order-payment" class="summary-value"></span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Total:</span>
+                        <span id="order-total" class="summary-value"></span>
+                    </div>
+                </div>
+
+                <div class="order-items-container">
+                    <h4>Items</h4>
+                    <table class="order-items-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="order-items-body">
+                            <!-- Items will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="print-order" class="btn-secondary">
+                    <i class="fas fa-print"></i> Print Receipt
+                </button>
+                <button class="close-btn btn-primary">
+                    <i class="fas fa-times"></i> Close
+                </button>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-orders">
+        <img src="{{ url_for('static', filename='images/empty-orders.svg') }}" alt="No orders" class="empty-img">
+        <h3>No Orders Found</h3>
+        <p>You haven't placed any orders yet</p>
+        <a href="{{ url_for('shop.shop_home') }}" class="btn-primary">
+            <i class="fas fa-shopping-cart"></i> Start Shopping
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

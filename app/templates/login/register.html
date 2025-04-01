@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - Your Brand</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login/register.css') }}">
+    <script src="{{ url_for('static', filename='js/login/register.js') }}"></script>
+
+  
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-store"></i>
+            </div>
+            <h2>Create Your Account</h2>
+            <p class="subtitle">Join us to get started</p>
+        </div>
+
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'error' %}exclamation-circle{% elif category == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Specific message -->
+        {% if message %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                {{ message }}
+            </div>
+        {% endif %}
+
+        <!-- Registration Form -->
+        <form method="POST" id="registerForm">
+            <div class="form-group">
+                <label for="name" class="required">Username</label>
+                <input 
+                    type="text" 
+                    id="name" 
+                    name="name" 
+                    class="form-control" 
+                    placeholder="Enter your username" 
+                    required
+                    autocomplete="username"
+                >
+                <div class="error-message" id="name-error">Please enter a valid username</div>
+            </div>
+
+            <div class="form-group">
+                <label for="email" class="required">Email</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    class="form-control" 
+                    placeholder="your@email.com" 
+                    required
+                    autocomplete="email"
+                >
+                <div class="error-message" id="email-error">Please enter a valid email address</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input 
+                    type="tel" 
+                    id="phone" 
+                    name="phone" 
+                    class="form-control" 
+                    placeholder="+1 (123) 456-7890"
+                    autocomplete="tel"
+                >
+                <div class="error-message" id="phone-error">Please enter a valid phone number</div>
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="required">Password</label>
+                <div class="password-container">
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        class="form-control" 
+                        placeholder="Create a password" 
+                        required
+                        autocomplete="new-password"
+                    >
+                    <button type="button" class="toggle-password" aria-label="Toggle password visibility">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <div class="password-strength">
+                    <div class="strength-meter">
+                        <div class="strength-bar" id="strength-bar"></div>
+                    </div>
+                    <span class="strength-text" id="strength-text">Password strength</span>
+                </div>
+                <div class="requirements">
+                    <div class="requirement unmet" id="length-req">At least 8 characters</div>
+                    <div class="requirement unmet" id="uppercase-req">1 uppercase letter</div>
+                    <div class="requirement unmet" id="number-req">1 number</div>
+                    <div class="requirement unmet" id="special-req">1 special character</div>
+                </div>
+                <div class="error-message" id="password-error">Please enter a valid password</div>
+            </div>
+
+            <button type="submit" class="btn">
+                <i class="fas fa-user-plus"></i>
+                Create Account
+            </button>
+        </form>
+
+        <div class="footer">
+            Already have an account? 
+            <a href="{{ url_for('user.login') }}" class="login-link">Sign in</a>
+        </div>
+    </div>
+
+
+</body>
+</html>

@@ -1,0 +1,133 @@
+{% extends "shop/base2.html" %}
+
+{% block title %}Checkout{% endblock %}
+
+{% block content %}
+    <h2>Checkout</h2>
+    <table class="checkout-table">
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Product Name</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Modify</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category, items in cart_summary.items() %}
+                {% if category != "TotalCost" %}
+                    <tr>
+                        <td rowspan="{{ items|length }}" class="category-cell">{{ category }}</td>
+                        {% for item in items %}
+                            {% if not loop.first %}<tr>{% endif %}
+                                <td class="left-align">{{ item["name"] }}</td>
+                                <td class="center-align">{{ item["quantity"] }}</td>
+                                <td class="right-align">${{ item["price"] }}</td>
+                                <td>
+                                    <a href="{{ url_for('shop.specific_product', product_id=item['product_id']) }}" class="modify-btn">
+                                        <i class="fa fa-edit"></i> Modify
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                {% endif %}
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" class="right-align"><strong>Total Cost:</strong></td>
+                <td colspan="2" class="right-align"><strong>${{ cart_summary["TotalCost"] }}</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+    
+    <div class="checkout-actions">
+        <a href="{{ url_for('shop.process_payment') }}" class="checkout-btn">Proceed to Payment</a>
+    </div>
+    <style>
+        /* General Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: #fff;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+th {
+    background: #333;
+    color: white;
+    text-align: left;
+}
+
+td {
+    vertical-align: middle;
+}
+
+td:nth-child(3), /* Quantity */
+td:nth-child(4), /* Price */
+tfoot td {
+    text-align: right;
+}
+
+/* Zebra Striping */
+tbody tr:nth-child(even) {
+    background: #f8f8f8;
+}
+
+/* Modify Button */
+.modify-btn {
+    display: inline-block;
+    padding: 6px 12px;
+    background: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.modify-btn:hover {
+    background: #0056b3;
+}
+
+/* Footer Fix */
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* Checkout Button */
+.checkout-btn {
+    display: block;
+    width: fit-content;
+    margin: 20px auto;
+    padding: 12px 20px;
+    background: #28a745;
+    color: white;
+    font-size: 16px;
+    text-decoration: none;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.checkout-btn:hover {
+    background: #218838;
+}
+
+    </style>
+{% endblock %}
+

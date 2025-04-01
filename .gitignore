@@ -1,0 +1,11 @@
+.venv/
+.env
+/__pychache__
+*.pyc
+.vscode/
+*.db 
+*.ipynb
+test/
+*.logs
+/LOGS
+/tests

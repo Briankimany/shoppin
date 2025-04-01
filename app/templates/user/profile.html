@@ -1,0 +1,155 @@
+{% extends 'shop/base2.html' %}
+
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/user/profile.js') }}"></script>
+{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/user/profile.css') }}">
+{% endblock %}
+
+
+{% block content %}
+<div class="profile-wrapper">
+    <div class="profile-card">
+        <div class="profile-header">
+            <h1 class="profile-title">My Profile</h1>
+            <div class="profile-avatar">
+                <div class="avatar-placeholder">
+                    {{ user.name|first|upper if user.name else 'U' }}
+                </div>
+                <button class="avatar-upload" aria-label="Change profile picture">
+                    <i class="fas fa-camera"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="profile-section">
+            <h2 class="section-title">Personal Information</h2>
+            
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <div class="input-group">
+                    <span class="static-value" id="name-value">{{ user.name if user.name else 'Not provided' }}</span>
+                    <div class="edit-controls" style="display:none">
+                        <input type="text" id="name-input" class="form-input" value="{{ user.name if user.name else '' }}">
+                        <div class="button-group">
+                            <button class="btn btn-secondary btn-sm cancel-edit">Cancel</button>
+                            <button class="btn btn-primary btn-sm save-edit">Save</button>
+                        </div>
+                    </div>
+                    <button class="btn btn-edit edit-trigger">
+                        <i class="fas fa-pencil-alt"></i> Edit
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <div class="input-group">
+                    <span class="static-value" id="email-value">{{ user.email if user.email else 'Not provided' }}</span>
+                    <div class="edit-controls" style="display:none">
+                        <input type="email" id="email-input" class="form-input" value="{{ user.email if user.email else '' }}">
+                        <div class="button-group">
+                            <button class="btn btn-secondary btn-sm cancel-edit">Cancel</button>
+                            <button class="btn btn-primary btn-sm save-edit">Save</button>
+                        </div>
+                    </div>
+                    <button class="btn btn-edit edit-trigger">
+                        <i class="fas fa-pencil-alt"></i> Edit
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <div class="input-group">
+                    <span class="static-value" id="phone-value">{{ user.phone if user.phone else 'Not provided' }}</span>
+                    <div class="edit-controls" style="display:none">
+                        <input type="tel" id="phone-input" class="form-input" value="{{ user.phone if user.phone else '' }}">
+                        <div class="button-group">
+                            <button class="btn btn-secondary btn-sm cancel-edit">Cancel</button>
+                            <button class="btn btn-primary btn-sm save-edit">Save</button>
+                        </div>
+                    </div>
+                    <button class="btn btn-edit edit-trigger">
+                        <i class="fas fa-pencil-alt"></i> Edit
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-section">
+            <h2 class="section-title">Security</h2>
+            
+            <div class="form-group">
+                <label>Password</label>
+                <div class="input-group">
+                    <span class="static-value">••••••••</span>
+                    <button class="btn btn-edit" id="password-toggle">
+                        <i class="fas fa-pencil-alt"></i> Change
+                    </button>
+                </div>
+                
+                <div class="password-form" style="display:none">
+                    <div class="form-group">
+                        <label for="current-password">Current Password</label>
+                        <div class="password-input">
+                            <input type="password" id="current-password" class="form-input">
+                            <button class="btn btn-icon toggle-password" type="button">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="new-password">New Password</label>
+                        <div class="password-input">
+                            <input type="password" id="new-password" class="form-input">
+                            <button class="btn btn-icon toggle-password" type="button">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="password-strength">
+                            <div class="strength-meter">
+                                <div class="strength-bar"></div>
+                            </div>
+                            <span class="strength-text">Password strength</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirm-password">Confirm New Password</label>
+                        <div class="password-input">
+                            <input type="password" id="confirm-password" class="form-input">
+                            <button class="btn btn-icon toggle-password" type="button">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button class="btn btn-secondary cancel-password">Cancel</button>
+                        <button class="btn btn-primary save-password">Update Password</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-meta">
+            <div class="meta-item">
+                <span class="meta-label">Member since</span>
+                <span class="meta-value">{{ user.created_at.strftime('%B %d, %Y') }}</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Last updated</span>
+                <span class="meta-value">{{ user.updated_at.strftime('%B %d, %Y') if user.updated_at else 'Never' }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}

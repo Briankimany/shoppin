@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin/inspect_vendors.css') }}">
+    <script src="{{ url_for('static', filename='js/admin/inspect_vendors.js') }}"></script>
+   
+</head>
+<body>
+    <h2><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h2>
+
+    {% for vendor in vendors %}
+    <div class="vendor-container">
+        <div class="vendor-header" onclick="toggleVendor('{{ vendor.id }}', this)">
+            <div>
+                <span>{{ vendor.name }}</span>
+                <small style="color: var(--text-medium); margin-left: 0.5rem;">({{ vendor.orders|length }} orders)</small>
+            </div>
+            <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="vendor-content" id="vendor-{{ vendor.id }}">
+            <div class="vendor-info">
+                <div>
+                    <strong>Email</strong>
+                    <span>{{ vendor.email }}</span>
+                </div>
+                <div>
+                    <strong>Total Products</strong>
+                    <span>{{ vendor.product_count }}</span>
+                </div>
+                <div>
+                    <strong>Total Sales</strong>
+                    <span>${{ "%.2f"|format(vendor.total_sales) }}</span>
+                </div>
+            </div>
+
+            {% if vendor.orders %}
+            <h4 class="orders-header"><i class="fas fa-clipboard-list"></i> Orders</h4>
+            
+            {% for order in vendor.orders %}
+                <div class="order-container">
+                    <div class="order-header" onclick="toggleOrder('{{ order.id }}', this)">
+                        <div>
+                            <span>Order #{{ order.id }}</span>
+                            <span class="order-status status-{{ order.status|lower }}">{{ order.status }}</span>
+                        </div>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="order-content" id="order-{{ order.id }}">
+                        <div class="order-details">
+                            <div>
+                                <strong>Date</strong>
+                                <span>{{ order.date }}</span>
+                            </div>
+                            <div>
+                                <strong>Customer</strong>
+                                <span>{{ order.customer_name or 'Guest' }}</span>
+                            </div>
+                            <div>
+                                <strong>Total</strong>
+                                <span>${{ "%.2f"|format(order.total) }}</span>
+                            </div>
+                        </div>
+                        
+                        <h5>Items:</h5>
+                        <ul class="order-items">
+                            {% for item in order.items %}
+                            <li>
+                                <span class="item-name">{{ item.product_name }}</span>
+                                <span class="item-qty">{{ item.quantity }} ×</span>
+                                <span class="item-price">${{ "%.2f"|format(item.price) }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            {% endfor %}
+            {% else %}
+                <p style="color: var(--text-medium);">No orders found for this vendor.</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+
+
+</body>
+</html>

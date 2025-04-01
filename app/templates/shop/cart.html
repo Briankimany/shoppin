@@ -1,0 +1,99 @@
+{% extends "shop/base2.html" %}
+
+{% block title %}Your Shopping Cart{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/shop/cart.js') }}"></script>
+{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/shop/cart.css') }}">
+{% endblock %}
+
+
+{% block content %}
+<div class="cart-container">
+    <div class="cart-header">
+        <h2><i class="fas fa-shopping-cart"></i> Your Cart</h2>
+        <a href="{{ url_for('shop.shop_home') }}" class="continue-shopping">
+            <i class="fas fa-arrow-left"></i> Continue Shopping
+        </a>
+    </div>
+
+    {% if cart_items %}
+    <div class="cart-items">
+        {% for item in cart_items %}
+        <div class="cart-item" data-product-id="{{ item.product.id }}">
+            <div class="product-image-container">
+                <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}">
+            </div>
+            
+            <div class="product-details">
+                <h3 class="product-name">{{ item.product.name }}</h3>
+                <p class="product-category">{{ item.product.category }}</p>
+                <div class="price">${{ "%.2f"|format(item.product.price) }}</div>
+            </div>
+            
+            <div class="quantity-controls">
+                <button class="qty-btn minus" data-action="decrease">-</button>
+                <input type="number" class="quantity-input" 
+                       value="{{ item.quantity }}" min="1" max="99"
+                       data-product-id="{{ item.product.id }}">
+                <button class="qty-btn plus" data-action="increase">+</button>
+            </div>
+            
+            <div class="item-subtotal">
+                ${{ "%.2f"|format(item.product.price * item.quantity) }}
+            </div>
+            
+            <button class="remove-btn" data-product-id="{{ item.product.id }}" 
+                    aria-label="Remove {{ item.product.name }}">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="cart-summary">
+        <div class="summary-row">
+            <span>Subtotal</span>
+            <span>Ksh{{ "%.2f"|format(subtotal) }}</span>
+        </div>
+        <div class="summary-row">
+            <span>Shipping</span>
+            <span>Free</span>
+        </div>
+        <div class="summary-row total">
+            <span>Total</span>
+            <span>Ksh{{ "%.2f"|format(subtotal) }}</span>
+        </div>
+    </div>
+
+    <div class="cart-actions">
+        <button id="update-cart-btn" class="btn-secondary">
+            <i class="fas fa-sync-alt"></i> Update Cart
+        </button>
+        <a href="{{ url_for('shop.checkout') }}" class="btn-primary checkout-btn">
+            Proceed to Checkout <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+    {% else %}
+    <div class="empty-cart">
+        <img src="/static/images/empty-cart.svg" alt="Empty cart" class="empty-cart-img">
+        <h3>Your cart is empty</h3>
+        <p>Browse our products to find something you'll love</p>
+        <a href="{{ url_for('shop.shop_home') }}" class="btn-primary">
+            Start Shopping
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+
+
+
+{% endblock %}
+
+{% block name %}
+Playpit
+{% endblock %}

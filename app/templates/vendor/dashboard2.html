@@ -1,0 +1,153 @@
+{% extends "vendor/base2.html" %}
+
+{% block title %}Vendor Dashboard{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="{{ url_for('static', filename='js/vendor/dashboard2.js') }}"></script>
+
+{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/vendor/dashboard2.css') }}">
+{% endblock %}
+
+
+{% block content %}
+<div class="vendor-dashboard-content">
+    <header class="dashboard-header">
+        <div class="header-left">
+            <h1>Dashboard Overview</h1>
+        </div>
+        <div class="header-right">
+            <span class="last-updated">
+                <i class="fas fa-sync-alt"></i> Updated just now
+            </span>
+         
+        </div>
+    </header>
+    
+    <div class="dashboard-grid">
+        <!-- Metric Cards -->
+        <div class="metric-card products-card">
+            <div class="metric-icon">
+                <i class="fas fa-cubes"></i>
+            </div>
+            <div class="metric-details">
+                <span class="metric-label">Inventory Summary</span>
+                <span class="metric-value">{{ data.total_products }}</span>
+                <div class="inventory-breakdown">
+                    <div class="inventory-item">
+                        <span class="inventory-label">Active</span>
+                        <span class="inventory-value">{{ data.active_products }}</span>
+                    </div>
+                    <div class="inventory-item">
+                        <span class="inventory-label">Out of Stock</span>
+                        <span class="inventory-value">{{ data.out_of_stock }}</span>
+                    </div>
+                    <div class="inventory-item">
+                        <span class="inventory-label">Low Stock</span>
+                        <span class="inventory-value">{{ data.low_stock_items|length if data.low_stock_items else 0 }}</span>
+                    </div>
+                </div>
+                <a href="{{ url_for('vendor.vendor_products') }}" class="card-link">
+                    Manage Inventory <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="metric-card highlight">
+            <div class="metric-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="metric-details">
+                <span class="metric-label">Total Revenue</span>
+                <span class="metric-value">${{ "%.2f"|format(data.total_revenue) }}</span>
+            </div>
+        </div>
+
+        <!-- Chart Card -->
+        <div class="chart-card">
+            <div class="card-header">
+                <h3>7-Day Revenue</h3>
+                <a href="{{ url_for('vendor.reports') }}" class="card-link">
+                    View Report <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            <div class="chart-container" style="height: 200px;">
+                <canvas class="revenue-chart" 
+                        data-dates="{{ data.daily_revenue.dates|join(',') }}"
+                        data-amounts="{{ data.daily_revenue.amounts|join(',') }}"></canvas>
+            </div>
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="orders-card">
+            <div class="card-header">
+                <h3>Recent Orders</h3>
+                <a href="{{ url_for('vendor.orders') }}" class="card-link">
+                    View All <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            <div class="orders-list">
+                {% for order in data.recent_orders %}
+                <div class="order-item {{ order.status }}">
+                    <div class="order-id">#{{ order.id }}</div>
+                    <div class="order-meta">
+                        <span class="customer">{{ order.customer }}</span>
+                        <span class="amount">${{ "%.2f"|format(order.total) }}</span>
+                    </div>
+                    <div class="order-footer">
+                        <span class="status-badge">{{ order.status|title }}</span>
+                        <span class="time">{{ order.time_ago }}</span>
+                    </div>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <p>No recent orders</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Low Stock -->
+        {% if data.low_stock_items %}
+
+        <div class="alert-card">
+            <div class="card-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Low Stock</h3>
+                <span class="count-badge">{{ data.low_stock_items|length }}</span>
+            </div>
+            <div class="alert-items">
+                {% for item in data.low_stock_items %}
+                <div class="alert-item">
+                    <div class="product-info">
+                        <span class="product-name">{{ item.name }}</span>
+                        <div class="stock-progress-container">
+                            <div class="stock-progress">
+                                <div class="progress-bar" 
+                                    data-stock="{{ item.stock }}"
+                                    data-threshold="{{ item.threshold }}">
+                                </div>
+                            </div>
+                            <span class="stock-value">{{ item.stock }} of {{ item.threshold }}</span>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('vendor.edit_product', product_id=item.id) }}" 
+                    class="action-btn">
+                        Restock
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif%}
+    </div>
+</div>
+
+{% endblock %}
+
+
+

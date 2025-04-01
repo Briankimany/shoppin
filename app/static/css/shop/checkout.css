@@ -1,0 +1,219 @@
+
+/* ===== Checkout Page Styles ===== */
+.checkout-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.checkout-title {
+    color: var(--text-dark);
+    margin-bottom: 1.5rem;
+    font-size: 1.75rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.checkout-table-container {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 2rem;
+}
+
+.checkout-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+.checkout-table th {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 500;
+}
+
+.checkout-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+
+.category-cell {
+    background-color: var(--bg-light);
+    font-weight: 500;
+    color: var(--text-dark);
+}
+
+.category-name {
+    display: inline-block;
+    transform: rotate(-90deg);
+    transform-origin: left top;
+    white-space: nowrap;
+    position: absolute;
+    left: 1rem;
+    margin-top: -0.5rem;
+}
+
+.product-cell {
+    position: relative;
+}
+
+.product-name {
+    font-weight: 500;
+    color: var(--text-dark);
+}
+
+.qty-cell {
+    text-align: center;
+    color: var(--text-medium);
+}
+
+.price-cell {
+    font-weight: 500;
+    color: var(--primary-color);
+}
+
+.action-cell {
+    text-align: right;
+}
+
+.modify-btn {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.modify-btn:hover {
+    background-color: rgba(37, 99, 235, 0.1);
+}
+
+.modify-btn i {
+    font-size: 0.8rem;
+}
+
+.total-row {
+    background-color: var(--bg-light);
+}
+
+.total-label {
+    font-weight: 600;
+    text-align: right;
+    color: var(--text-dark);
+}
+
+.total-amount {
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+}
+
+.checkout-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.continue-btn, .payment-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.2s ease;
+}
+
+.continue-btn {
+    background-color: white;
+    color: var(--primary-color);
+    border: 1px solid var(--border-color);
+}
+
+.continue-btn:hover {
+    background-color: var(--bg-light);
+}
+
+.payment-btn {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.payment-btn:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+/* ===== Responsive Styles ===== */
+@media (max-width: 768px) {
+    .checkout-table th, 
+    .checkout-table td {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .category-name {
+        transform: none;
+        position: static;
+        margin: 0;
+    }
+    
+    .checkout-actions {
+        flex-direction: column;
+    }
+    
+    .continue-btn, 
+    .payment-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .checkout-table {
+        display: block;
+        overflow-x: auto;
+    }
+    
+    .modify-btn span {
+        display: none;
+    }
+    
+    .modify-btn i {
+        margin-right: 0;
+    }
+}
+@media (max-width: 480px) {
+    /* Stack table rows for better mobile viewing */
+    .checkout-table tr {
+        display: block;
+        margin-bottom: 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+    }
+    
+    .checkout-table td {
+        display: flex;
+        justify-content: space-between;
+        border-bottom: none;
+    }
+    
+    .checkout-table td:before {
+        content: attr(data-label);
+        font-weight: 500;
+        margin-right: 1rem;
+    }
+    
+  
+}

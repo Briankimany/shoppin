@@ -1,0 +1,26 @@
+{% extends "shop/base2.html" %}
+
+{% block title %}Available Vendors{% endblock %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/shop/shops.css') }}">
+{% endblock %}
+{% block content %}
+<div class="vendor-container">
+    <h2 class="vendor-title">Discover Our Vendors</h2>
+    <p class="vendor-subtitle">Find top-rated sellers offering quality products across different categories.</p>
+    
+    <div class="vendor-grid">
+        {% for vendor in vendors %}
+            <a href="{{ url_for('shop.vendor_products', vendor_id=vendor.id) }}" class="vendor-card">
+                <img src="{{ vendor.store_logo }}" alt="{{ vendor.name }}" class="vendor-logo">
+                <div class="vendor-info">
+                    <h3>{{ vendor.name }}</h3>
+                    <p class="vendor-desc">{{ vendor.store_description[:120] }}...</p> <!-- Shortened desc -->
+                    <span class="view-products">View Products →</span>
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

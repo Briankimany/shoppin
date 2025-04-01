@@ -1,0 +1,180 @@
+/* ======================================
+   dashboard.css - Tight Integration with Base Template
+====================================== */
+
+/* ---------- Reset & Base Defaults ---------- */
+.dashboard-container * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font: inherit;
+}
+
+/* ---------- Content Area & Dashboard Container ---------- */
+.content-area {
+    padding: 0; /* Remove default padding to eliminate gaps */
+    margin-left: var(--sidebar-width);
+    width: calc(100vw - var(--sidebar-width));
+    overflow-x: hidden;
+}
+
+.dashboard-container {
+    padding: 1.5rem;
+    margin-left: 0; /* Align flush with sidebar */
+    width: 100%;
+    max-width: calc(100vw - var(--sidebar-width)); /* Prevent horizontal scroll */
+    min-height: calc(100vh - 120px); /* Account for header/footer */
+}
+
+/* ---------- Metrics Grid ---------- */
+.metrics-grid {
+    display: grid;
+    gap: 1rem; /* Reduced from 1.5rem */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    margin-bottom: 1.5rem;
+}
+
+/* ---------- Dashboard Cards ---------- */
+.dashboard-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    padding: 1.25rem;
+    border: 1px solid var(--border);
+    height: 100%;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* ---------- Revenue Sparkline ---------- */
+.revenue-sparkline {
+    height: 120px;
+    margin-top: 0.5rem;
+}
+
+/* ---------- Recent Orders List ---------- */
+.activity-list {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.activity-item {
+    padding: 0.75rem;
+    background: white;
+    border-radius: 6px;
+    border-left: 3px solid var(--border);
+    transition: all 0.2s;
+}
+
+.activity-item.completed {
+    border-left-color: var(--success);
+}
+
+.activity-item.pending {
+    border-left-color: var(--warning);
+}
+
+/* ---------- Low Stock Alerts ---------- */
+.alert-items {
+    margin-top: 0.5rem;
+}
+
+.alert-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed var(--border);
+}
+
+/* ---------- Quick Actions ---------- */
+.action-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.action-btn {
+    padding: 0.5rem;
+    text-align: center;
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+/* ---------- Tight Header ---------- */
+.content-header {
+    padding: 1rem 1.5rem;
+    margin-bottom: 0; /* Remove extra space */
+}
+
+/* ---------- Micro-interactions ---------- */
+@keyframes subtleBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+}
+
+.metric-card:hover {
+    animation: subtleBounce 0.5s ease;
+}
+
+/* ---------- Sidebar & Content Integration ---------- */
+.main-nav:not(.collapsed) + .content-area .dashboard-container {
+    padding-left: 1.5rem; /* Balanced spacing */
+}
+
+.main-nav.collapsed + .content-area .dashboard-container {
+    padding-left: 0.5rem;
+}
+
+/* ---------- Collapsed State Adjustment ---------- */
+.main-nav.collapsed ~ .content-area {
+    margin-left: var(--sidebar-collapsed);
+    width: calc(100vw - var(--sidebar-collapsed));
+}
+
+/* ---------- Mobile First Fix ---------- */
+@media (max-width: 992px) {
+    .content-area {
+        margin-left: 0 !important;
+        width: 100vw !important;
+    }
+}
+
+/* ---------- Override Conflicting Styles ---------- */
+.vendor-dashboard .dashboard-container {
+    z-index: 1; /* Stay below sidebar */
+    position: relative;
+}
+
+/* ---------- Responsive Adjustments ---------- */
+@media (max-width: 992px) {
+    .dashboard-container {
+        max-width: 100vw;
+    }
+    
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .action-buttons {
+        grid-template-columns: 1fr;
+    }
+    
+    .dashboard-container {
+        padding-top: 60px !important; /* Mobile header height */
+    }
+    
+    .main-nav.mobile-open ~ .content-area {
+        transform: translateX(var(--sidebar-width));
+    }
+}
+
+/* ======================================
+   End of dashboard.css
+====================================== */

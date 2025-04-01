@@ -1,0 +1,67 @@
+{% extends "shop/base2.html" %}
+{% block content %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/shop/checkout.css') }}">
+{% endblock %}
+
+<div class="checkout-container">
+    <h2 class="checkout-title">Checkout Summary</h2>
+    
+    <div class="checkout-table-container">
+        <table class="checkout-table">
+            <thead>
+                <tr>
+                    <th class="category-header">Category</th>
+                    <th class="product-header">Product</th>
+                    <th class="qty-header">Qty</th>
+                    <th class="price-header">Price</th>
+                    <th class="action-header">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category, items in cart_summary.items() %}
+                    {% if category != "TotalCost" %}
+                        <tr class="category-row">
+                            <td rowspan="{{ items|length }}" class="category-cell">
+                                <span class="category-name">{{ category }}</span>
+                            </td>
+                            {% for item in items %}
+                                {% if not loop.first %}<tr class="product-row">{% endif %}
+                                    <td class="product-cell">
+                                        <span class="product-name">{{ item["name"] }}</span>
+                                    </td>
+                                    <td class="qty-cell">{{ item["quantity"] }}</td>
+                                    <td class="price-cell">${{ "%.2f"|format(item["price"]) }}</td>
+                                    <td class="action-cell">
+                                        <a href="{{ url_for('shop.specific_product', product_id=item['product_id']) }}" 
+                                           class="modify-btn"
+                                           aria-label="Modify {{ item['name'] }}">
+                                            <i class="fas fa-pencil-alt"></i> Edit
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="total-row">
+                    <td colspan="3" class="total-label">Total:</td>
+                    <td colspan="2" class="total-amount">${{ "%.2f"|format(cart_summary["TotalCost"]) }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div class="checkout-actions">
+        <a href="{{ url_for('shop.shop_home') }}" class="continue-btn">
+            <i class="fas fa-arrow-left"></i> Continue Shopping
+        </a>
+        <a href="{{ url_for('shop.process_payment') }}" class="payment-btn">
+            Proceed to Payment <i class="fas fa-lock"></i>
+        </a>
+    </div>
+</div>
+
+
+{% endblock %}

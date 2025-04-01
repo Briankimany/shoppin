@@ -1,0 +1,176 @@
+
+/* Edit Product Container - matches base template styling */
+.edit-product-form {
+   display: grid;
+   grid-template-columns: repeat(2, 1fr);
+   gap: 1.5rem; /* Matches base template spacing */
+}
+
+input, textarea, select {
+   padding: 0.75rem;
+   border: 1px solid var(--border); /* #e2e8f0 */
+   border-radius: 6px;
+   transition: var(--transition); /* 0.3s ease */
+}
+
+input:focus {
+   border-color: var(--primary); /* #4361ee */
+   box-shadow: 0 0 0 3px var(--primary-light); /* #eef2ff */
+}
+
+@media (max-width: 768px) {
+   .edit-product-form {
+       grid-template-columns: 1fr; /* Stacks vertically like base */
+   }
+}
+.update-button {
+   background-color: var(--primary); /* #4361ee */
+   border-radius: 6px;
+   padding: 0.75rem 1.5rem;
+   transition: var(--transition);
+}
+
+.edit-product-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.edit-product-container h1 {
+    color: var(--text);
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+/* Grid Layout - matches add product page */
+.edit-product-form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+/* Full-width form groups */
+.form-group-full {
+    grid-column: span 2;
+}
+
+/* Form Elements - consistent with base template */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+label {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 0.9rem;
+}
+
+input, 
+textarea, 
+select {
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: inherit;
+    background: white;
+    transition: var(--transition);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+input:focus, 
+textarea:focus, 
+select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* Image Section - matches add product layout */
+.image-section {
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+    margin-top: 1rem;
+}
+
+.current-image-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.image-upload-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.image-preview img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+}
+
+/* Button - matches base template */
+.update-button {
+    padding: 0.75rem 1.5rem;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: var(--transition);
+    margin-top: 1rem;
+    grid-column: span 2;
+    justify-self: start;
+}
+
+.update-button:hover {
+    background-color: var(--primary);
+    opacity: 0.9;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .edit-product-form {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-group-full {
+        grid-column: span 1;
+    }
+    
+    .image-section {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Using base template's variables */
+:root {
+    --primary: #4361ee;
+    --primary-light: #eef2ff;
+    --text: #1e293b;
+    --text-light: #64748b;
+    --border: #e2e8f0;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}

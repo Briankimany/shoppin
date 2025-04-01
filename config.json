@@ -1,0 +1,10 @@
+{
+    "database_url": "vendor_project.db",
+    "log_file": "/var/logs/vendor_project.log",
+    "debug": true,
+    "uploads_dir_path": "./uploads",
+    "payment_url":"https://playpit.pythonanywhere.com",
+    "DELAY_BEFORE_STATUS_CHECK":1,
+    "MAX_RETIRES":4,
+    "SIMULATE":true
+}

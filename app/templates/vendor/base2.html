@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Vendor Dashboard{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/vendor/vendor_base_template.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="{{ url_for('static', filename='js/vendor/vendor_base_template.js') }}"></script>
+    {% block styles %}{% endblock %}
+    {% block scripts %}{% endblock %}
+</head>
+
+
+<body class="vendor-dashboard">
+    <!-- Main Navigation -->
+    <nav class="main-nav" id="mainNav">
+        <div class="nav-brand">
+            <i class="fas fa-store"></i>
+            <span>Vendor Portal</span>
+            <button class="collapse-toggle" title="Collapse menu">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        </div>
+        
+        <div class="nav-scroll">
+            <ul class="nav-menu">
+                <li class="nav-item {% if request.endpoint == 'vendor.dashboard' %}active{% endif %}">
+                    <a href="{{ url_for('vendor.dashboard') }}">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                
+                <!-- Products Section with Dropdown -->
+                <li class="nav-item has-dropdown {% if request.endpoint in ['vendor.vendor_products', 'vendor.add_product'] %}open{% endif %}">
+                    <div class="dropdown-header">
+                        <i class="fas fa-boxes"></i>
+                        <span>Products</span>
+                        <i class="dropdown-icon fas fa-chevron-down"></i>
+                    </div>
+                    <ul class="dropdown-menu">
+                        <li class="{% if request.endpoint == 'vendor.vendor_products' %}active{% endif %}">
+                            <a href="{{ url_for('vendor.vendor_products') }}">All Products</a>
+                        </li>
+                        <li class="{% if request.endpoint == 'vendor.add_product' %}active{% endif %}">
+                            <a href="{{ url_for('vendor.add_product') }}">Add New</a>
+                        </li>
+                    </ul>
+                </li>
+                
+                <li class="nav-item {% if request.endpoint == 'vendor.track_orders' %}active{% endif %}">
+                    <a href="{{ url_for('vendor.track_orders') }}">
+                        <i class="fas fa-clipboard-list"></i>
+                        <span>Orders</span>
+                        <span class="badge">3</span>
+                    </a>
+                </li>
+                
+                <li class="nav-item {% if request.endpoint == 'vendor.payouts' %}active{% endif %}">
+                    <a href="{{ url_for('vendor.payouts') }}">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Payouts</span>
+                    </a>
+                </li>
+            </ul>
+            
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <h3>Quick Actions</h3>
+             
+                <button class="quick-action" data-href="{{ url_for('vendor.add_product') }}" onclick="redirectTo(this)"></button>
+                    <i class="fas fa-plus"></i>
+                    <span>New Product</span>
+                </button>
+                <button class="quick-action" data-href="{{ url_for('vendor.reports') }}" onclick="redirectTo(this)">
+
+                    <i class="fas fa-chart-line"></i>
+                    <span>View Reports</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="nav-footer">
+            <div class="user-menu">
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="user-info">
+                    <span class="user-name">Vendor Account</span>
+                    <span class="user-email">{{ current_user.email if current_user and current_user.is_authenticated else 'vendor@example.com' }}</span>
+                </div>
+            </div>
+            <div class="social-links">
+                <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+            </div>
+            <a href="{{ url_for('vendor.logout') }}" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="content-area">
+        <header class="content-header">
+            <button class="nav-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="breadcrumbs">
+                {% block breadcrumbs %}
+                <a href="{{ url_for('vendor.dashboard') }}">Home</a>
+                {% endblock %}
+            </div>
+            <div class="header-actions">
+                <button class="header-action notification-btn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                <button class="header-action help-btn">
+                    <i class="fas fa-question-circle"></i>
+                </button>
+            </div>
+        </header>
+        
+        <div class="content-container">
+            {% block content %}{% endblock %}
+        </div>
+
+        <!-- Main Footer -->
+        <footer class="main-footer">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">API Reference</a></li>
+                        <li><a href="#">Support Center</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Careers</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Cookie Policy</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section newsletter">
+                    <h4>Stay Updated</h4>
+                    <form class="newsletter-form">
+                        <input type="email" placeholder="Your email address">
+                        <button type="submit">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 Vendor Portal. All rights reserved.</p>
+                <div class="footer-social">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </footer>
+    </main>
+  
+</body>
+</html>
