@@ -24,6 +24,11 @@ session_manager = SessionManager(db_session)
 user_obj = UserManager(db_session , user=None)
 
 
+class Category:
+    def __init__(self , name , products_list):
+        self.name = name 
+        self.products = products_list
+
 def vendor_selected(func):
     @wraps(func)
     def decorated_func(*args, **kwargs):
@@ -80,14 +85,8 @@ def vendor_products(vendor_id):
             final_data[key]=[]
         final_data[key].append(product)
         
-    class Category:
-        def __init__(self , name , products_list):
-            self.name = name 
-            self.products = products_list
     p = [Category(k , v) for  k , v in final_data.items()]
 
-    
-    
     return render_template("shop/products.html", categories=p ,vendor=vendor.vendor_table)
 
 @shop_bp.route("/product/<product_id>")

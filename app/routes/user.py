@@ -164,7 +164,7 @@ def get_order_items(order_id):
 
 
 
-@user_bp.route("/forgot_password", methods=["GET", "POST"])
+@user_bp.route("/forgot-password", methods=["GET", "POST"])
 @force_user_reload
 @session_set
 def forgot_password():

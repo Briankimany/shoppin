@@ -19,6 +19,37 @@ DEFAULT_SETTINGS = {
     "SIMULATE": True
 }
 PATHS_LIST = ['uploads_dir_path']
+
+image_urls = [
+    {
+        "width": 1000,
+        "height": 1000,
+        "link": "https://res.cloudinary.com/dqmqwijyf/image/upload/c_fill,f_auto,h_1000,q_auto,w_1000/shoes"
+    },
+    {
+        "width": 500,
+        "height": 500,
+        "link": "https://res.cloudinary.com/dqmqwijyf/image/upload/c_fill,f_auto,h_500,q_auto,w_500/shoes"
+    },
+    {
+        "width": 300,
+        "height": 300,
+        "link": "https://res.cloudinary.com/dqmqwijyf/image/upload/c_fill,f_auto,h_300,q_auto,w_300/shoes"
+    },
+    {
+        "width": 800,
+        "height": 800,
+        "link": "https://res.cloudinary.com/dqmqwijyf/image/upload/c_fill,f_auto,h_800,q_auto,w_800/shoes"
+    },
+    {
+        "width": 1920,
+        "height": 1080,
+        "link": "https://res.cloudinary.com/dqmqwijyf/image/upload/c_fill,f_auto,h_1080,q_auto,w_1920/shoes"
+    }
+]
+
+
+
 class Config(ABC):
     def __init__(self, json_path: str, default_data = None):
         self.json_path = Path(json_path)

@@ -9,3 +9,4 @@ test/
 *.logs
 /LOGS
 /tests
+venv
