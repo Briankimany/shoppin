@@ -5,15 +5,16 @@
 - [ ] 2. add the remove item method
 - [x] 3. add the meet vendor requirements deocrator
 - [x] 4. impliment image uploading 
-- [ ] 5. fix vendors tracking individual producs from users buying from mulitple vendors
+- [x] 5. fix vendors tracking individual producs from users buying from mulitple vendors
 - [x] 6. remove duplicate html files
 - [ ] 7. fix the ability to ad products after an initial checkout fails
 - [x] 8. add the reducing in stock quantity after succesful checkout -- update the values after setting the order to paid
 - [x] 9. group products in vendors edit page , shop 
 - [x] 10. Automatic upload of images to the remote server and clear space in the static folder
-- [ ] 11. password reseting :
+- [x] 11. password reseting :
             1. mail gun emailing 
             2. gmail 
+  [ ] 12. 
             
 
 
