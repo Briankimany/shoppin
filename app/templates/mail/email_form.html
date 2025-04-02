@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Composer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mail/email_form.css') }}">
+
+</head>
+
+
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <h1>Email Composer</h1>
+            <p>Send beautiful emails with ease</p>
+        </div>
+        
+        <div class="email-body">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <form method="POST" action="{{ url_for('mail.send_test_email') }}">
+               
+                
+                <div class="form-group">
+                    <label for="recipient">Recipient Email</label>
+                    <input type="email" 
+                           id="recipient" 
+                           name="recipient" 
+                           value="{{ default_recipient }}" 
+                           required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <input type="text" 
+                           id="subject" 
+                           name="subject" 
+                           value="{{ default_subject }}" 
+                           required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Your Message</label>
+                    <textarea id="message" name="message" required></textarea>
+                </div>
+                
+                <button type="submit" class="btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 8px;">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                    Send Email
+                </button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

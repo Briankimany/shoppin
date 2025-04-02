@@ -5,7 +5,7 @@ from config.config import JSONConfig
 from sqlalchemy import text
 
 from app.models.session_tracking import SessionTracking
-from app.models.user_profile import UserProfile
+from app.models.user_profile import UserProfile ,ResetToken
 from app.models.vendor import Vendor , VendorPayout
 from app.models.product import Product 
 from app.models.order import Order 

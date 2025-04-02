@@ -37,27 +37,12 @@ class UserManager:
 
     def get_user(self, user):
         
-        if isinstance(user, UserProfile):
-            return user
-
-        query = None
-        if isinstance(user, int):  # Query by ID
-            query = self.db_session.query(UserProfile).filter(UserProfile.id == user)
-        elif isinstance(user, str):  # Query by name, email, or phone
-            query = self.db_session.query(UserProfile).filter(
-                or_(
-                    UserProfile.name == user,
-                    UserProfile.email == user,
-                    UserProfile.phone == user
-                )
-            )
-
-        user_obj = query.first() if query else None
-
+        user_obj = UserManager.get_user_(self.db_session , user)
         if user_obj:
             self.user = user_obj
-
         return user_obj
+    
+
     def verify_password(self , password , user):
         if not isinstance(user,UserProfile):
             user = self.db_session.query(UserProfile).filter(
@@ -208,6 +193,27 @@ class UserManager:
             for order_item, product in order_items
         ]
         return items
+    
+    @staticmethod
+    def get_user_(db_session, user):
+        
+        if isinstance(user, UserProfile):
+            return user
+
+        query = None
+        if isinstance(user, int):  # Query by ID
+            query = db_session.query(UserProfile).filter(UserProfile.id == user)
+        elif isinstance(user, str):  # Query by name, email, or phone
+            query = db_session.query(UserProfile).filter(
+                or_(
+                    UserProfile.name == user,
+                    UserProfile.email == user,
+                    UserProfile.phone == user
+                )
+            )
+
+        user_obj = query.first() if query else None
+        return user_obj
     
     
     

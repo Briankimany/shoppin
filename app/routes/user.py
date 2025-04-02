@@ -5,10 +5,14 @@ from app.data_manager.users_manager import UserManager
 from config.config import JSONConfig
 from app.routes.routes_utils import session_set 
 from app.routes.logger import LOG
+from app.routes.mail import send_reset_email
+from app.data_manager.token_manager import ResetTokenManager
 from functools import wraps
 
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
+import time
+
 
 
 
@@ -164,13 +168,59 @@ def get_order_items(order_id):
 
 
 
+
+
+
+@user_bp.route('/validate-token/<token>', methods=['GET', 'POST'])
+def validate_token(token):
+ 
+    token_record = ResetTokenManager.verify_token(db_session=db_session,
+                                                reset_token=token)
+    if not token_record:
+        return render_template("user/password_reset_error.html") ,400
+    
+    if request.method == 'GET':
+        return render_template("user/reset_password.html",
+                             user_id=token_record.user_id,
+                             token=token)
+    
+    if request.method == 'POST':
+        data = request.get_json()
+        new_password = data.get('new_password')
+
+        user_obj.reload_object(user=token_record.user_id ,token=session.get("session_token"))
+        user_obj.update_data({"password_hash":new_password})
+        session.clear()
+
+        return jsonify({
+            "message": "Password updated successfully",
+            "redirect_url": url_for('user.login')
+        }), 200
+        
+
 @user_bp.route("/forgot-password", methods=["GET", "POST"])
 @force_user_reload
 @session_set
 def forgot_password():
+    response = None
     if request.method == "POST":
-        email = request.form.get("email")
-        if  'user'not in session:
-            return redirect(url_for("login"))
-
-    return render_template("user/forgot_password.html")
+        email = request.get_json().get("email")
+        user = UserManager.get_user_(db_session=db_session ,user=email)
+        response = {
+            "success": True,
+            "message": "If this email exists in our system, you'll receive a reset link shortly.",
+            "cooldown": 60  
+            }
+        if user:
+            reset_token = ResetTokenManager.create_token(db_session=db_session ,
+                                                         session_token=session.get("session_token"),
+                                                         user_id=user.id ,expires_in_hours=1)
+            
+         
+            reset_link = url_for("user.validate_token", token=reset_token.reset_token, _external=True)
+            send_reset_email(recipient=user.email, reset_link=reset_link)
+        else:
+            time.sleep(3)
+        return jsonify(response)
+        
+    return render_template("user/forgot_password.html" , message=response)
