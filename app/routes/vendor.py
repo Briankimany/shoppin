@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session , jsonify ,g
-import os 
+import os
 from pathlib import Path
 from app.data_manager.vendor import VendorObj
 from config.config import JSONConfig
@@ -25,12 +25,12 @@ vendor_bp = Blueprint("vendor", __name__, url_prefix="/vendor")
 
 @vendor_bp.before_request
 def load_current_user():
-    user_id = session.get('vendor_id') 
+    user_id = session.get('vendor_id')
     if user_id:
         g.current_user = VendorObj(session.get('vendor_id') ,db_session).vendor_table
         g.current_user.is_authenticated = True
     else:
-        g.current_user = None  
+        g.current_user = None
 
 @vendor_bp.context_processor
 def inject_user():
@@ -57,8 +57,8 @@ def login():
         return redirect(url_for("user.login"))
     else:
         return redirect(url_for("vendor.dashboard"))
-    
-    
+
+
 @vendor_bp.route("/reports")
 def reports():
     return "helo reports"
@@ -82,7 +82,7 @@ def logout():
 def register():
     session['vendor_register'] = True
     return redirect (url_for('user.register'))
- 
+
 
 @vendor_bp.route("/")
 @session_set
@@ -95,23 +95,23 @@ def add_details():
     name = session.get("user_name" , None)
     if not name:
         return redirect (url_for("vendor.login"))
-    
+
     user_obj = UserManager(db_session=db_session , user=name)
     if request.method == "POST":
         data = request.get_json().get('data')
-       
+
         data['name'] = name
         vendor_ = VendorObj.register_vendor(db_session=db_session ,data=data)
         session['vendor_id'] = vendor_.vendor_id
     if 'vendor_id' in session:
         vendor_ = VendorObj(db_session=db_session , vendor_id=session.get('vendor_id'))
-        extra_data = {'name':name , 'email':vendor_.vendor_table.email , 'phone':vendor_.vendor_table.phone , 
+        extra_data = {'name':name , 'email':vendor_.vendor_table.email , 'phone':vendor_.vendor_table.phone ,
                       'store_logo':vendor_.vendor_table.store_logo , 'store_description':vendor_.vendor_table.store_description
                       ,'store_name':vendor_.vendor_table.store_name}
     else:
         extra_data = {'name':user_obj.user.name , 'phone':user_obj.user.phone ,'email':user_obj.user.email}
     return render_template("vendor/update_details.html" , name=name , data=extra_data )
-  
+
 @vendor_bp.route("/dashboard")
 @meet_vendor_requirements
 @session_set
@@ -147,7 +147,7 @@ def add_product():
         image_url = request.form.get("image_url")
         preview_url = request.form.get("preview_url")
         product_type = request.form.get("product_type", type=int)
-        
+
         vendor = VendorObj(session["vendor_id"], db_session)
         vendor.add_product(name=name, description=description, price=price, stock=stock, category=category, image_url=image_url, preview_url=preview_url, product_type=product_type)
 
@@ -189,7 +189,7 @@ def edit_product(product_id):
 @meet_vendor_requirements
 @session_set
 def delete_product(product_id):
-    
+
     vendor = VendorObj(session["vendor_id"], db_session)
     vendor.remove_product(product_id)
     return redirect(url_for("vendor.dashboard"))
@@ -224,7 +224,7 @@ def payouts():
                 'status': 'completed',
                 'request_date': datetime.now()
             },
-           
+
         ]
     return render_template("vendor/payouts.html",vendor_balance=vendor_balance ,withdrawals=withdrawals)
 
@@ -258,9 +258,9 @@ def vendor_products():
 #     if "store_logo_file" not in request.files and "image" not in request.files:
 #         return jsonify({"success": False, "error": "No file part"}) , 500
 
-#     file = request.files.get("store_logo_file") 
+#     file = request.files.get("store_logo_file")
 #     if not file:
-#         file = request.files.get("image") 
+#         file = request.files.get("image")
 #     if not file:
 #         return jsonify({"success": False, "error": "No file part"}) , 500
 #     if file.filename == "":
@@ -277,37 +277,44 @@ def vendor_products():
 #                                                 public_id=image_public_id,
 #                                                 size_idx=2
 #                                     )
-        
+
 #         vendorid = session.get("vendor_id")
-#         ImageManager.record_image_upload(db_session=db_session , image_public_id=image_public_id, 
+#         ImageManager.record_image_upload(db_session=db_session , image_public_id=image_public_id,
 #                                          vendor_id=vendorid ,filename = file.filename)
-        
+
 #         return jsonify({"success": True, "image_url": remote_url})
 
 #     return jsonify({"success": False, "error": "Unknown error"})
 
 
-@vendor_bp.route('/upload', methods=['POST'])
+@vendor_bp.route('/upload', methods=['POST' , 'GET'])
 @meet_vendor_requirements
 @session_set
 def upload_image():
-    try:
+        if request.method == 'GET':
+            return render_template("upload.html")
+    # try:
         file = request.files.get('image') or request.files.get('store_logo_file')
-        ImageManager._validate_file(file) 
-        
+        ImageManager._validate_file(file)
+
         upload_dir = os.path.join(config.UPLOAD_DIR, 'temp')
         os.makedirs(upload_dir, exist_ok=True)
         local_path = os.path.join(upload_dir, file.filename)
         file.save(local_path)
-        
-    
+
+        with open("customlog.txt" ,'w') as fff:
+            fff.write(f"string sfkajfdkdjf {local_path}")
+            fff.write(f"my osenvrons are {os.getenv('CLOUDINARY_URL')}")
+
+        print("in upload ",os.getenv("CLOUDINARY_URL"))
+
         public_id = ImageManager.generate_public_id(file.filename)
         cloudinary_url = ImageManager.upload_and_transform_image(
             image_path=local_path,
             public_id=public_id,
             size_idx=2
         )
-        
+
         ImageManager.record_image_upload(
             db_session=db_session,
             image_url=cloudinary_url,
@@ -315,19 +322,19 @@ def upload_image():
             vendor_id=session['vendor_id'],
             filename=file.filename
         )
-        
+
         os.remove(local_path)
-        
+
         return jsonify({
             "success": True,
             "image_url": cloudinary_url,
             "public_id": public_id
         }), 200
-        
-    except ValueError as e:
-        return jsonify({"success": False, "error": str(e)}), 400
-    except RuntimeError as e:
-        return jsonify({"success": False, "error": str(e)}), 500
-    except Exception as e:
-        LOG.SHOP_LOGGER.error(f"Unexpected error: {str(e)}")
-        return jsonify({"success": False, "error": "Internal server error"}), 500
+
+    # except ValueError as e:
+    #     return jsonify({"success": False, "error": str(e)}), 400
+    # except RuntimeError as e:
+    #     return jsonify({"success": False, "error": str(e)}), 500
+    # except Exception as e:
+    #     LOG.SHOP_LOGGER.error(f"Unexpected error: {str(e)}")
+    #     return jsonify({"success": False, "error": "Internal server error"}), 500

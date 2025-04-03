@@ -1,6 +1,6 @@
 {% extends "vendor/base2.html" %}
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/update_vendor_details.js') }}"></script>
+<script src="{{ url_for('static', filename='js/vendor/update_vendor_details.js') }}"></script>
 {% endblock %}
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/vendor/update_details.css') }}">
@@ -28,13 +28,13 @@
         {% endif %}
         <label for="store_logo">Store Logo URL:</label>
         <input type="text" id="store_logo" name="store_logo" placeholder="Enter image URL" value="{{data.get('store_logo' , none)}}">
-        
+
         <label for="store_logo_file">Or Upload Store Logo:</label>
         <input type="file" id="store_logo_file" name="store_logo_file" accept="image/*">
-        
+
         <img id="preview" style="max-width: 200px; display: none; margin-top: 10px;">
-        
-              
+
+
         <label for="payment_type">Payment Type:</label>
         <select id="payment_type" name="payment_type" required >
             <option value="Pre-delivery">Pre-delivery</option>
@@ -42,10 +42,10 @@
         </select>
         <label for="store_description">Store Description:</label>
         <textarea id="store_description" name="store_description">{% if data.get("store_description") %}{{ data.get("store_description") }}{% endif %}</textarea>
-        
-        <button onclick="uploadImageThenSubmit()">Submit</button>  
+
+        <button onclick="uploadImageThenSubmit()">Submit</button>
         <button type="button" onclick="uploadImageThenSubmit()">Save Changes</button>
-      
+
     </form>
 </div>
 

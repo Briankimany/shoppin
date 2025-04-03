@@ -1,10 +1,20 @@
+
 import cloudinary
-import cloudinary.uploader
-from cloudinary.utils import cloudinary_url
-
-
 from dotenv import load_dotenv
 import os
+load_dotenv()
+
+
+
+cloudinary.config(
+    cloud_name =  os.getenv("CLOUD_NAME"),
+    api_key =  os.getenv("API_KEY"),
+    api_secret = os.getenv("API_SECRET"),
+    secure=True
+)
+from cloudinary.utils import cloudinary_url
+import cloudinary.uploader
+import cloudinary.api
 
 from app.models.images import ImageUpload
 from sqlalchemy.orm import Session
@@ -14,19 +24,8 @@ from sqlalchemy.exc import SQLAlchemyError
 import base64
 import hashlib
 
-load_dotenv()
 
 
-CLAUDINAR_API_NAME = os.getenv("CLAUDINAR_API_NAME")
-CLAUDINAR_API_KEY   = os.getenv("CLAUDINAR_API_KEY")
-CLAUDINAR_API_SECRET = os.getenv("CLAUDINAR_API_SECRET")
-
-cloudinary.config( 
-    cloud_name = CLAUDINAR_API_NAME, 
-    api_key = CLAUDINAR_API_KEY, 
-    api_secret = CLAUDINAR_API_SECRET,
-    secure=True
-)
 
 class ImageManager:
 
@@ -44,7 +43,7 @@ class ImageManager:
         """Validate file before processing."""
         if not file or file.filename == '':
             raise ValueError("No valid file provided")
-        
+
         allowed_extensions = {'jpg', 'jpeg', 'png', 'webp'}
         if '.' not in file.filename or file.filename.split('.')[-1].lower() not in allowed_extensions:
             raise ValueError("Invalid file type")
@@ -59,14 +58,14 @@ class ImageManager:
 
     @staticmethod
     def upload_and_transform_image(image_path, public_id, size_idx=2):
-        """Upload to Cloudinary with dynamic transformations."""
-        try:
+            """Upload to Cloudinary with dynamic transformations."""
+        # try:
             upload_result = cloudinary.uploader.upload(
                 image_path,
-                public_id=f"vendor_uploads/{public_id}",  
-                overwrite=False  
+                public_id=public_id,
+                overwrite=True
             )
-            
+
             size = ImageManager.IMAGE_SIZES[size_idx]
             optimized_url, _ = cloudinary_url(
                 upload_result['public_id'],
@@ -77,8 +76,8 @@ class ImageManager:
                 fetch_format="webp"  # Force modern format
             )
             return optimized_url
-        except Exception as e:
-            raise RuntimeError(f"Cloudinary upload failed: {str(e)}")
+        # except Exception as e:
+        #     raise RuntimeError(f"Cloudinary upload failed: {str(e)}")
 
     @staticmethod
     def record_image_upload(db_session:Session, image_url, public_id, vendor_id, filename):
