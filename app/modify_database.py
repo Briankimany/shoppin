@@ -7,11 +7,31 @@ from app.models.user_profile import UserProfile
 from config.config import JSONConfig
 from pathlib import Path
 
-from app.create_database import init_engine ,init_db
+from app.create_database import init_db
+import csv
+
+def get_urls_from_csv(csv_path: str) -> list[str]:
+    """Read URLs from a single-column CSV and return as list."""
+    with open(csv_path, mode='r') as file:
+        reader = csv.reader(file)
+        return ([row[0] for row in reader if row] )[1:] 
+
+def set_urls(extra_products ,image_urls):
+    if image_urls:
+        result = []
+        for i, product in enumerate(extra_products):
+            url_index = int((i / len(extra_products)) * len(image_urls))
+            product.image_url = image_urls[url_index]
+            result.append(product)
+        return result
+    return extra_products
+
+    
 
 def add_muliple_prodct(p:list[Product]):
     db_session.add_all(p)
     db_session.commit()
+
 
 
 vendor_data = {
@@ -213,13 +233,14 @@ def add_products():
 
     Product(vendor_id=vendor4.id, name="Embedded Systems Development", description="Develop firmware and software for embedded systems.", price=259.99, stock=999, category="Engineering Services", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
     Product(vendor_id=vendor4.id, name="Custom API Development", description="Develop RESTful and GraphQL APIs for your applications.", price=199.99, stock=999, category="Programming Services", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
-]
+    ]
 
-    add_muliple_prodct(p=extra_products1)
-    add_muliple_prodct(p=extra_products2)
-    add_muliple_prodct(p=extra_products3)
-    add_muliple_prodct(p=extra_products4)
+    image_urls = get_urls_from_csv("studio_urls_c_pad,w_300,h_300.csv")
 
+    add_muliple_prodct(p=set_urls(extra_products1 , image_urls))
+    add_muliple_prodct(p=set_urls(extra_products2 , image_urls))
+    add_muliple_prodct(p=set_urls(extra_products3 , image_urls))
+    add_muliple_prodct(p=set_urls(extra_products3 , image_urls))
 
 def main():
     try:

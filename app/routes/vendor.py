@@ -28,13 +28,16 @@ def load_current_user():
     user_id = session.get('vendor_id')
     if user_id:
         g.current_user = VendorObj(session.get('vendor_id') ,db_session).vendor_table
-        g.current_user.is_authenticated = True
+        if not g.current_user:
+            session.clear()
+        else:
+            g.current_user.is_authenticated = True
     else:
         g.current_user = None
 
 @vendor_bp.context_processor
 def inject_user():
-    # Enhanced with proper null checks
+   
     user = getattr(g, 'current_user', None)
     return {
         'current_user': user,

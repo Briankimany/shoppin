@@ -13,7 +13,9 @@ from app.models.cart import Cart , CartItem
 from app.models.order_item import OrderItem
 from app.models.images import ImageUpload
 
+
 config = JSONConfig("config.json")
+
 
 
 def reset_table( table_name: str):
