@@ -138,6 +138,7 @@ def orders():
 @meet_vendor_requirements
 @session_set
 def add_product():
+    categories = VendorObj.get_vendor_product_categories(db_session , session.get("vendor_id"))
     if request.method == "POST":
         name = request.form.get("name")
         description = request.form.get("description")
@@ -151,8 +152,6 @@ def add_product():
         vendor = VendorObj(session["vendor_id"], db_session)
         vendor.add_product(name=name, description=description, price=price, stock=stock, category=category, image_url=image_url, preview_url=preview_url, product_type=product_type)
 
-        return redirect(url_for("vendor.dashboard"))
-    categories = VendorObj.get_vendor_product_categories(db_session , session.get("vendor_id"))
     return render_template("vendor/add_product.html",categories=categories)
 
 
@@ -161,7 +160,6 @@ def add_product():
 @session_set
 def product_details(product_id):
     return edit_product(product_id)
-
 
 @vendor_bp.route("/edit_product/<int:product_id>", methods=["GET", "POST"])
 @meet_vendor_requirements
@@ -180,7 +178,6 @@ def edit_product(product_id):
             "preview_url": request.form.get("preview_url"),
         }
         vendor.modify_products([{"id": product_id, "data": updated_data}])
-        return jsonify({"success":True}) , 200
     return render_template("vendor/edit_product.html", product_id=product_id , product=product)
 
 
@@ -229,6 +226,7 @@ def payouts():
 
 
 
+
 @vendor_bp.route("/process-pay" , methods = ['POST'])
 def process_withdrawal():
     return jsonify({"sussess":True})
@@ -254,10 +252,13 @@ def vendor_products():
 
 
 
-@vendor_bp.route('/upload', methods=['POST' , 'GET'])
+methods = ["POST", "GET"] if os.getenv("CUSTOM_DEBUG_MODE", "").lower() in ("true", "1", "yes")  else ["POST"]
+@vendor_bp.route('/upload', methods=methods)
 @meet_vendor_requirements
 @session_set
 def upload_image():
+
+    
     if request.method == 'GET':
         return render_template("upload.html")
 

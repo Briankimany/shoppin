@@ -50,7 +50,7 @@ class VendorObj:
             vendor =VendorObj.get_vendor_by(db_session ,'name' , data.get('name'))
             if vendor:
                 vendorobj = VendorObj(vendor_id=vendor.id , db_session=db_session)
-                print(data)
+            
                 vendorobj.update_details(data)
                 return vendorobj
             else:
@@ -62,6 +62,7 @@ class VendorObj:
         except Exception as e:
             LOG.VENDOR_LOGGER.error(f"error during creation of new vendor E: {e}")
             return None
+        
     def reload(self):
         self.vendor_table = self.db.get_vendor(vendor_id=self.vendor_id)
 

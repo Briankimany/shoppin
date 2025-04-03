@@ -123,12 +123,12 @@ class UserManager:
     
     def is_vendor(self):
         if self.user:
-            return UserManager.verify_is_vendor(self.db_session ,user_name=self.user.name)
+            return UserManager.verify_is_vendor(self.db_session ,user_name=self.user.id)
         
 
     @staticmethod
-    def verify_is_vendor(db_session,user_name:str):
-        vendor = VendorObj.get_vendor_by(db_session=db_session ,key='name' , value=user_name)
+    def verify_is_vendor(db_session,user_name:int):
+        vendor = VendorObj.get_vendor_by(db_session=db_session ,key='id' , value=user_name)
         return vendor
     
     

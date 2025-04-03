@@ -1,49 +1,167 @@
 from sqlalchemy.orm import Session
-from models.vendor import Vendor, VendorPayout
+from models.vendor import Vendor
 from models.product import Product
 from app.routes.vendor import db_session
+from app.data_manager.vendor import VendorObj
+from app.models.user_profile import UserProfile
+from config.config import JSONConfig
+from pathlib import Path
 
-def add_vendor(session: Session, name: str, email: str, phone: str, store_name: str, store_description: str = None):
-    """
-    Adds a new vendor to the database.
-    """
-    try:
-        # Create Vendor instance
-        new_vendor = Vendor(
-            name=name,
-            email=email,
-            phone=phone,
-            store_name=store_name,
-            store_description=store_description,
-            verified=False  # Default to unverified
-        )
-        
-        session.add(new_vendor)
-        session.flush()  # Get vendor.id before commit
-        
-        # Optional: Initialize payout tracking (if applicable)
-        initial_payout = VendorPayout(
-            vendor_id=new_vendor.id,
-            amount=0.00,
-            status='pending',
-            transaction_ref=f"INIT-{new_vendor.id}"
-        )
-        session.add(initial_payout)
-        
-        session.commit()
-        return new_vendor.id
+from app.create_database import init_engine ,init_db
+
+def add_muliple_prodct(p:list[Product]):
+    db_session.add_all(p)
+    db_session.commit()
+
+
+vendor_data = {
+
+    "vendor1": {
+        "user": {
+            "name": "TechMaster",
+            "email": "tech@example.com",
+            "phone": "1234567001",
+            "password_hash": "tech_hash_123"
+        },
+        "vendor": {
+            "id":1,
+            "name": "TechMaster Inc.",
+            "email": "tech@example.com",
+            "phone": "1234567001",
+            "store_name": "Tech Haven",
+            "store_logo": "https://example.com/logos/tech.png",
+            "payment_type": "Stripe",
+            "store_description": "Gadgets, gaming gear, and cutting-edge tech",
+            "verified": True
+        }
+    },
+
+    # Vendor 2 (Fashion)
+    "vendor2": {
+        "user": {
+            "name": "FashionGuru",
+            "email": "fashion@example.com",
+            "phone": "1234567002",
+            "password_hash": "fashion_hash_123"
+        },
+        "vendor": {
+            "id":2,
+            "name": "FashionGuru Styles",
+            "email": "fashion@example.com",
+            "phone": "1234567002",
+            "store_name": "Urban Threads",
+            "store_logo": "https://example.com/logos/fashion.png",
+            "payment_type": "PayPal",
+            "store_description": "Trendy apparel and accessories",
+            "verified": True
+        }
+    },
+
+    # Vendor 3 (Home Goods)
+    "vendor3": {
+        "user": {
+            "name": "HomeKing",
+            "email": "home@example.com",
+            "phone": "1234567003",
+            "password_hash": "home_hash_123"
+        },
+        "vendor": {
+            "id":3,
+            "name": "HomeKing Supplies",
+            "email": "home@example.com",
+            "phone": "1234567003",
+            "store_name": "Domestic Bliss",
+            "store_logo": "https://example.com/logos/home.png",
+            "payment_type": "Bank Transfer",
+            "store_description": "Everything for your home and kitchen",
+            "verified": True
+        }
+    },
+
+    # Vendor 4 (Services)
+    "vendor4": {
+        "user": {
+            "name": "ServicePro",
+            "email": "services@example.com",
+            "phone": "1234567004",
+            "password_hash": "services_hash_123"
+        },
+        "vendor": {
+            "id":4,
+            "name": "ServicePro Solutions",
+            "email": "services@example.com",
+            "phone": "1234567004",
+            "store_name": "Digital Services Hub",
+            "store_logo": "https://example.com/logos/services.png",
+            "payment_type": "Crypto",
+            "store_description": "IT, AI, and cloud services",
+            "verified": True
+        }
+    }
+}
+
+
+def create_users():
+    for vendor_key, data in vendor_data.items():
+        user = UserProfile(**data["user"])
+        db_session.add(user)
+    db_session.commit()
+def create_vendors():
+    for vendor_key, data in vendor_data.items():
+        vendor = Vendor(**data["vendor"])
+        db_session.add(vendor)
+    db_session.commit()
+
+
+def add_products():
+    vendor1 =db_session.query(Vendor).filter(Vendor.id == 1).first()
+    vendor2 =db_session.query(Vendor).filter(Vendor.id == 2).first()
+    vendor3 =db_session.query(Vendor).filter(Vendor.id == 3).first()
+    vendor4 =db_session.query(Vendor).filter(Vendor.id == 4).first()
+
+
+
+    extra_products1 = [
+    Product(vendor_id=vendor1.id, name="Wireless Mechanical Keyboard", description="RGB backlit wireless mechanical keyboard.", price=129.99, stock=15, category="Electronics", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
+    Product(vendor_id=vendor1.id, name="Noise Cancelling Headphones", description="Over-ear wireless headphones with active noise cancellation.", price=199.99, stock=12, category="Audio", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
+    Product(vendor_id=vendor1.id, name="Smartwatch", description="Feature-packed smartwatch with fitness tracking.", price=249.99, stock=10, category="Wearable Tech", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
+    Product(vendor_id=vendor1.id, name="4K Action Camera", description="Waterproof 4K action camera with stabilization.", price=149.99, stock=8, category="Cameras", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
     
-    except Exception as e:
-        session.rollback()
-        raise e
+    Product(vendor_id=vendor1.id, name="Wireless Gaming Mouse", description="High-precision gaming mouse with adjustable DPI.", price=79.99, stock=20, category="Gaming", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
+    Product(vendor_id=vendor1.id, name="Curved Gaming Monitor", description="32-inch curved gaming monitor with 165Hz refresh rate.", price=399.99, stock=6, category="Monitors", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
+    Product(vendor_id=vendor1.id, name="USB-C Docking Station", description="Multi-port docking station with HDMI and Ethernet.", price=89.99, stock=15, category="Accessories", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
+    
+    Product(vendor_id=vendor1.id, name="Portable SSD 1TB", description="High-speed portable SSD with USB 3.2.", price=129.99, stock=18, category="Storage", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
+    Product(vendor_id=vendor1.id, name="Wireless Charging Pad", description="Fast-charging wireless pad for all Qi-compatible devices.", price=49.99, stock=25, category="Accessories", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
+    
+    Product(vendor_id=vendor1.id, name="Smart Light Bulbs (Pack of 3)", description="Voice-controlled smart bulbs with RGB color.", price=59.99, stock=22, category="Smart Home", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
+    Product(vendor_id=vendor1.id, name="VR Headset", description="Next-gen VR headset for an immersive experience.", price=349.99, stock=5, category="Gaming", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
 
+    Product(vendor_id=vendor1.id, name="Dash Cam", description="HD dash cam with night vision and loop recording.", price=119.99, stock=10, category="Automotive", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
+    Product(vendor_id=vendor1.id, name="Bluetooth Speaker", description="Portable waterproof Bluetooth speaker with deep bass.", price=89.99, stock=15, category="Audio", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
+    
+    Product(vendor_id=vendor1.id, name="Mini Projector", description="Compact HD projector for home entertainment.", price=199.99, stock=7, category="Home Theater", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
+    Product(vendor_id=vendor1.id, name="Gaming Chair", description="Ergonomic gaming chair with lumbar support.", price=249.99, stock=9, category="Furniture", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
+    ]
 
-vendor1 =db_session.query(Vendor).filter(Vendor.id == 1).first()
-vendor2 =db_session.query(Vendor).filter(Vendor.id == 2).first()
-vendor3 =db_session.query(Vendor).filter(Vendor.id == 3).first()
-vendor4 =db_session.query(Vendor).filter(Vendor.id == 4).first()
+    extra_products2 = [
+    Product(vendor_id=vendor2.id, name="Leather Jacket", description="Genuine leather jacket for a stylish look.", price=199.99, stock=10, category="Men's Fashion", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
+    Product(vendor_id=vendor2.id, name="Casual Sneakers", description="Comfortable and stylish sneakers for everyday wear.", price=89.99, stock=15, category="Footwear", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
+    Product(vendor_id=vendor2.id, name="Designer Handbag", description="Luxury handbag with premium materials.", price=249.99, stock=8, category="Women's Fashion", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
+    
+    Product(vendor_id=vendor2.id, name="Sports T-Shirt", description="Breathable sports T-shirt for workouts.", price=39.99, stock=25, category="Activewear", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
+    Product(vendor_id=vendor2.id, name="Luxury Watch", description="Elegant wristwatch with a stainless steel finish.", price=499.99, stock=5, category="Accessories", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
+    
+    Product(vendor_id=vendor2.id, name="Slim Fit Jeans", description="Trendy slim-fit jeans for a modern look.", price=59.99, stock=18, category="Men's Fashion", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
+    Product(vendor_id=vendor2.id, name="Formal Dress", description="Elegant evening dress for special occasions.", price=179.99, stock=12, category="Women's Fashion", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
+    
+    Product(vendor_id=vendor2.id, name="Winter Coat", description="Warm and stylish winter coat for cold weather.", price=199.99, stock=10, category="Outerwear", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
+    Product(vendor_id=vendor2.id, name="Running Shoes", description="Lightweight running shoes with cushioned soles.", price=129.99, stock=20, category="Footwear", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
+    
+    Product(vendor_id=vendor2.id, name="Beanie Hat", description="Soft knit beanie for winter.", price=29.99, stock=30, category="Accessories", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
+    ]
 
-extra_products3 = [
+    extra_products3 = [
     Product(vendor_id=vendor3.id, name="Dish Drying Rack", description="Compact stainless steel rack for drying dishes efficiently.", price=34.99, stock=20, category="Kitchen", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
     Product(vendor_id=vendor3.id, name="Electric Rice Cooker", description="Automatic rice cooker with keep-warm function.", price=79.99, stock=15, category="Kitchen Appliances", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
     Product(vendor_id=vendor3.id, name="Blender", description="High-power blender for smoothies and soups.", price=59.99, stock=25, category="Kitchen Appliances", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
@@ -71,50 +189,9 @@ extra_products3 = [
     
     Product(vendor_id=vendor3.id, name="Towel Warmer", description="Heated towel rack for warm towels after showers.", price=149.99, stock=8, category="Bathroom", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
     Product(vendor_id=vendor3.id, name="Bathrobe", description="Soft and absorbent bathrobe for comfort.", price=69.99, stock=12, category="Bathroom", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg")
-]
+    ]
 
-extra_products1 = [
-    Product(vendor_id=vendor1.id, name="Wireless Mechanical Keyboard", description="RGB backlit wireless mechanical keyboard.", price=129.99, stock=15, category="Electronics", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
-    Product(vendor_id=vendor1.id, name="Noise Cancelling Headphones", description="Over-ear wireless headphones with active noise cancellation.", price=199.99, stock=12, category="Audio", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
-    Product(vendor_id=vendor1.id, name="Smartwatch", description="Feature-packed smartwatch with fitness tracking.", price=249.99, stock=10, category="Wearable Tech", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
-    Product(vendor_id=vendor1.id, name="4K Action Camera", description="Waterproof 4K action camera with stabilization.", price=149.99, stock=8, category="Cameras", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
-    
-    Product(vendor_id=vendor1.id, name="Wireless Gaming Mouse", description="High-precision gaming mouse with adjustable DPI.", price=79.99, stock=20, category="Gaming", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
-    Product(vendor_id=vendor1.id, name="Curved Gaming Monitor", description="32-inch curved gaming monitor with 165Hz refresh rate.", price=399.99, stock=6, category="Monitors", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
-    Product(vendor_id=vendor1.id, name="USB-C Docking Station", description="Multi-port docking station with HDMI and Ethernet.", price=89.99, stock=15, category="Accessories", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
-    
-    Product(vendor_id=vendor1.id, name="Portable SSD 1TB", description="High-speed portable SSD with USB 3.2.", price=129.99, stock=18, category="Storage", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
-    Product(vendor_id=vendor1.id, name="Wireless Charging Pad", description="Fast-charging wireless pad for all Qi-compatible devices.", price=49.99, stock=25, category="Accessories", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
-    
-    Product(vendor_id=vendor1.id, name="Smart Light Bulbs (Pack of 3)", description="Voice-controlled smart bulbs with RGB color.", price=59.99, stock=22, category="Smart Home", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
-    Product(vendor_id=vendor1.id, name="VR Headset", description="Next-gen VR headset for an immersive experience.", price=349.99, stock=5, category="Gaming", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
-
-    Product(vendor_id=vendor1.id, name="Dash Cam", description="HD dash cam with night vision and loop recording.", price=119.99, stock=10, category="Automotive", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
-    Product(vendor_id=vendor1.id, name="Bluetooth Speaker", description="Portable waterproof Bluetooth speaker with deep bass.", price=89.99, stock=15, category="Audio", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
-    
-    Product(vendor_id=vendor1.id, name="Mini Projector", description="Compact HD projector for home entertainment.", price=199.99, stock=7, category="Home Theater", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
-    Product(vendor_id=vendor1.id, name="Gaming Chair", description="Ergonomic gaming chair with lumbar support.", price=249.99, stock=9, category="Furniture", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
-]
-
-extra_products2 = [
-    Product(vendor_id=vendor2.id, name="Leather Jacket", description="Genuine leather jacket for a stylish look.", price=199.99, stock=10, category="Men's Fashion", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
-    Product(vendor_id=vendor2.id, name="Casual Sneakers", description="Comfortable and stylish sneakers for everyday wear.", price=89.99, stock=15, category="Footwear", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
-    Product(vendor_id=vendor2.id, name="Designer Handbag", description="Luxury handbag with premium materials.", price=249.99, stock=8, category="Women's Fashion", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
-    
-    Product(vendor_id=vendor2.id, name="Sports T-Shirt", description="Breathable sports T-shirt for workouts.", price=39.99, stock=25, category="Activewear", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
-    Product(vendor_id=vendor2.id, name="Luxury Watch", description="Elegant wristwatch with a stainless steel finish.", price=499.99, stock=5, category="Accessories", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
-    
-    Product(vendor_id=vendor2.id, name="Slim Fit Jeans", description="Trendy slim-fit jeans for a modern look.", price=59.99, stock=18, category="Men's Fashion", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
-    Product(vendor_id=vendor2.id, name="Formal Dress", description="Elegant evening dress for special occasions.", price=179.99, stock=12, category="Women's Fashion", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
-    
-    Product(vendor_id=vendor2.id, name="Winter Coat", description="Warm and stylish winter coat for cold weather.", price=199.99, stock=10, category="Outerwear", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
-    Product(vendor_id=vendor2.id, name="Running Shoes", description="Lightweight running shoes with cushioned soles.", price=129.99, stock=20, category="Footwear", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
-    
-    Product(vendor_id=vendor2.id, name="Beanie Hat", description="Soft knit beanie for winter.", price=29.99, stock=30, category="Accessories", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
-]
-
-
-services = [
+    extra_products4 = [
     Product(vendor_id=vendor4.id, name="Software Installation & Setup", description="We install and configure any software on Windows, macOS, or Linux.", price=29.99, stock=999, category="Software Services", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
     Product(vendor_id=vendor4.id, name="AI Model Training & Fine-Tuning", description="Train and fine-tune AI models for various applications.", price=199.99, stock=999, category="AI Services", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
     Product(vendor_id=vendor4.id, name="MATLAB Project Development", description="Assistance with MATLAB simulations, algorithms, and analysis.", price=149.99, stock=999, category="Engineering Services", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
@@ -138,15 +215,35 @@ services = [
     Product(vendor_id=vendor4.id, name="Custom API Development", description="Develop RESTful and GraphQL APIs for your applications.", price=199.99, stock=999, category="Programming Services", image_url="https://img401.picturelol.com/th/67769/9rxu5xjquw3l.jpg"),
 ]
 
+    add_muliple_prodct(p=extra_products1)
+    add_muliple_prodct(p=extra_products2)
+    add_muliple_prodct(p=extra_products3)
+    add_muliple_prodct(p=extra_products4)
 
 
+def main():
+    try:
+        create_users()
+        create_vendors()
+    except Exception as e:
+        if  Path(conf.database_url).exists():
+            db_path = Path(JSONConfig('config.json').database_url)
+            db_path.rename(db_path.with_name(f"{db_path.stem}_BACKUP.DB"))
+            init_db()
+            print("encoutered error resetting all tables")
+        return
+    add_products()
 
-def add_prodct(p:list[Product]):
-    db_session.add_all(p)
-    db_session.commit()
 
-add_prodct(p=extra_products1)
-add_prodct(p=extra_products2)
-add_prodct(p=extra_products3)
-add_prodct(p=services)
+if __name__ == "__main__":
+    conf = JSONConfig("config.json")
+    if not Path(conf.database_url).exists():
+        init_db()
+    else:
+        print('using existing db')
+    
+    main()
+
+    
+
 

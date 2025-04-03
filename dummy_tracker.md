@@ -19,6 +19,8 @@
   [ ] 13. fix order preview in users pages
   [ ] 14. fix the update detail endpoint for vendors
   [ ] 15. fix tracking user data
+  [x] 16. fix the tempfile having items not in data base
+  []  17. link the user table and vendor via the user id
 
 
 HTML RESTRUCTRUNG

@@ -2,14 +2,14 @@
 from sqlalchemy import Column, Integer, String, Boolean, Text, DateTime ,ForeignKey ,TIMESTAMP ,DECIMAL
 from datetime import datetime
 from sqlalchemy.sql import func
-
+from .user_profile import UserProfile
 from .base import Base
 
 
 
 class Vendor(Base):
     __tablename__ = 'vendors'
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(ForeignKey("user_table.id"), primary_key=True)
     name = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False)
     phone = Column(String, unique=True, nullable=False)
