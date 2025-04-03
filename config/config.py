@@ -17,7 +17,7 @@ DEFAULT_SETTINGS = {
     "DELAY_BEFORE_STATUS_CHECK":2,
     "MAX_RETIRES":3,
     "SIMULATE": True,
-    "allowed_extensions":{'jpg', 'jpeg', 'png', 'webp' ,'svg'}
+    "allowed_extensions":['jpg', 'jpeg', 'png', 'webp' ,'svg']
 }
 PATHS_LIST = ['uploads_dir_path' ,'TEMP_UPLOAD_IMAGE_DIR']
 

@@ -25,7 +25,6 @@ def reset_table(SessionLocal ,engine,table_name: str):
             print(f"Table '{table_name}' dropped successfully.")
             session.close()
         except Exception as e:
-            session.rollback()
             print(f"Error resetting table {table_name}: {e}")
 
 def init_db(engine):
