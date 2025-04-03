@@ -179,7 +179,6 @@ def edit_product(product_id):
             "image_url": request.form.get("image_url"),
             "preview_url": request.form.get("preview_url"),
         }
-        print("here is the data" , updated_data)
         vendor.modify_products([{"id": product_id, "data": updated_data}])
         return jsonify({"success":True}) , 200
     return render_template("vendor/edit_product.html", product_id=product_id , product=product)
@@ -228,6 +227,8 @@ def payouts():
         ]
     return render_template("vendor/payouts.html",vendor_balance=vendor_balance ,withdrawals=withdrawals)
 
+
+
 @vendor_bp.route("/process-pay" , methods = ['POST'])
 def process_withdrawal():
     return jsonify({"sussess":True})
@@ -272,11 +273,9 @@ def upload_image():
             "public_id": pre_uploaded_image.uniqueid
         }), 200 
 
-    upload_dir = os.path.join(config.UPLOAD_DIR, 'temp')
-    os.makedirs(upload_dir, exist_ok=True)
-    local_path = os.path.join(upload_dir, file.filename)
+    upload_dir = Path(ImageManager.config.TEMP_UPLOAD_IMAGE_DIR)
+    local_path = upload_dir/file.filename
     file.save(local_path)
-
     
     image_url = url_for("static", filename=f"uploads/temp/{file.filename}", _external=True)
     

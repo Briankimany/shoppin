@@ -19,7 +19,7 @@ DEFAULT_SETTINGS = {
     "SIMULATE": True,
     "allowed_extensions":{'jpg', 'jpeg', 'png', 'webp' ,'svg'}
 }
-PATHS_LIST = ['uploads_dir_path']
+PATHS_LIST = ['uploads_dir_path' ,'TEMP_UPLOAD_IMAGE_DIR']
 
 image_urls = [
     {
@@ -59,8 +59,10 @@ class Config(ABC):
         self.UPLOAD_DIR = str(Path().cwd()/"app/static/uploads")
         self.allowed_extensions = {'jpg', 'jpeg', 'png', 'webp' ,'svg'}
         self.UPLOAD_IMAGES_DIRECTLY = os.getenv("UPLOAD_IMAGES_DIRECTLY","false") == "true"
-      
-        self.TEMP_UPLOAD_IMAGE_DIR = str(Path(self.UPLOAD_DIR)/'temp') 
+
+        self.TEMP_UPLOAD_IMAGE_DIR = Path(self.UPLOAD_DIR)/'temp'
+        self.TEMP_UPLOAD_IMAGE_DIR.mkdir(parents= True ,exist_ok=True)
+        self.TEMP_UPLOAD_IMAGE_DIR = str(self.TEMP_UPLOAD_IMAGE_DIR)
 
         if not self.json_path.exists():
             self.__save__(self.default_data)

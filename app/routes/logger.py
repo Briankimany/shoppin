@@ -28,3 +28,4 @@ class LOG:
     VENDOR_LOGGER = LoggerManager(parent_dir/"vendor_bp.logs", logger_name="VENDOR").get_logger()
     ORDER_LOGGER = LoggerManager(parent_dir/"order.logs", logger_name="ORDER").get_logger()
     PAYMENT_LOGGER = LoggerManager(parent_dir/"payment.logs", logger_name="PAYMENT").get_logger()
+    ADMIN_LOGGER = LoggerManager(parent_dir/"admin.logs", logger_name="PAYMENT").get_logger()
