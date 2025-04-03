@@ -16,7 +16,8 @@ DEFAULT_SETTINGS = {
     "payment_url": "http://playpit.pythonanywhere.com",
     "DELAY_BEFORE_STATUS_CHECK":2,
     "MAX_RETIRES":3,
-    "SIMULATE": True
+    "SIMULATE": True,
+    "allowed_extensions":{'jpg', 'jpeg', 'png', 'webp' ,'svg'}
 }
 PATHS_LIST = ['uploads_dir_path']
 
@@ -56,6 +57,10 @@ class Config(ABC):
         self.default_data = default_data if default_data else DEFAULT_SETTINGS 
         self.authkey = authkey
         self.UPLOAD_DIR = str(Path().cwd()/"app/static/uploads")
+        self.allowed_extensions = {'jpg', 'jpeg', 'png', 'webp' ,'svg'}
+        self.UPLOAD_IMAGES_DIRECTLY = os.getenv("UPLOAD_IMAGES_DIRECTLY","false") == "true"
+      
+        self.TEMP_UPLOAD_IMAGE_DIR = str(Path(self.UPLOAD_DIR)/'temp') 
 
         if not self.json_path.exists():
             self.__save__(self.default_data)
@@ -88,14 +93,14 @@ class JSONConfig(Config):
         with open(self.json_path, "r", encoding="utf-8") as f:
             data = json.load(f)
         self._load_attributes(data)
-        print("self.upload_lath" ,self.uploads_dir_path )
+      
         self.uploads_dir_path.mkdir(parents=True , exist_ok= True)
     def __save__(self, data: dict):
         """Save dictionary data to JSON file."""
         with open(self.json_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4)
 
-JSONConfig('config.json')
+
 
 
 

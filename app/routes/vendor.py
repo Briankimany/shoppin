@@ -251,90 +251,60 @@ def vendor_products():
     return render_template("vendor/products.html",products=products , categories=categories)
 
 
-# @vendor_bp.route("/upload" , methods = ['POST'])
-# @meet_vendor_requirements
-# @session_set
-# def upload_image():
-#     if "store_logo_file" not in request.files and "image" not in request.files:
-#         return jsonify({"success": False, "error": "No file part"}) , 500
-
-#     file = request.files.get("store_logo_file")
-#     if not file:
-#         file = request.files.get("image")
-#     if not file:
-#         return jsonify({"success": False, "error": "No file part"}) , 500
-#     if file.filename == "":
-#         return jsonify({"success": False, "error": "No selected file"})
-
-#     if file:
-#         filepath = os.path.join(config.UPLOAD_DIR, file.filename)
-#         Path(filepath).parent.mkdir(parents=True  , exist_ok=True)
-#         file.save(filepath)
-
-#         image_public_id = ImageManager.generate_public_id(file.filename)
-#         image_url = url_for("static", filename=f"uploads/{file.filename}", _external=True)
-#         remote_url = ImageManager.upload_and_transform_image(image_url=image_url,
-#                                                 public_id=image_public_id,
-#                                                 size_idx=2
-#                                     )
-
-#         vendorid = session.get("vendor_id")
-#         ImageManager.record_image_upload(db_session=db_session , image_public_id=image_public_id,
-#                                          vendor_id=vendorid ,filename = file.filename)
-
-#         return jsonify({"success": True, "image_url": remote_url})
-
-#     return jsonify({"success": False, "error": "Unknown error"})
 
 
 @vendor_bp.route('/upload', methods=['POST' , 'GET'])
 @meet_vendor_requirements
 @session_set
 def upload_image():
-        if request.method == 'GET':
-            return render_template("upload.html")
-    # try:
-        file = request.files.get('image') or request.files.get('store_logo_file')
-        ImageManager._validate_file(file)
+    if request.method == 'GET':
+        return render_template("upload.html")
 
-        upload_dir = os.path.join(config.UPLOAD_DIR, 'temp')
-        os.makedirs(upload_dir, exist_ok=True)
-        local_path = os.path.join(upload_dir, file.filename)
-        file.save(local_path)
-
-        with open("customlog.txt" ,'w') as fff:
-            fff.write(f"string sfkajfdkdjf {local_path}")
-            fff.write(f"my osenvrons are {os.getenv('CLOUDINARY_URL')}")
-
-        print("in upload ",os.getenv("CLOUDINARY_URL"))
-
-        public_id = ImageManager.generate_public_id(file.filename)
-        cloudinary_url = ImageManager.upload_and_transform_image(
-            image_path=local_path,
-            public_id=public_id,
-            size_idx=2
-        )
-
-        ImageManager.record_image_upload(
-            db_session=db_session,
-            image_url=cloudinary_url,
-            public_id=public_id,
-            vendor_id=session['vendor_id'],
-            filename=file.filename
-        )
-
-        os.remove(local_path)
-
+    file = request.files.get('image') or request.files.get('store_logo_file')
+    ImageManager._validate_file(file)
+    pre_uploaded_image  = ImageManager.validate_image_not_duplicate(db_session=db_session,
+                                                                   name=file.filename)
+    if pre_uploaded_image:
+        LOG.VENDOR_LOGGER.info(f"[IMAGE UPLOAD] duplication detected {pre_uploaded_image.__repr__()}")
         return jsonify({
             "success": True,
-            "image_url": cloudinary_url,
-            "public_id": public_id
-        }), 200
+            "image_url": pre_uploaded_image.imageurl,
+            "public_id": pre_uploaded_image.uniqueid
+        }), 200 
 
-    # except ValueError as e:
-    #     return jsonify({"success": False, "error": str(e)}), 400
-    # except RuntimeError as e:
-    #     return jsonify({"success": False, "error": str(e)}), 500
-    # except Exception as e:
-    #     LOG.SHOP_LOGGER.error(f"Unexpected error: {str(e)}")
-    #     return jsonify({"success": False, "error": "Internal server error"}), 500
+    upload_dir = os.path.join(config.UPLOAD_DIR, 'temp')
+    os.makedirs(upload_dir, exist_ok=True)
+    local_path = os.path.join(upload_dir, file.filename)
+    file.save(local_path)
+
+    
+    image_url = url_for("static", filename=f"uploads/temp/{file.filename}", _external=True)
+    
+    public_id = ImageManager.generate_public_id(file.filename)
+    cloudinary_url = ImageManager.upload_and_transform_image(
+        image_path=local_path,
+        public_id=public_id,
+        size_idx=2
+    )
+
+    LOG.VENDOR_LOGGER.info(f"[IMAGE UPLOAD] {session.get('vendor_id')} uploaded an image {image_url}: cloudinary url {cloudinary_url}")
+    if not cloudinary_url:
+        ImageManager.save_local_image_url(image_path=Path(local_path),image_url =image_url)
+        cloudinary_url = image_url
+    else:
+        os.remove(local_path)
+
+    ImageManager.record_image_upload(
+        db_session=db_session,
+        image_url=cloudinary_url,
+        public_id=public_id,
+        vendor_id=session['vendor_id'],
+        filename=file.filename
+    )
+
+    return jsonify({
+        "success": True,
+        "image_url": cloudinary_url,
+        "public_id": public_id
+    }), 200
+

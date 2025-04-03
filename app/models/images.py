@@ -13,3 +13,15 @@ class ImageUpload(Base):
     filename = Column(String(255), nullable=False)
     imageurl = Column(String(512), nullable=False)  
     uploaded_at = Column(TIMESTAMP, server_default=func.now())  
+
+    def __repr__(self):
+       
+        return (
+            f"<ImageUpload(id={self.id}, "
+            f"vendorid={self.vendorid}, "
+            f"filename='{self.filename}', "
+            f"uploaded_at={self.uploaded_at})>"
+        )
+
+    def __str__(self):
+        return self.__repr__()

@@ -2,8 +2,11 @@
 import cloudinary
 from dotenv import load_dotenv
 import os
-load_dotenv()
+import json
+from pathlib import Path
+from config.config import JSONConfig
 
+load_dotenv()
 
 
 cloudinary.config(
@@ -12,6 +15,7 @@ cloudinary.config(
     api_secret = os.getenv("API_SECRET"),
     secure=True
 )
+
 from cloudinary.utils import cloudinary_url
 import cloudinary.uploader
 import cloudinary.api
@@ -25,9 +29,11 @@ import base64
 import hashlib
 
 
-
+import os
+import socket
 
 class ImageManager:
+    config = JSONConfig("config.json")
 
     IMAGE_SIZES = [
         {"width": 1000, "height": 1000},  # Main product image
@@ -44,7 +50,7 @@ class ImageManager:
         if not file or file.filename == '':
             raise ValueError("No valid file provided")
 
-        allowed_extensions = {'jpg', 'jpeg', 'png', 'webp'}
+        allowed_extensions =ImageManager.config.allowed_extensions
         if '.' not in file.filename or file.filename.split('.')[-1].lower() not in allowed_extensions:
             raise ValueError("Invalid file type")
 
@@ -58,8 +64,9 @@ class ImageManager:
 
     @staticmethod
     def upload_and_transform_image(image_path, public_id, size_idx=2):
-            """Upload to Cloudinary with dynamic transformations."""
-        # try:
+        """Upload to Cloudinary with dynamic transformations."""
+    
+        if ImageManager.config.UPLOAD_IMAGES_DIRECTLY:
             upload_result = cloudinary.uploader.upload(
                 image_path,
                 public_id=public_id,
@@ -76,8 +83,8 @@ class ImageManager:
                 fetch_format="webp"  # Force modern format
             )
             return optimized_url
-        # except Exception as e:
-        #     raise RuntimeError(f"Cloudinary upload failed: {str(e)}")
+        else:
+            return None
 
     @staticmethod
     def record_image_upload(db_session:Session, image_url, public_id, vendor_id, filename):
@@ -92,5 +99,26 @@ class ImageManager:
             db_session.add(image)
             db_session.commit()
         except SQLAlchemyError as e:
-            db_session.rollback()
             raise RuntimeError(f"Database error: {str(e)}")
+    @staticmethod
+    def validate_image_not_duplicate(db_session:Session , name:str):
+        image = db_session.query(ImageUpload).filter(ImageUpload.filename == name).first()
+        return image
+    
+    @staticmethod
+    def save_local_image_url(image_path:Path , image_url):
+        json_file = Path(ImageManager.config.TEMP_UPLOAD_IMAGE_DIR) /'images.json'
+        data = {}
+        if os.path.exists(json_file):
+            with open(json_file , 'r' ) as file:
+                data =json.load(file)
+        
+        data[image_path.name] = {"path":str(image_path),"url":image_url}
+
+        with open(json_file , 'w') as file:
+            json.dump(data,file)
+        
+      
+
+ 
+        
