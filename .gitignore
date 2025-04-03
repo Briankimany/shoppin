@@ -12,3 +12,4 @@ test/
 venv
 .last_req_hash  
 /app/static/uploads
+*.json
