@@ -11,3 +11,5 @@ test/
 /tests
 venv
 .last_req_hash  
+/app/statuc/uploads
+*.png
