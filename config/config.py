@@ -57,7 +57,7 @@ class Config(ABC):
         self.default_data = default_data if default_data else DEFAULT_SETTINGS 
         self.authkey = authkey
         self.UPLOAD_DIR = str(Path().cwd()/"app/static/uploads")
-        self.allowed_extensions = {'jpg', 'jpeg', 'png', 'webp' ,'svg'}
+        self.allowed_extensions = ['jpg', 'jpeg', 'png', 'webp' ,'svg']
         self.UPLOAD_IMAGES_DIRECTLY = os.getenv("UPLOAD_IMAGES_DIRECTLY","false") == "true"
 
         self.TEMP_UPLOAD_IMAGE_DIR = Path(self.UPLOAD_DIR)/'temp'
