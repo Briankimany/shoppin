@@ -1,9 +1,10 @@
 import requests
 from typing import List, Dict, Any
 from app.services.upload import ImageManager
+from app.routes.logger import LOG
 
 class ImageMigrationService:
-    def __init__(self, base_url: str = "http://localhost:5500/admin"):
+    def __init__(self, base_url: str = "http://kimany.pythonanywhere.com/admin"):
         self.base_url = base_url
         self.headers = {"Content-Type": "application/json"}
 
@@ -42,10 +43,12 @@ class ImageMigrationService:
                     "api_response": update_result
                 })
             except Exception as e:
-                results.append({
+                info ={
                     "error": str(e),
                     "failed_image": image
-                })
+                }
+                results.append(info)
+                LOG.ADMIN_LOGGER.error(f"[MIGRATION ERROR] {info}")
         
         return results
 

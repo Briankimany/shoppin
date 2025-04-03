@@ -160,7 +160,10 @@ class ImageManager:
         results =[]
         for name in names:
             image = db_sessoin.query(ImageUpload).filter(ImageUpload.filename==name).first()
-            results.append(image.to_dict())
+            
+            image_path = Path(ImageManager.config.TEMP_UPLOAD_IMAGE_DIR) /str(image.filename)
+            if image_path.exists():
+                results.append(image.to_dict())
         return results
     
     @staticmethod
