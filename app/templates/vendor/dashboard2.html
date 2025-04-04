@@ -35,8 +35,11 @@
                 <i class="fas fa-cubes"></i>
             </div>
             <div class="metric-details">
-                <span class="metric-label">Inventory Summary</span>
-                <span class="metric-value">{{ data.total_products }}</span>
+                <div class="details">
+                    <p class="metric-label">Inventory Summary</p>
+                    <p class="metric-value">{{ data.total_products }}</p>
+                </div>
+              
                 <div class="inventory-breakdown">
                     <div class="inventory-item">
                         <span class="inventory-label">Active</span>
@@ -51,9 +54,11 @@
                         <span class="inventory-value">{{ data.low_stock_items|length if data.low_stock_items else 0 }}</span>
                     </div>
                 </div>
-                <a href="{{ url_for('vendor.vendor_products') }}" class="card-link">
-                    Manage Inventory <i class="fas fa-arrow-right"></i>
-                </a>
+                <div>
+                    <a href="{{ url_for('vendor.vendor_products') }}" class="card-link">
+                        Manage Inventory <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -62,8 +67,8 @@
                 <i class="fas fa-chart-line"></i>
             </div>
             <div class="metric-details">
-                <span class="metric-label">Total Revenue</span>
-                <span class="metric-value">${{ "%.2f"|format(data.total_revenue) }}</span>
+                <p class="metric-label">Total Revenue</p>
+                <p class="metric-value">${{ "%.2f"|format(data.total_revenue) }}</p>
             </div>
         </div>
 

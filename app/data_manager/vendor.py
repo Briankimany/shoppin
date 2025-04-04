@@ -347,7 +347,6 @@ class VendorObj:
         .limit(3) \
         .all()
 
-        print(recent_orders)
         for order, total, customer in recent_orders:
             dashboard_data['recent_orders'].append({
                 'id': f"ORD-{order.id}",

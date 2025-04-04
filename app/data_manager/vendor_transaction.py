@@ -49,7 +49,7 @@ class VendorTransactionSystem:
             VendorOrder.vendorid == vendor_id,
             OrderModel.created_at >= min(date_range)
         ).group_by(func.date(OrderModel.created_at)).all()
-        print(revenue_results)
+     
         revenue_by_date = {r.date: float(r.amount) for r in revenue_results}
         
         return {

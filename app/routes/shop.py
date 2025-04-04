@@ -1,6 +1,6 @@
-from flask import Blueprint, render_template, request, session, redirect, url_for, flash ,jsonify
+from flask import Blueprint, render_template, request, session, redirect, url_for, flash ,jsonify ,g
 
-from app.data_manager.session_manager import SessionManager
+from app.data_manager.session_manager import SessionManager 
 from app.data_manager.vendor import VendorObj
 from app.data_manager.cart_manager import OrderManager
 from app.routes.logger import LOG
@@ -10,6 +10,7 @@ from app.routes.routes_utils import  UserManager
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from functools import wraps
+from datetime import datetime
 
 from app.routes.routes_utils import session_set
 config = JSONConfig("config.json")
@@ -38,6 +39,32 @@ def vendor_selected(func):
             return redirect(url_for("shop.shop_home"))
         return func(*args, **kwargs)  # Ensure the wrapped function still executes
     return decorated_func
+
+
+
+@shop_bp.before_request
+def load_current_user():
+    user_id = session.get('user_id')
+    if user_id:
+        user_obj.reload_object(user=user_id)
+        g.current_user = user_obj.user
+        if not g.current_user:
+            session.clear()
+        else:
+            g.current_user.is_authenticated = True
+    else:
+        g.current_user = None
+
+@shop_bp.context_processor
+def inject_user():
+   
+    user = getattr(g, 'current_user', None)
+    print("the current user is ",user)
+    return {
+        'current_user': user,
+        'is_authenticated':True,
+        'now': datetime.now()
+    }
 
 
 
