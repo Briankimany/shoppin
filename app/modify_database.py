@@ -49,7 +49,7 @@ vendor_data = {
             "email": "tech@example.com",
             "phone": "1234567001",
             "store_name": "Tech Haven",
-            "store_logo": "https://example.com/logos/tech.png",
+            "store_logo": "https://res.cloudinary.com/dqmqwijyf/image/upload/c_pad,w_300,h_300/v1743681390/b470ZdEWk3d2kQWT.webp",
             "payment_type": "Stripe",
             "store_description": "Gadgets, gaming gear, and cutting-edge tech",
             "verified": True
@@ -70,7 +70,7 @@ vendor_data = {
             "email": "fashion@example.com",
             "phone": "1234567002",
             "store_name": "Urban Threads",
-            "store_logo": "https://example.com/logos/fashion.png",
+            "store_logo": "https://res.cloudinary.com/dqmqwijyf/image/upload/c_pad,w_300,h_300/v1743517291/samples/outdoor-woman.jpg",
             "payment_type": "PayPal",
             "store_description": "Trendy apparel and accessories",
             "verified": True
@@ -91,7 +91,7 @@ vendor_data = {
             "email": "home@example.com",
             "phone": "1234567003",
             "store_name": "Domestic Bliss",
-            "store_logo": "https://example.com/logos/home.png",
+            "store_logo": "https://res.cloudinary.com/dqmqwijyf/image/upload/c_pad,w_300,h_300/v1743517284/samples/food/spices.jpg",
             "payment_type": "Bank Transfer",
             "store_description": "Everything for your home and kitchen",
             "verified": True
@@ -112,7 +112,7 @@ vendor_data = {
             "email": "services@example.com",
             "phone": "1234567004",
             "store_name": "Digital Services Hub",
-            "store_logo": "https://example.com/logos/services.png",
+            "store_logo": "https://res.cloudinary.com/dqmqwijyf/image/upload/c_pad,w_300,h_300/v1743691066/tech_support_zafgsj.webp",
             "payment_type": "Crypto",
             "store_description": "IT, AI, and cloud services",
             "verified": True
@@ -240,7 +240,7 @@ def add_products():
     add_muliple_prodct(p=set_urls(extra_products1 , image_urls))
     add_muliple_prodct(p=set_urls(extra_products2 , image_urls))
     add_muliple_prodct(p=set_urls(extra_products3 , image_urls))
-    add_muliple_prodct(p=set_urls(extra_products3 , image_urls))
+    add_muliple_prodct(p=set_urls(extra_products4 , image_urls))
 
 def main():
     try:

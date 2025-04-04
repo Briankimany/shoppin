@@ -77,7 +77,6 @@ def vendor_products(vendor_id):
     session['vendor_id']=vendor_id
     vendor = VendorObj(vendor_id=vendor_id, db_session=db_session)
     products = vendor.get_product("vendor_id", vendor_id, occurrence="all")
-    
     final_data = {}
     for product in products:
         key = product.category
@@ -199,9 +198,6 @@ def api_process_payment():
 
     if phone[0] == "0":
         phone = phone.replace("0" , "254")
-
-    amount = str(float(amount)/100)
-    
 
     if not phone or not amount:
         return jsonify({"message": "Invalid data received."}), 400

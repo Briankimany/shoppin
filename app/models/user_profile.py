@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, TIMESTAMP  , ForeignKey 
+from sqlalchemy import Column, Integer, String, TIMESTAMP  , ForeignKey ,DateTime
+from datetime import datetime
 from sqlalchemy.sql import func
 from .base import Base
 
@@ -21,3 +22,9 @@ class ResetToken(Base):
     reset_token = Column(String(255), unique=True, nullable=False)
     user_id = Column(Integer, ForeignKey('user_table.id'), nullable=False)
     expires_at = Column(TIMESTAMP )
+
+class UserBalance(Base):
+    __tablename__ = "users_balance"
+    id = Column(Integer ,ForeignKey('user_table.id') , primary_key=True,nullable= False)
+    balance = Column(Integer)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

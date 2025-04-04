@@ -120,9 +120,13 @@ def add_details():
 @session_set
 def dashboard():
     vendor = VendorObj(session['vendor_id'], db_session=db_session)
+    from pprint import pprint
 
+    print("\n")
     data =vendor.get_dashboard_data()
-    print(data)
+    pprint(data, indent=2, width=80, sort_dicts=False)
+    print("\n")
+
 
     return render_template(
         "vendor/dashboard2.html",
