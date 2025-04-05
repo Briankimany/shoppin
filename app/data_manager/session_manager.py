@@ -54,7 +54,6 @@ class SessionManager:
                 return True
         else:
             return False
-
             
 
     def create_cart(self , user_id, session_tkn):

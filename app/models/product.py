@@ -21,3 +21,12 @@ class Product(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
+    def __repr__(self):
+        return (
+        f"<Product(id={self.id}, name='{self.name}', vendor_id={self.vendor_id}, "
+        f"type={'Service' if self.product_type == 1 else 'Physical'}, "
+        f"price={self.price}, stock={self.stock}, category='{self.category}')>"
+    )
+
+    def __str__(self):
+        return self.__repr__()

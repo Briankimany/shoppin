@@ -13,6 +13,16 @@ class UserProfile(Base):
     password_hash = Column(String, nullable=True)  
     created_at = Column(TIMESTAMP, server_default=func.now())
 
+    def __repr__(self):
+        return (
+            f"<UserProfile(id={self.id}, name='{self.name}', email='{self.email}', "
+            f"phone='{self.phone}')>"
+        )
+
+    def __str__(self):
+        return self.__repr__()
+
+
 
 class ResetToken(Base):
     __tablename__ = 'reset_tokens'

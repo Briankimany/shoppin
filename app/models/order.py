@@ -6,6 +6,7 @@ from .user_profile import UserProfile
 from .session_tracking import SessionTracking
 from .cart import Cart
 
+
 class Order(Base):
     __tablename__ = 'orders'
     
@@ -19,3 +20,13 @@ class Order(Base):
     cart_id = Column(Integer, ForeignKey(Cart.id), nullable=False)  
     created_at = Column(TIMESTAMP, server_default=func.now())
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    def __repr__(self):
+        return (
+        f"<Order(id={self.id}, session='{self.session}', user_id={self.user_id}, "
+        f"phone_number='{self.phone_number}', total_amount={self.total_amount}, "
+        f"status='{self.status}', payment_type='{self.payment_type}', cart_id={self.cart_id})>"
+    )
+    
+    def __str__(self):
+        return self.__repr__()

@@ -6,7 +6,7 @@ from app.data_manager.vendor import VendorObj
 from app.models.user_profile import UserProfile
 from config.config import JSONConfig
 from pathlib import Path
-
+from typing import List
 from app.create_database import init_db
 import csv
 
@@ -16,12 +16,14 @@ def get_urls_from_csv(csv_path: str) -> list[str]:
         reader = csv.reader(file)
         return ([row[0] for row in reader if row] )[1:] 
 
-def set_urls(extra_products ,image_urls):
+def set_urls(extra_products:List[Product] ,image_urls):
     if image_urls:
         result = []
         for i, product in enumerate(extra_products):
             url_index = int((i / len(extra_products)) * len(image_urls))
             product.image_url = image_urls[url_index]
+        
+            product.stock = product.vendor_id *10
             result.append(product)
         return result
     return extra_products

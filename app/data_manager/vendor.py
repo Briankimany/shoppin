@@ -11,7 +11,7 @@ from app.routes.logger import LOG
 from app.models.session_tracking import SessionTracking
 from datetime import datetime
 import humanize
-
+from .vendor_transaction import VendorTransactionSystem
 from datetime import timedelta
 
 class VendorObj:
@@ -198,9 +198,9 @@ class VendorObj:
     
 
 
-    def get_dashboard_data(self):
+    def get_dashboard_data(self ,stock_threshold=10):
         return VendorObj.get_vendor_dashboard_data(db_session=self.db_session , 
-                                           vendor_id=self.vendor_id)
+                                           vendor_id=self.vendor_id,stock_threshold=stock_threshold)
 
    
 
@@ -275,114 +275,8 @@ class VendorObj:
     
     @staticmethod
     def get_vendor_dashboard_data(vendor_id, db_session:Session , stock_threshold=10):
-        # Initialize response structure
-        dashboard_data = {
-            "active_products":10,
-            "out_of_stock":3,
-            'total_products': 0,
-            'total_revenue': 0.0,
-            'daily_revenue': {
-                'dates': [],
-                'amounts': []
-            },
-            'recent_orders': [],
-            'low_stock_items': []
-        }
-
-        # 1. Get total products count
-        dashboard_data['total_products'] = db_session.query(func.count(ProductModel.id)) \
-            .filter(ProductModel.vendor_id == vendor_id) \
-            .scalar()
-
-        # 2. Calculate total revenue and daily breakdown (last 7 days)
-        seven_days_ago = datetime.now() - timedelta(days=7)
-        
-        revenue_data = db_session.query(
-        OrderModel.created_at.label('date'),
-            func.sum(OrderItem.quantity * OrderItem.price_at_purchase).label('daily_total')
-        ) \
-        .join(VendorOrder, VendorOrder.orderid == OrderModel.id) \
-        .join(OrderItem, VendorOrder.orderitem == OrderItem.id) \
-        .filter(
-            VendorOrder.vendorid == vendor_id,
-            OrderModel.created_at >= seven_days_ago
-        ) \
-        .group_by(func.date(OrderModel.created_at)) \
-        .order_by(func.date(OrderModel.created_at)) \
-        .all()
-
-
-    
-        # Format daily revenue data
-        for day in revenue_data:
-            dashboard_data['daily_revenue']['dates'].append(day.date.strftime('%m-%d'))
-            dashboard_data['daily_revenue']['amounts'].append(float(day.daily_total or 0))
-        
-        # Fill missing days with 0
-        all_dates = [(datetime.now() - timedelta(days=i)).strftime('%m-%d') for i in range(7)]
-        for date in all_dates:
-            if date not in dashboard_data['daily_revenue']['dates']:
-                dashboard_data['daily_revenue']['dates'].append(date)
-                dashboard_data['daily_revenue']['amounts'].append(0.0)
-        
-        # Sort by date
-        sorted_data = sorted(zip(dashboard_data['daily_revenue']['dates'], 
-                                dashboard_data['daily_revenue']['amounts']),
-                            key=lambda x: x[0])
-        dashboard_data['daily_revenue']['dates'] = [d[0] for d in sorted_data]
-        dashboard_data['daily_revenue']['amounts'] = [d[1] for d in sorted_data]
-
-        # 3. Get recent orders (last 3)
-        recent_orders = db_session.query(
-            OrderModel,
-            func.sum(OrderItem.quantity * OrderItem.price_at_purchase).label('order_total'),
-            SessionTracking.token.label('customer_name')
-        ) \
-        .join(VendorOrder, VendorOrder.orderid == OrderModel.id) \
-        .join(OrderItem, VendorOrder.orderitem == OrderItem.id) \
-        .join(SessionTracking, OrderModel.session == SessionTracking.token) \
-        .filter(VendorOrder.vendorid == vendor_id) \
-        .group_by(OrderModel.id, SessionTracking.token) \
-        .order_by(OrderModel.created_at.desc()) \
-        .limit(3) \
-        .all()
-
-        print(recent_orders)
-        for order, total, customer in recent_orders:
-            dashboard_data['recent_orders'].append({
-                'id': f"ORD-{order.id}",
-                'total': float(total),
-                'status': order.status,
-                'time_ago': humanize.naturaltime(datetime.now() - order.created_at),
-                'customer': customer
-            })
-            dashboard_data['total_revenue'] += float(total)
-
-        # 4. Get low stock items (stock < 5)
-        low_stock_items = db_session.query(ProductModel) \
-            .filter(
-                ProductModel.vendor_id == vendor_id,
-                ProductModel.stock < stock_threshold
-            ) \
-            .order_by(ProductModel.stock.asc()) \
-            .all()
-
-        for product in low_stock_items:
-            dashboard_data['low_stock_items'].append({
-                'id': product.id,
-                'name': product.name,
-                'stock': product.stock,
-                'threshold': stock_threshold
-            })
-     
-
-        out_of_stocks = db_session.query(func.count(ProductModel.id)).filter(
-            ProductModel.vendor_id == vendor_id,
-            ProductModel.stock == 0
-        ).scalar()
-
-        dashboard_data['out_of_stock'] = out_of_stocks
-        dashboard_data['active_products'] = dashboard_data['total_products'] - dashboard_data['out_of_stock']
-        dashboard_data['today_revenue'] = 788
-        return dashboard_data
-
+        return VendorTransactionSystem.get_vendor_dashboard(
+            vendor_id=vendor_id,
+            db_session=db_session,
+            stock_threshold = stock_threshold
+        )

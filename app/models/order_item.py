@@ -19,7 +19,7 @@ class OrderItem(Base):
     price_at_purchase = Column(DECIMAL(10, 2), nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
 
-    def __reprs__(self):
+    def __repr__(self):
         return self.__str__()
     def __str__(self):
         return f"<OrderItem id={self.id} , orderid={self.order_id} , quantity={self.quantity} , product={self.product_id}"
@@ -31,3 +31,11 @@ class VendorOrder(Base):
     orderid = Column(Integer , ForeignKey(Order.id) , nullable = False)
     orderitem = Column(Integer , ForeignKey(OrderItem.id),nullable = False)
 
+    def __repr__(self):
+        return (
+            f"<VendorOrder(id={self.id}, vendorid={self.vendorid}, orderid={self.orderid}, "
+            f"orderitem={self.orderitem})>"
+        )
+
+    def __str__(self):
+        return self.__repr__()

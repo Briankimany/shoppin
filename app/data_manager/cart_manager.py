@@ -6,7 +6,7 @@ from app.models.product import Product
 
 from config.config import JSONConfig
 from .session_manager import SessionManager
-from .database_index import Database
+from .vendor_transaction import VendorTransactionSystem
 import json , requests ,time
 from sqlalchemy.exc import SQLAlchemyError
 from app.routes.logger import LOG
@@ -246,26 +246,23 @@ class OrderManager:
             order_id (int): The ID of the order.
         """
         try:
-           
             order_items = session.query(OrderItem).filter_by(order_id=order_id).all()
 
             if not order_items:
-                print(f"No items found for order ID: {order_id}")
+                LOG.ORDER_LOGGER.info(f"No items found for order ID: {order_id}")
                 return
 
             for item in order_items:
                 product = session.query(Product).filter_by(id=item.product_id).first()
-
                 if product:
-                    
                     if product.stock >= item.quantity:
                         product.stock -= item.quantity
                     else:
                         LOG.ORDER_LOGGER.info(f"Not enough stock for Product ID {product.id} (Requested: {item.quantity}, Available: {product.stock})")
                         continue
 
-            session.commit()
-            print(f"Stock updated successfully for order ID: {order_id}")
+                session.commit()
+            LOG.ORDER_LOGGER.info(f"Stock updated successfully for order ID: {order_id}")
 
         except Exception as e:
             session.rollback()  # Rollback in case of an error
@@ -310,6 +307,17 @@ class OrderManager:
             LOG.ORDER_LOGGER.error(f"Database Error while updating order {order_id}: {e}")
             return False
 
+    
+    def divide_to_vendors(self,order_id):
+        return OrderManager.allocate_order_shares(order_id=order_id ,
+                                                  db_session=self.db_session)
+    
+    @staticmethod
+    def allocate_order_shares(order_id , db_session:Session):
+        num_vendors =VendorTransactionSystem.divide_order_to_vendors(order_id=order_id , 
+                                                        db_session=db_session)
+        LOG.VENDOR_LOGGER.info("[ORDER DIVISION] order {} allocated to {} vendors".format(order_id,num_vendors))
+        return True
     
     @staticmethod
     def collect_payment(phone , amount ,orderid):

@@ -18,3 +18,13 @@ class SessionTracking(Base):
     device = Column(String, nullable=True)
     consent_given = Column(Boolean, default=False)
 
+
+    def __repr__(self):
+        return (
+        f"<SessionTracking(token='{self.token}', expires_at='{self.expires_at}', cart_id={self.cart_id}, "
+        f"user_id={self.user_id}, ip='{self.ip_address}', location='{self.city}, {self.region}, {self.country}', "
+        f"browser='{self.browser}', device='{self.device}', consent_given={self.consent_given})>"
+    )
+
+    def __str__(self):
+        return self.__repr__()

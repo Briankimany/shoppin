@@ -21,6 +21,15 @@ class Vendor(Base):
     created_at = Column(TIMESTAMP, server_default=func.now())
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    def __repr__(self):
+        return (
+            f"<Vendor(id={self.id}, name='{self.name}', email='{self.email}', phone='{self.phone}', "
+            f"store_name='{self.store_name}', payment_type='{self.payment_type}', verified={self.verified})>"
+        )
+
+    def __str__(self):
+        return self.__repr__()
+
 
 class VendorPayout(Base):
     __tablename__ = "vendor_payouts"
@@ -32,5 +41,15 @@ class VendorPayout(Base):
     transaction_ref = Column(String(100), unique=True, nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    def __repr__(self):
+        return (
+            f"<VendorPayout(id={self.id}, vendor_id={self.vendor_id}, amount={self.amount}, "
+            f"status='{self.status}', method='{self.method}', transaction_ref='{self.transaction_ref}')>"
+        )
+
+    def __str__(self):
+        return self.__repr__()
+
 
 

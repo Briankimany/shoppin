@@ -123,7 +123,7 @@ def dashboard():
     from pprint import pprint
 
     print("\n")
-    data =vendor.get_dashboard_data()
+    data =vendor.get_dashboard_data(stock_threshold=7)
     pprint(data, indent=2, width=80, sort_dicts=False)
     print("\n")
 

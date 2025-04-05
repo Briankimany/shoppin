@@ -20,7 +20,11 @@
   [ ] 14. fix the update detail endpoint for vendors
   [ ] 15. fix tracking user data
   [x] 16. fix the tempfile having items not in data base
-  []  17. link the user table and vendor via the user id
+  [ ]  17. link the user table and vendor via the user id
+  [ ] 18. fill the payment table with records from succesfule checkout
+  [ ] 19. fix vendor /order enpoint
+  [ ] 20. fix venodr withdrawal history enpoin
+  [ ] 21. fix endpoint reports
 
 
 HTML RESTRUCTRUNG

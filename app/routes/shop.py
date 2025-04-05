@@ -6,7 +6,7 @@ from app.data_manager.cart_manager import OrderManager
 from app.routes.logger import LOG
 from config.config import JSONConfig
 from app.routes.routes_utils import  UserManager
-
+from app.data_manager.vendor_transaction import VendorTransactionSystem
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from functools import wraps
@@ -142,7 +142,7 @@ def view_cart():
   
     cart_id = session_manager.get_cart(session_token)
     cart_items = session_manager.get_cartitems(cart_id=cart_id)
-    print(cart_items)
+   
     subtotal =sum([i.quantity*i.product.price for i in cart_items])
   
     return render_template("shop/cart.html", cart_items=cart_items , subtotal=subtotal)
@@ -226,6 +226,8 @@ def api_process_payment():
     if status == 'paid':
         cart_status = session_manager.update_cart(cart_id=cart_id , attribute="is_active" , new_value=False)
         order.update_stock(order_id = order.order.id)
+        order.divide_to_vendors(order_id=order.order.id)
+        
         return jsonify({"message": "success"}) , 200
     return jsonify({"message": f"Payment request sent for ksh: {amount} to +{phone}."}) , 200
 
