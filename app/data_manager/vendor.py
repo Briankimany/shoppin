@@ -13,6 +13,8 @@ from datetime import datetime
 import humanize
 from .vendor_transaction import VendorTransactionSystem
 from datetime import timedelta
+from app.models.vendor import Vendor , VendorPayout
+from app.models.model_utils import PaymentMethod
 
 class VendorObj:
     """
@@ -142,7 +144,7 @@ class VendorObj:
             data = product_data['data']
             results.append(self.db.modify_product(product_id , data))
         return results
-        
+
     def view_products(self):
         """
         Retrieves all products listed by the vendor.
@@ -186,23 +188,13 @@ class VendorObj:
         return self.db.get_vendor_orders(self.vendor_id)
 
     def manage_payouts(self):
-        """
-        Retrieves all payout requests made by the vendor.
-
-        Returns:
-            list: A list of payout objects.
-        """
-        return self.db.get_payouts(self.vendor_id)
-
-
-    
-
+        return VendorObj.get_vendor_withdrawal_records(
+            db_session=self.db_session,vendor_id=self.vendor_id
+        )
 
     def get_dashboard_data(self ,stock_threshold=10):
         return VendorObj.get_vendor_dashboard_data(db_session=self.db_session , 
                                            vendor_id=self.vendor_id,stock_threshold=stock_threshold)
-
-   
 
     def get_recent_orders(self, limit=5):
         """Fetch recent orders."""
@@ -213,6 +205,15 @@ class VendorObj:
                         .order_by(OrderModel.created_at.desc())
                         .limit(limit)
                         .all()
+        )
+
+    def record_payout(self ,payment_method,amount ,status:str = 'pending'):
+        return VendorObj.create_vendor_payout_record(
+            db_session=self.db_session,
+            vendor_id=self.vendor_id,
+            payment_method=payment_method,
+            amount=amount,
+            status=status
         )
 
     def get_low_stock_products(self , threshold=5):
@@ -280,3 +281,76 @@ class VendorObj:
             db_session=db_session,
             stock_threshold = stock_threshold
         )
+
+    @staticmethod
+    def get_vendor_withdrawal_records(db_session: Session, vendor_id: int) -> tuple[dict, list[dict]]:
+        """Retrieves withdrawal records and balance information for a specific vendor.
+
+        Args:
+            db_session (Session): SQLAlchemy database session for querying data.
+            vendor_id (int): Unique identifier of the vendor.
+
+        Returns:
+            tuple[dict, list[dict]]: A tuple containing two elements:
+                - First element (dict): Vendor balance information with keys:
+                    * 'available' (float): Available balance (total - withdrawn)
+                    * 'pending' (float): Sum of pending withdrawals
+                    * 'total' (float): Total account balance
+                - Second element (list[dict]): List of withdrawal dictionaries with keys:
+                    * 'amount' (float): Withdrawal amount
+                    * 'method' (str): Payment method used
+                    * 'status' (str): Withdrawal status ('completed' or 'pending')
+                    * 'request' (datetime): When withdrawal was requested
+
+        Example:
+            >>> balance, withdrawals = get_vendor_withdrawal_records(session, 123)
+            >>> print(balance)
+            {'available': 850.0, 'pending': 150.0, 'total': 1000.0}
+            >>> print(withdrawals[0])
+            {'amount': 100.0, 'method': 'bank_transfer', 'status': 'completed', ...}
+        """
+        
+        vendor_withdrwals = db_session.query(
+            VendorPayout
+            ).filter(VendorPayout.vendor_id==vendor_id
+            ).order_by(VendorPayout.created_at.desc()
+            ).all()
+        account_data = VendorTransactionSystem.calculate_total_revenue(db_session=db_session,
+                                                                       vendor_id=vendor_id)
+        completed = []
+        pending = []
+        withdrawals = []
+        for vendor_pay  in vendor_withdrwals:
+            if vendor_pay.status == 'completed':
+                completed.append(vendor_pay.amount)
+            elif vendor_pay.status == 'pendig':
+                pending.append(vendor_pay.amount)
+            
+            withdrawals.append({'amount':vendor_pay.amount,'method':vendor_pay.method
+                                ,'status':vendor_pay.status,'request':vendor_pay.created_at})
+        
+        amount_withdrawn = sum(completed)
+        vendor_balance = {
+            "available":account_data['account_balance'] - amount_withdrawn,
+            'pending': sum(pending),
+            'total':amount_withdrawn
+        }
+        return  vendor_balance , withdrawals
+
+    @staticmethod
+    def create_vendor_payout_record(db_session:Session , amount:float ,
+                                    payment_method:PaymentMethod ,
+                                    vendor_id:int,
+                                    status:str = 'pending'):
+        payout = VendorPayout(
+            vendor_id= vendor_id,
+            method = payment_method,
+            amount=amount,
+            status = status
+        )
+       
+        db_session.add(payout)
+        db_session.commit()
+        LOG.VENDOR_LOGGER.info(f"withdrwal record initiated {payout}")
+        return payout
+    

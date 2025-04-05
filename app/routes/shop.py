@@ -261,7 +261,7 @@ def api_process_payment():
                                         method=PaymentMethod.MPESA,
                                         category=PaymentCategory.PRODUCT_SALE,
                                         description="Products from order id {} sold at {}".format(order.order.id ,
-                                                                                                  amount))
+                                                                                                  float(amount)))
         return jsonify({"message": "success"}) , 200
     return jsonify({"message": f"Payment request sent for ksh: {amount} to +{phone}."}) , 200
 

@@ -1,9 +1,9 @@
 # vendor.py
-from sqlalchemy import Column, Integer, String, Boolean, Text, DateTime ,ForeignKey ,TIMESTAMP ,DECIMAL
+from sqlalchemy import Column, Integer, String, Boolean, Text, DateTime ,ForeignKey ,TIMESTAMP ,DECIMAL ,Enum as SQLENUM
 from datetime import datetime
 from sqlalchemy.sql import func
-from .user_profile import UserProfile
 from .base import Base
+from .model_utils import PaymentMethod
 
 
 
@@ -36,16 +36,15 @@ class VendorPayout(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     vendor_id = Column(Integer, ForeignKey(Vendor.id), nullable=False)
     amount = Column(DECIMAL(10, 2), nullable=False)
-    status = Column(String(20), nullable=False)  # pending, processing, completed, failed
-    method = Column(String(30) , nullable=False)  # eg m-pesa ,bank , airtel-money
-    transaction_ref = Column(String(100), unique=True, nullable=False)
+    status = Column(String(20), nullable=False)  # pending,  completed, failed
+    method = Column(SQLENUM(PaymentMethod) , nullable=False)  # eg m-pesa ,bank , airtel-money
     created_at = Column(TIMESTAMP, server_default=func.now())
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     def __repr__(self):
         return (
             f"<VendorPayout(id={self.id}, vendor_id={self.vendor_id}, amount={self.amount}, "
-            f"status='{self.status}', method='{self.method}', transaction_ref='{self.transaction_ref}')>"
+            f"status='{self.status}', method='{self.method})>"
         )
 
     def __str__(self):

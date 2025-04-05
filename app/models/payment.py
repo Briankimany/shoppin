@@ -1,18 +1,6 @@
-from enum import Enum
+from .model_utils import PaymentCategory , PaymentMethod
 from sqlalchemy import Column, Integer, String, Numeric, DateTime, func, Enum as SQLAlchemyEnum
 from .base import Base
-
-
-class PaymentMethod(str, Enum):
-    BANK = "Bank"
-    MPESA = "M-pesa"
-    AIRTEL_MONEY = "Airtel-money"
-
-class PaymentCategory(str, Enum):
-    PRODUCT_SALE = "Product sale"
-    VENDOR_FEE = "Vendor fee"
-    HOSTING_FEE = "Hosting Fee"
-
 
 class Payment(Base):
     __tablename__ = "payments"
