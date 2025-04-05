@@ -167,10 +167,6 @@ def get_order_items(order_id):
     return jsonify(items)
 
 
-
-
-
-
 @user_bp.route('/validate-token/<token>', methods=['GET', 'POST'])
 def validate_token(token):
  
@@ -198,29 +194,30 @@ def validate_token(token):
         }), 200
         
 
-@user_bp.route("/forgot-password", methods=["GET", "POST"])
+@user_bp.route("/forgot-password", methods=["GET"])
 @force_user_reload
 @session_set
 def forgot_password():
     response = None
-    if request.method == "POST":
-        email = request.get_json().get("email")
-        user = UserManager.get_user_(db_session=db_session ,user=email)
-        response = {
-            "success": True,
-            "message": "If this email exists in our system, you'll receive a reset link shortly.",
-            "cooldown": 60  
-            }
-        if user:
-            reset_token = ResetTokenManager.create_token(db_session=db_session ,
-                                                         session_token=session.get("session_token"),
-                                                         user_id=user.id ,expires_in_hours=1)
-            
-         
-            reset_link = url_for("user.validate_token", token=reset_token.reset_token, _external=True)
-            send_reset_email(recipient=user.email, reset_link=reset_link)
-        else:
-            time.sleep(3)
-        return jsonify(response)
-        
     return render_template("user/forgot_password.html" , message=response)
+
+@user_bp.route("/reset-password" , methods = ['POST'])
+def reser_user_password():
+    email = request.get_json().get("email")  
+    user = UserManager.get_user_(db_session=db_session ,user=email)
+    response = {
+        "success": True,
+        "message": "If this email exists in our system, you'll receive a reset link shortly.",
+        "cooldown": 6 
+        }
+    if user:
+        reset_token = ResetTokenManager.create_token(db_session=db_session ,
+                                                        session_token=session.get("session_token"),
+                                                        user_id=user.id ,expires_in_hours=1)
+        
+        
+        reset_link = url_for("user.validate_token", token=reset_token.reset_token, _external=True)
+        send_reset_email(recipient=user.email, reset_link=reset_link)
+    else:
+        time.sleep(3)
+    return jsonify(response) ,200
