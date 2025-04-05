@@ -320,10 +320,10 @@ class OrderManager:
     
     @staticmethod
     def allocate_order_shares(order_id , db_session:Session):
-        num_vendors =VendorTransactionSystem.divide_order_to_vendors(order_id=order_id , 
+        num_vendors ,vendor_data =VendorTransactionSystem.divide_order_to_vendors(order_id=order_id , 
                                                         db_session=db_session)
         LOG.VENDOR_LOGGER.info("[ORDER DIVISION] order {} allocated to {} vendors".format(order_id,num_vendors))
-        return True
+        return vendor_data
     
     @staticmethod
     def collect_payment(phone , amount ,orderid):

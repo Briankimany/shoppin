@@ -185,8 +185,14 @@ class VendorTransactionSystem:
         ).filter(VendorOrder.orderid == order_id
         ).group_by(VendorOrder.vendorid).all()
 
+
         # Update each vendor's balance
+        vendor_data = {}
         for vendor_id, amount in vendor_shares:
             cls.update_vendor_balance(vendor_id, float(amount), db_session)
-
-        return len(vendor_shares)  
+        
+        for vendor_id , amount in vendor_shares:
+            vendor =db_session.query(VendorModel).filter(VendorModel.id == vendor_id).first()
+            vendor_data[vendor.phone]=amount
+            
+        return len(vendor_shares)   ,vendor_data

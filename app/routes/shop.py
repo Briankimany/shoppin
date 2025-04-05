@@ -12,6 +12,8 @@ from sqlalchemy import create_engine
 from functools import wraps
 from datetime import datetime
 
+from app.data_manager.payments import PaymentManager , PaymentCategory , PaymentMethod
+
 from app.routes.routes_utils import session_set
 config = JSONConfig("config.json")
 engine = create_engine(f"sqlite:///{config.database_url.absolute()}")
@@ -191,7 +193,6 @@ def update_cart():
     data = request.get_json()
     quantities = data.get("quantities", {})
     errored =  False
-    print("data from modify cart",data)
     for product_id, quantity in quantities.items():
         if session_manager.verify_available_stock(int(product_id) , int(quantity)):
             session_manager.update_cart_item(cart_id, int(product_id), int(quantity))
@@ -208,8 +209,6 @@ def update_cart():
 def checkout():
     """Handles the checkout process."""
     session_token = session.get("session_token")
-    if not session_token:
-        return redirect(url_for("shop.vendor_products", vendor_id=session.get("vendor_id")))
     cart_summary = session_manager.get_cart_summary(session_token=session_token)
     session['cart']=cart_summary
    
@@ -253,8 +252,16 @@ def api_process_payment():
     if status == 'paid':
         cart_status = session_manager.update_cart(cart_id=cart_id , attribute="is_active" , new_value=False)
         order.update_stock(order_id = order.order.id)
-        order.divide_to_vendors(order_id=order.order.id)
+        vendor_data =order.divide_to_vendors(order_id=order.order.id)
         
+        for vendor_phone , amount in vendor_data.items():
+            PaymentManager.record_payment(source= phone,
+                                        recipient=vendor_phone,
+                                        amount=amount ,
+                                        method=PaymentMethod.MPESA,
+                                        category=PaymentCategory.PRODUCT_SALE,
+                                        description="Products from order id {} sold at {}".format(order.order.id ,
+                                                                                                  amount))
         return jsonify({"message": "success"}) , 200
     return jsonify({"message": f"Payment request sent for ksh: {amount} to +{phone}."}) , 200
 
