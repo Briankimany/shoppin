@@ -49,10 +49,7 @@
 
 .category-name {
     display: inline-block;
-    transform: rotate(-90deg);
-    transform-origin: left top;
     white-space: nowrap;
-    position: absolute;
     left: 1rem;
     margin-top: -0.5rem;
 }
@@ -78,6 +75,7 @@
 
 .action-cell {
     text-align: right;
+    font-weight: bold;
 }
 
 .modify-btn {

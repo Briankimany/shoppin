@@ -13,21 +13,26 @@
     <!-- Category Navigation -->
     <div class="category-nav">
         <div class="category-scroll">
+  
             {% for category in categories %}
             <button class="category-btn {% if loop.first %}active{% endif %}" 
                     data-category="{{ category.id }}">
-                {{ category.name }}
+                
+                <a class="link-name" href="#category-title-id-{{ category.name }}"><p>{{ category.name }}</p></a>
             </button>
             {% endfor %}
         </div>
     </div>
 
+
+
     <!-- Products by Category -->
     <div class="products-by-category">
         {% for category in categories %}
-        <section class="product-category {% if loop.first %}active{% endif %}" 
+        <section class="product-category active" 
+      
                  id="category-{{ category.id }}">
-            <h2 class="category-title">{{ category.name }}</h2>
+            <h2 id="category-title-id-{{ category.name }}" class="category-title">{{ category.name }}</h2>
             <div class="product-grid">
                 {% for product in category.products %}
                 <div class="product-card">

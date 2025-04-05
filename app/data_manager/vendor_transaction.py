@@ -53,7 +53,7 @@ class VendorTransactionSystem:
             OrderModel.created_at >= min(date_range),
             OrderModel.status  ==status,
         ).group_by(func.date(OrderModel.created_at)).all()
-        
+    
         revenue_by_date = {r.date.strftime("%m-%d"): float(r.amount) for r in revenue_results}
         return {
             "dates": [d.strftime('%m-%d') for d in date_range],

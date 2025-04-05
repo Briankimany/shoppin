@@ -1,4 +1,9 @@
-/* vendor.css - Professional White Theme */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
 :root {
     --sidebar-width: 280px;
     --sidebar-collapsed: 80px;
@@ -12,9 +17,6 @@
     --danger: #ef4444;
   }
   
-
-  
-  /* Fixed Height Sidebar */
   .main-nav {
     width: var(--sidebar-width);
     height: 100vh;
@@ -27,7 +29,6 @@
     transition: width 0.3s ease;
   }
   
-  /* Scrollable Nav Area */
   .nav-scroll {
     flex: 1;
     overflow-y: auto;
@@ -35,7 +36,7 @@
     padding: 1rem 0;
   }
   
-  /* Brand Header */
+
   .nav-brand {
     padding: 1.25rem;
     display: flex;
@@ -49,7 +50,7 @@
     color: var(--primary);
   }
   
-  /* Navigation Items */
+
   .nav-menu {
     list-style: none;
     padding: 0;
@@ -80,7 +81,7 @@
     font-weight: 500;
   }
   
-  /* Dropdown Menus */
+ 
   .has-dropdown .dropdown-header {
     display: flex;
     align-items: center;
@@ -111,7 +112,7 @@
     color: var(--primary);
   }
   
-  /* Quick Actions */
+
   .quick-actions {
     padding: 1.25rem;
     border-top: 1px solid var(--border);
@@ -145,7 +146,7 @@
     color: var(--primary);
   }
   
-  /* Footer Section */
+
   .nav-footer {
     padding: 1rem;
     border-top: 1px solid var(--border);
@@ -200,7 +201,6 @@
     text-decoration: none;
   }
   
-  /* Main Content Area */
   .content-area {
     margin-left: var(--sidebar-width);
     flex: 1;
@@ -216,7 +216,6 @@
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
-    gap: 1rem;
   }
   
   .nav-toggle {
@@ -269,7 +268,6 @@
     padding: 1.5rem;
   }
   
-  /* Footer */
   .main-footer {
     background: white;
     padding: 2rem 1.5rem;
@@ -322,7 +320,6 @@
     gap: 1rem;
   }
   
-  /* Collapsed State */
   .main-nav.collapsed {
     width: var(--sidebar-collapsed);
   }
@@ -349,7 +346,6 @@
     justify-content: center;
   }
   
-  /* Mobile Responsiveness */
   @media (max-width: 992px) {
     .main-nav {
       transform: translateX(-100%);
@@ -368,13 +364,12 @@
     }
   }
   
-  /* Animations */
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
   }
   
-  /* Badges */
+ 
   .badge {
     background: var(--danger);
     color: white;
@@ -385,8 +380,6 @@
   }
 
 
-  
-  /* Dynamic styles needed for JS interactions */
   .ripple {
       position: absolute;
       border-radius: 50%;
@@ -431,9 +424,9 @@
       40%, 80% { transform: translateX(5px); }
   }
   
-  body.nav-open {
+  /* body.nav-open {
       overflow: hidden;
-  }
+  } */
   
   @media (max-width: 992px) {
       .main-nav.mobile-open {
@@ -461,7 +454,6 @@
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ===== Base Structure ===== */
 .vendor-dashboard {
   display: flex;
   min-height: 100vh;
@@ -470,7 +462,6 @@
   overflow-x: hidden;
 }
 
-/* ===== Sidebar ===== */
 .main-nav {
   width: var(--sidebar-width);
   height: 100vh;
@@ -506,7 +497,6 @@
   transition: var(--transition);
 }
 
-/* ===== Navigation Items ===== */
 .nav-scroll {
   flex: 1;
   overflow-y: auto;
@@ -540,7 +530,6 @@
   font-weight: 500;
 }
 
-/* ===== Dropdowns ===== */
 .has-dropdown .dropdown-header {
   display: flex;
   align-items: center;
@@ -575,7 +564,6 @@
   color: var(--text-light);
 }
 
-/* ===== Collapsed State ===== */
 .main-nav.collapsed {
   width: var(--sidebar-collapsed);
 }
@@ -601,7 +589,6 @@
   display: none;
 }
 
-/* ===== Content Area ===== */
 .content-area {
   margin-left: var(--sidebar-width);
   flex: 1;
@@ -626,7 +613,6 @@
   padding: 1.5rem;
 }
 
-/* ===== Mobile Responsiveness ===== */
 @media (max-width: 992px) {
   .main-nav {
     transform: translateX(-100%);
@@ -645,14 +631,12 @@
   }
 }
 
-/* ===== Footer ===== */
 .main-footer {
   background: white;
   padding: 1.5rem;
   border-top: 1px solid var(--border);
 }
 
-/* ===== Utility Classes ===== */
 .badge {
   background: var(--danger);
   color: white;
@@ -677,11 +661,6 @@
   justify-content: center;
 }
 
-
-
-
-
-    /* Add to your CSS */
 body.nav-open {
     overflow: hidden;
 }

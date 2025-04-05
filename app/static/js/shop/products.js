@@ -1,3 +1,34 @@
+document.addEventListener("DOMContentLoaded", function() {
+    // Scroll behavior for category navigation
+    const categoryNav = document.querySelector('.category-nav');
+    let lastScroll = 0;
+    const threshold = 50; // pixels to scroll before hiding
+    
+    // Make category nav sticky
+    categoryNav.style.position = 'sticky';
+    categoryNav.style.top = '0';
+    
+    window.addEventListener('scroll', () => {
+        const currentScroll = window.pageYOffset;
+        
+        if (currentScroll <= 0) {
+            // At top of page - always show navbar
+            categoryNav.style.transform = 'translateY(0)';
+            return;
+        }
+        
+        if (currentScroll > lastScroll && currentScroll > threshold) {
+            // Scrolling down past threshold - hide navbar
+            categoryNav.style.transform = 'translateY(-100%)';
+        } else if (currentScroll < lastScroll || currentScroll < threshold) {
+            // Scrolling up or not past threshold - show navbar
+            categoryNav.style.transform = 'translateY(0)';
+        }
+        
+        lastScroll = currentScroll;
+ });
+});
+
 
 document.addEventListener("DOMContentLoaded", function() {
     // Category Navigation

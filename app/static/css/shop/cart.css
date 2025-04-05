@@ -64,17 +64,13 @@
 
 .product-image-container {
     width: 100px;
-    height: 100px;
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-    background: var(--bg-light);
+    
 }
 
 .product-image-container img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    mix-blend-mode: multiply;
+    border-radius: 50%;
 }
 
 .product-details {
@@ -256,12 +252,6 @@
             "remove remove";
         gap: 1rem;
         padding: 1rem;
-    }
-    
-    .product-image-container {
-        grid-area: image;
-        width: 80px;
-        height: 80px;
     }
     
     .product-details {
