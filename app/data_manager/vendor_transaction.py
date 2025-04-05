@@ -129,7 +129,7 @@ class VendorTransactionSystem:
             'total': float(total),
             'status': order.status,
             'time_ago': humanize.naturaltime(datetime.now() - order.created_at),
-            'customer': order.session
+            'customer': f"{order.phone_number[:-2]}.."
         } for order, total in cls.get_recent_orders(vendor_id, db_session)]
 
         # 4. Low stock items

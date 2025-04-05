@@ -1,59 +1,61 @@
+### **Track Changes**
 
-**track changes**
-## vendor bp
-- [x] 1. add loging and register funcionality
-- [ ] 2. add the remove item method
-- [x] 3. add the meet vendor requirements deocrator
-- [x] 4. impliment image uploading 
-- [x] 5. fix vendors tracking individual producs from users buying from mulitple vendors
-- [x] 6. remove duplicate html files
-- [ ] 7. fix the ability to ad products after an initial checkout fails
-- [x] 8. add the reducing in stock quantity after succesful checkout -- update the values after setting the order to paid
-- [x] 9. group products in vendors edit page , shop 
-- [ ] 10. Automatic upload of images to the remote server and clear space in the static folder
-            - mages are stored on python anywhere until manual triggering to uploasd to claudinary
-- [x] 11. password reseting :
-            1. mail gun emailing 
-            2. gmail 
-  [ ] 12. add edit profile
-  [ ] 13. fix order preview in users pages
-  [ ] 14. fix the update detail endpoint for vendors
-  [ ] 15. fix tracking user data
-  [x] 16. fix the tempfile having items not in data base
-  [ ]  17. link the user table and vendor via the user id
-  [ ] 18. fill the payment table with records from succesfule checkout
-  [ ] 19. fix vendor /order enpoint
-  [ ] 20. fix venodr withdrawal history enpoin
-  [ ] 21. fix endpoint reports
+#### **Vendor Backend**
+- **[x] 1.** Add login and register functionality
+- **[ ] 2.** Add the remove item method
+- **[x] 3.** Add the "meet vendor requirements" decorator
+- **[x] 4.** Implement image uploading
+- **[x] 5.** Fix vendor tracking of individual products from users buying from multiple vendors
+- **[x] 6.** Remove duplicate HTML files
+- **[ ] 7.** Fix the ability to add products after an initial checkout fails
+- **[x] 8.** Reduce stock quantity after successful checkout (update the values after setting the order to "paid")
+- **[x] 9.** Group products in the vendor's edit page, shop
+- **[ ] 10.** Automatic upload of images to the remote server and clear space in the static folder
+    - Images are stored on PythonAnywhere until manual triggering to upload to Cloudinary
+- **[x] 11.** Password resetting:
+    - Mailgun emailing
+    - Gmail
+- **[ ] 12.** Add edit profile functionality
+- **[ ] 13.** Fix order preview on user pages
+- **[ ] 14.** Fix the update detail endpoint for vendors
+- **[ ] 15.** Fix tracking user data
+- **[x] 16.** Fix tempfile having items not in the database
+- **[ ] 17.** Link the user table and vendor via the user ID
+- **[ ] 18.** Fill the payment table with records from successful checkout
+- **[ ] 19.** Fix the vendor/order endpoint
+- **[ ] 20.** Fix vendor withdrawal history endpoint
+- **[ ] 21.** Fix endpoint for reports
 
+---
 
-HTML RESTRUCTRUNG
+#### **HTML Restructuring**
 
-1. ADMIN
-    admni.html
-    inspect_vendor.html
-2. login
+1. **Admin**
+    - admin.html
+    - inspect_vendor.html
 
-3. shop
-    1. shops.html
-    2. payment.html
-    3. products.html
-    4. specific_product.html
-    5. cart.html
-    6. checkout2.html
+2. **Login**
+    - login.html
 
-4. user
-    1. orders.
-    2. profile -- needs fixing 
-    3. fogort password -- needs to be finnished
+3. **Shop**
+    - shops.html
+    - payment.html
+    - products.html
+    - specific_product.html
+    - cart.html
+    - checkout2.html
 
-5. Vendor
-    1. base2.html
-    2. home.html
-    3. update_details.html
-    4. dashboard2.html
-    5. add_product.html
-    6. edit_prodcut.html
-    7. payout.html
-    8. products.html
+4. **User**
+    - orders.html
+    - profile.html (needs fixing)
+    - forgot_password.html
+5. **Vendor**
+    - base2.html
+    - home.html
+    - update_details.html
+    - dashboard2.html
+    - add_product.html
+    - edit_product.html
+    - payout.html
+    - products.html
 
