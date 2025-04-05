@@ -47,3 +47,10 @@ def log_out():
 def g():
     return "".join([f"<br> {k}: {v}</br>" for k,v in session.items()])
 
+@app.route("/help")
+def help():
+    return "hello"
+
+@app.route("/index")
+def index():
+    return "index"
