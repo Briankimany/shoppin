@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/errors/errors.css') }}">
+    <title>Error - {{ status_code }}</title>
+</head>
+<body>
+    <div class="error-container">
+        <h1>Something Went Wrong</h1>
+        <p>We encountered an issue while processing your request. Please try again later.</p>
+        <a href="javascript:history.back()" class="btn">Go Back</a>
+        <p><small>Reference ID: {{ error_id }}</small></p>
+
+        <div class="error-details">
+            {% if message %} 
+                {{ message }}
+            {% else %}
+                Contact support with error id: {{ error_id }}
+            {% endif %}
+        </div>
+
+    </div>
+</body>
+</html>

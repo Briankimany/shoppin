@@ -6,9 +6,6 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/vendor/payout.css') }}">
 {% endblock %}
 
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/vendor/payout.js') }}"></script>
-{% endblock %}
 
 
 {% block content %}
@@ -47,9 +44,10 @@
                 <h3>Request Withdrawal</h3>
             </div>
             <div class="card-content">
-                <form method="POST" action="{{ url_for('vendor.process_withdrawal') }}">
+                <form method="POST" id="withdrawal-form">  <!-- Added ID -->
+           
                     <div class="form-group">
-                        <label for="amount">Withdrawal Amount ($)</label>
+                        <label for="amount">Withdrawal Amount (Ksh)</label>
                         <div class="input-group">
                             <span class="input-prefix">$</span>
                             <input type="number" 
@@ -61,16 +59,16 @@
                                    placeholder="0.00"
                                    required>
                         </div>
-                        <small class="form-note">Minimum withdrawal: $10.00</small>
+                        <small class="form-note">Minimum withdrawal: Ksh 100.00</small>
                     </div>
 
                     <div class="form-group">
                         <label for="method">Payment Method</label>
                         <select id="method" name="method" required>
                             <option value="">Select payment method</option>
-                            <option value="paypal">PayPal</option>
-                            <option value="bank_transfer">Bank Transfer</option>
-                            <option value="venmo">Venmo</option>
+                            {% for method in payment_methods %}
+                                <option value="{{ method.name }}">{{ method.value }}</option>
+                            {% endfor %}
                         </select>
                     </div>
 
@@ -94,22 +92,22 @@
             <div class="card-header">
                 <i class="fas fa-history"></i>
                 <h3>Recent Withdrawals</h3>
-                <a href="{{ url_for('vendor.withdrawal_history') }}" class="card-link">
+                <!-- <a href="{{ url_for('vendor.withdrawal_history') }}" class="card-link">
                     View All <i class="fas fa-arrow-right"></i>
-                </a>
+                </a> -->
             </div>
             <div class="card-content">
                 {% if withdrawals %}
                 <div class="transactions-list">
-                    {% for withdrawal in withdrawals %}
+                    {% set maxlen = 3 if withdrawals|length > 3 else withdrawal_history|length %}
+                    {% for withdrawal in withdrawals[:maxlen] %}
                     <div class="transaction-item {{ withdrawal.status }}">
                         <div class="transaction-meta">
-                            <span class="transaction-id">#{{ withdrawal.id }}</span>
                             <span class="transaction-date">{{ withdrawal.request_date }}</span>
                         </div>
                         <div class="transaction-details">
                             <span class="transaction-amount">${{ "%.2f"|format(withdrawal.amount) }}</span>
-                            <span class="transaction-method">{{ withdrawal.method }}</span>
+                            <span class="transaction-method">{{ withdrawal.method.value }}</span>
                             <span class="transaction-status">{{ withdrawal.status }}</span>
                         </div>
                     </div>
@@ -126,5 +124,8 @@
     </div>
 </div>
 
+{% endblock %}
 
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/vendor/payout.js') }}"></script>
 {% endblock %}
