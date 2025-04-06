@@ -1,121 +1,4 @@
-/* * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-}
 
-.withdrawal-container {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-}
-
-.balance-card .card-content {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-}
-
-.balance-metric {
-    background: var(--primary-light);
-    padding: 1rem;
-    border-radius: 6px;
-    text-align: center;
-}
-
-.balance-metric .metric-value {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--primary);
-}
-
-.input-group {
-    display: flex;
-    align-items: center;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    overflow: hidden;
-}
-
-.input-prefix {
-    padding: 0.75rem;
-    background: var(--primary-light);
-    color: var(--primary);
-    font-weight: 600;
-}
-
-.input-group input {
-    border: none;
-    border-left: 1px solid var(--border);
-    border-radius: 0;
-}
-
-.transactions-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.transaction-item {
-    padding: 1rem;
-    border-radius: 6px;
-    background: var(--primary-light);
-    border: 1px solid var(--border);
-}
-
-.transaction-item.completed {
-    border-left: 4px solid var(--success);
-}
-
-.transaction-item.pending {
-    border-left: 4px solid var(--warning);
-}
-
-.transaction-meta {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-    color: var(--text-light);
-}
-
-.transaction-details {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.transaction-amount {
-    font-weight: 600;
-}
-
-.transaction-status {
-    padding: 0.25rem 0.5rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    background: var(--border);
-}
-
-.transaction-status.completed {
-    background: var(--success);
-    color: white;
-}
-
-.transaction-status.pending {
-    background: var(--warning);
-    color: white;
-}
-
-@media (min-width: 992px) {
-    .withdrawal-container {
-        grid-template-columns: 1fr 1fr;
-    }
-    
-    .transactions-card {
-        grid-column: span 2;
-    }
-} */
 :root {
     /* Color System */
     --primary: #4361ee;
@@ -473,4 +356,33 @@
         text-align: left;
         width: 100%;
     }
+}
+
+.error-message {
+    color: #ff4444;
+    font-size: 0.85em;
+    margin-top: 5px;
+    display: none;
+}
+
+.input-error {
+    border-color: #ff4444 !important;
+    box-shadow: 0 0 0 1px rgba(255, 68, 68, 0.2);
+}
+
+.withdrawal-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 15px;
+    color: white;
+    border-radius: 4px;
+    z-index: 1000;
+    display: none;
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
