@@ -26,7 +26,18 @@
 - **[ ] 20.** Fix vendor withdrawal history endpoint
 - **[ ] 21.** Fix endpoint for reports
 
----
+
+### **Error Logger & Blueprint System**  
+- **[x] 1.** Universal `@bp_error_logger` decorator for all blueprints  
+- **[x] 2.** Blueprint-specific logging (e.g., `LOG.SHOP_LOGGER`)   
+- **[x] 3.** Production-ready error template (`error.html`):  
+    - **[x]** Styled error message display  
+    - **[x]** "Go Back" button  
+    - **[x]** Error code visibility  
+- **[x] 5.** Debug/production mode safety (hide sensitive errors)  
+- **[x] 6.** Customizable HTTP status codes per route  
+
+
 
 #### **HTML Restructuring**
 
@@ -58,4 +69,5 @@
     - edit_product.html
     - payout.html
     - products.html
+
 
