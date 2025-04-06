@@ -11,6 +11,8 @@ from sqlalchemy import create_engine
 from datetime import datetime
 from app.routes.logger import LOG
 from app.services.upload import ImageManager
+from app.models.model_utils import PaymentMethod
+from pprint import pprint
 
 config = JSONConfig('config.json')
 
@@ -49,9 +51,6 @@ def inject_user():
 def test_base():
     return render_template("vendor/base2.html")
 
-
-
-
 @vendor_bp.route("/login")
 @session_set
 def login():
@@ -60,11 +59,6 @@ def login():
         return redirect(url_for("user.login"))
     else:
         return redirect(url_for("vendor.dashboard"))
-
-
-@vendor_bp.route("/reports")
-def reports():
-    return "helo reports"
 
 @vendor_bp.route("/login/<vendoid>")
 @session_set
@@ -120,25 +114,12 @@ def add_details():
 @session_set
 def dashboard():
     vendor = VendorObj(session['vendor_id'], db_session=db_session)
-    from pprint import pprint
-
-    print("\n")
     data =vendor.get_dashboard_data(stock_threshold=7)
-    pprint(data, indent=2, width=80, sort_dicts=False)
-    print("\n")
-
 
     return render_template(
         "vendor/dashboard2.html",
         data = data
     )
-
-
-@vendor_bp.route("/orders")
-@meet_vendor_requirements
-@session_set
-def orders():
-    return "order in view"
 
 
 @vendor_bp.route("/add_product", methods=["GET", "POST"])
@@ -204,44 +185,6 @@ def delete_product(product_id):
 @session_set
 def track_orders():
     return redirect(url_for("vendor.dashboard"))
-
-
-@vendor_bp.route("/payouts")
-@meet_vendor_requirements
-@session_set
-def payouts():
-
-    vendor = VendorObj(session["vendor_id"], db_session)
-    payouts = vendor.manage_payouts()
-    vendor_balance = {
-    'available': 10000,
-    'pending': 1,
-    'total': 300
-        }
-
-    withdrawals = [
-            {
-                'id': 123,
-                'amount': 50.00,
-                'method': 'paypal',
-                'status': 'completed',
-                'request_date': datetime.now()
-            },
-
-        ]
-    return render_template("vendor/payouts.html",vendor_balance=vendor_balance ,withdrawals=withdrawals)
-
-
-
-
-@vendor_bp.route("/process-pay" , methods = ['POST'])
-def process_withdrawal():
-    return jsonify({"sussess":True})
-
-@vendor_bp.route("/withdrawal-history-pay")
-def withdrawal_history():
-    return jsonify({"sussess":True})
-
 
 
 
@@ -314,4 +257,70 @@ def upload_image():
         "image_url": cloudinary_url,
         "public_id": public_id
     }), 200
+
+
+# ==================
+# to be worked on ||
+# ==================
+
+@vendor_bp.route("/orders")
+@meet_vendor_requirements
+@session_set
+def orders():
+    return "order in view"
+
+
+
+@vendor_bp.route("/payouts")
+@meet_vendor_requirements
+@session_set
+def payouts():
+
+    vendor = VendorObj(session["vendor_id"], db_session)
+    vendor_balance , withdrawals = vendor.manage_payouts()
+    return render_template("vendor/payouts.html",vendor_balance=vendor_balance 
+                           ,withdrawals=withdrawals
+                           ,payment_methods = list(PaymentMethod))
+
+
+@vendor_bp.route("/reports")
+def reports():
+    return "helo reports"
+
+
+@vendor_bp.route("/process-pay" , methods = ['POST'])
+@meet_vendor_requirements
+@session_set
+def process_withdrawal():
+    try:
+        form_data = request.form
+        amount =float(form_data.get("amount"))
+        method = form_data.get('method')
+        account_info = form_data.get('account_info')
+
+        if not all((amount,method,account_info)) :
+            raise ValueError("missing values from {} {} {}".format(amount,method,account_info))
+        
+        enum_instance = PaymentMethod[method]
+        VendorObj.create_vendor_payout_record(
+            db_session=db_session,
+            vendor_id=session['vendor_id'],
+            payment_method=enum_instance,
+            amount=amount
+        )
+        return jsonify({
+            "status": "success",
+            "message": f"Withdrawal of ${amount:.2f} is being processed!"
+        })
+    except Exception as e:
+        LOG.VENDOR_LOGGER.error(f"Withdrawal error{e}")
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 400
+    
+
+@vendor_bp.route("/withdrawal-history-pay")
+def withdrawal_history():
+    return jsonify({"sussess":True})
 

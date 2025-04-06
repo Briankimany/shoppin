@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, request, session, redirect, url_fo
 from app.data_manager.session_manager import SessionManager 
 from app.data_manager.vendor import VendorObj
 from app.data_manager.cart_manager import OrderManager
-from app.routes.logger import LOG
+from app.routes.logger import LOG ,bp_error_logger
 from config.config import JSONConfig
 from app.routes.routes_utils import  UserManager
 from app.data_manager.vendor_transaction import VendorTransactionSystem
@@ -11,6 +11,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from functools import wraps
 from datetime import datetime
+
+from app.data_manager.payments import PaymentManager , PaymentCategory , PaymentMethod
 
 from app.routes.routes_utils import session_set
 config = JSONConfig("config.json")
@@ -57,7 +59,6 @@ def load_current_user():
 
 @shop_bp.context_processor
 def inject_user():
-   
     user = getattr(g, 'current_user', None)
     print("the current user is ",user)
     return {
@@ -70,22 +71,23 @@ def inject_user():
 
 @shop_bp.route('/')
 @session_set
+@bp_error_logger(LOG.SHOP_LOGGER,500)
 def shop_home():
     vendors = VendorObj.get_all_vendors(db_session=db_session)
     return render_template("shop/shops.html", vendors=vendors)
 
 
-
 @shop_bp.route("/logout")
 @session_set
+@bp_error_logger(LOG.SHOP_LOGGER,500)
 def logout():
     session.clear()
     return "Logged out"
 
 
-
 @shop_bp.route("/complete-payment")
 @session_set
+@bp_error_logger(LOG.SHOP_LOGGER,500)
 def process_payment():
     cartdata =  session.get('cart' ,None)
     if  cartdata:
@@ -99,8 +101,10 @@ def process_payment():
 
 
 @shop_bp.route("/<vendor_id>")
+@bp_error_logger(LOG.SHOP_LOGGER,500 ,'errors.html')
 def vendor_products(vendor_id):
     """Displays products for a specific vendor."""
+   
     session['vendor_id']=vendor_id
     vendor = VendorObj(vendor_id=vendor_id, db_session=db_session)
     products = vendor.get_product("vendor_id", vendor_id, occurrence="all")
@@ -117,6 +121,7 @@ def vendor_products(vendor_id):
 
 @shop_bp.route("/product/<product_id>")
 @vendor_selected
+@bp_error_logger(LOG.SHOP_LOGGER,500)
 def specific_product(product_id):
     """Displays a specific product."""
     product = VendorObj(session.get("vendor_id"), db_session=db_session).get_product(
@@ -127,6 +132,7 @@ def specific_product(product_id):
 
 @shop_bp.route("/add_to_cart", methods=["POST"])
 @session_set
+@bp_error_logger(LOG.SHOP_LOGGER,500)
 def add_to_cart():
     session_token = session.get("session_token")
     if not session_token:
@@ -149,6 +155,7 @@ def add_to_cart():
 
 @shop_bp.route("/cart/remove", methods=["POST"])
 @session_set
+@bp_error_logger(LOG.SHOP_LOGGER,500)
 def remove_from_cart():
     """Removes a product from the cart."""
     session_token = session["session_token"]
@@ -163,6 +170,7 @@ def remove_from_cart():
 
 @shop_bp.route("/cart")
 @session_set
+@bp_error_logger(LOG.SHOP_LOGGER,500)
 def view_cart(): 
     """Displays the user's cart."""
     session_token = session["session_token"]
@@ -177,6 +185,7 @@ def view_cart():
 
 @shop_bp.route("/update_cart", methods=["POST"])
 @session_set
+@bp_error_logger(LOG.SHOP_LOGGER,500)
 def update_cart():
     """Handles updating cart item quantities via JavaScript."""
     session_token = session.get("session_token")
@@ -191,7 +200,6 @@ def update_cart():
     data = request.get_json()
     quantities = data.get("quantities", {})
     errored =  False
-    print("data from modify cart",data)
     for product_id, quantity in quantities.items():
         if session_manager.verify_available_stock(int(product_id) , int(quantity)):
             session_manager.update_cart_item(cart_id, int(product_id), int(quantity))
@@ -205,11 +213,10 @@ def update_cart():
 
 @shop_bp.route("/checkout", methods=["GET", "POST"])
 @session_set
+@bp_error_logger(LOG.SHOP_LOGGER,500)
 def checkout():
     """Handles the checkout process."""
     session_token = session.get("session_token")
-    if not session_token:
-        return redirect(url_for("shop.vendor_products", vendor_id=session.get("vendor_id")))
     cart_summary = session_manager.get_cart_summary(session_token=session_token)
     session['cart']=cart_summary
    
@@ -218,6 +225,7 @@ def checkout():
 
 
 @shop_bp.route("/api-pay" , methods = ['POST'])
+@bp_error_logger(LOG.SHOP_LOGGER,500)
 def api_process_payment():
     data = request.get_json()
     phone = data.get("phone")
@@ -253,14 +261,24 @@ def api_process_payment():
     if status == 'paid':
         cart_status = session_manager.update_cart(cart_id=cart_id , attribute="is_active" , new_value=False)
         order.update_stock(order_id = order.order.id)
-        order.divide_to_vendors(order_id=order.order.id)
+        vendor_data =order.divide_to_vendors(order_id=order.order.id)
         
+        for vendor_phone , amount in vendor_data.items():
+            PaymentManager.record_payment(source= phone,
+                                        recipient=vendor_phone,
+                                        amount=amount ,
+                                        method=PaymentMethod.MPESA,
+                                        category=PaymentCategory.PRODUCT_SALE,
+                                        description="Products from order id {} sold at {}".format(order.order.id ,
+                                                                                                  float(amount)))
         return jsonify({"message": "success"}) , 200
     return jsonify({"message": f"Payment request sent for ksh: {amount} to +{phone}."}) , 200
 
 
 
 @shop_bp.route("/search")
+@bp_error_logger(LOG.SHOP_LOGGER,500 ,'errors.html')
 def search():
+    request.get_json()
     return "Search Page (Placeholder)"
 

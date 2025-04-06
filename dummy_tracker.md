@@ -7,11 +7,11 @@
 - **[x] 4.** Implement image uploading
 - **[x] 5.** Fix vendor tracking of individual products from users buying from multiple vendors
 - **[x] 6.** Remove duplicate HTML files
-- **[ ] 7.** Fix the ability to add products after an initial checkout fails
+- **[x] 7.** Fix the ability to add products after an initial checkout fails
 - **[x] 8.** Reduce stock quantity after successful checkout (update the values after setting the order to "paid")
 - **[x] 9.** Group products in the vendor's edit page, shop
-- **[ ] 10.** Automatic upload of images to the remote server and clear space in the static folder
-    - Images are stored on PythonAnywhere until manual triggering to upload to Cloudinary
+- **[x] 10.** Automatic upload of images to the remote server and clear space in the static folder
+           - Images are stored on PythonAnywhere until manual triggering to upload to Cloudinary
 - **[x] 11.** Password resetting:
     - Mailgun emailing
     - Gmail
@@ -20,13 +20,24 @@
 - **[ ] 14.** Fix the update detail endpoint for vendors
 - **[ ] 15.** Fix tracking user data
 - **[x] 16.** Fix tempfile having items not in the database
-- **[ ] 17.** Link the user table and vendor via the user ID
-- **[ ] 18.** Fill the payment table with records from successful checkout
+- **[x] 17.** Link the user table and vendor via the user ID
+- **[x] 18.** Fill the payment table with records from successful checkout
 - **[ ] 19.** Fix the vendor/order endpoint
 - **[ ] 20.** Fix vendor withdrawal history endpoint
 - **[ ] 21.** Fix endpoint for reports
 
----
+
+### **Error Logger & Blueprint System**  
+- **[x] 1.** Universal `@bp_error_logger` decorator for all blueprints  
+- **[x] 2.** Blueprint-specific logging (e.g., `LOG.SHOP_LOGGER`)   
+- **[x] 3.** Production-ready error template (`error.html`):  
+    - **[x]** Styled error message display  
+    - **[x]** "Go Back" button  
+    - **[x]** Error code visibility  
+- **[x] 5.** Debug/production mode safety (hide sensitive errors)  
+- **[x] 6.** Customizable HTTP status codes per route  
+
+
 
 #### **HTML Restructuring**
 
@@ -58,4 +69,5 @@
     - edit_product.html
     - payout.html
     - products.html
+
 

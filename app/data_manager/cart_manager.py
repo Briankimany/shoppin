@@ -4,6 +4,7 @@ from app.models.order import Order
 from app.models.order_item import OrderItem , VendorOrder
 from app.models.product import Product
 
+
 from config.config import JSONConfig
 from .session_manager import SessionManager
 from .vendor_transaction import VendorTransactionSystem
@@ -58,7 +59,7 @@ class OrderManager:
                 grouped[vendorid]=[]
             grouped[vendorid].append(orderitem)
         
-  
+       
         LOG.ORDER_LOGGER.info("Initiating creation of vendor orders")
         LOG.ORDER_LOGGER.info(f"Data = {grouped}")
 
@@ -107,6 +108,7 @@ class OrderManager:
             OrderManager: An instance of `OrderManager` managing the newly created order.
             None: if creation fails.
         """
+        LOG.ORDER_LOGGER.info('='*55)
         LOG.ORDER_LOGGER.info(f"Initiating order creation for session: {session_tkn}")
 
         order = OrderManager.get_order_by_session_tkn(db_session=db_session,session_tkn=session_tkn)
@@ -150,6 +152,10 @@ class OrderManager:
                 order = new_order
             else:
                 LOG.ORDER_LOGGER.info(f"Existing order found for session: {session_tkn}, Order ID: {order.id}")
+                if float(order.total_amount) != float(total_amount):
+                    LOG.ORDER_LOGGER.info(f"Updating the order {order.id} from {order.total_amount} to amount {total_amount}")
+                    order.total_amount =total_amount
+                    db_session.commit()
 
             OrderManager.group_orders_to_vendors(db_session=db_session ,orderid=order.id)
             return OrderManager(db_session=db_session , order_id=order)
@@ -314,14 +320,15 @@ class OrderManager:
     
     @staticmethod
     def allocate_order_shares(order_id , db_session:Session):
-        num_vendors =VendorTransactionSystem.divide_order_to_vendors(order_id=order_id , 
+        num_vendors ,vendor_data =VendorTransactionSystem.divide_order_to_vendors(order_id=order_id , 
                                                         db_session=db_session)
         LOG.VENDOR_LOGGER.info("[ORDER DIVISION] order {} allocated to {} vendors".format(order_id,num_vendors))
-        return True
+        return vendor_data
     
     @staticmethod
     def collect_payment(phone , amount ,orderid):
         LOG.ORDER_LOGGER.info(f"Initiating payment collection for session : {orderid}, Phone: {phone}, Amount: {amount}")
+        response = None
 
         try:
             config = JSONConfig(json_path='config.json')
@@ -369,7 +376,7 @@ class OrderManager:
             return 'pending'
 
         except Exception as e:
-            LOG.ORDER_LOGGER.error(f"Exception occurred in payment collection for session: {orderid}: {e}")
+            LOG.ORDER_LOGGER.error(f"Exception occurred in payment collection for session: {orderid}: {e} Latest response:{response}")
             return None
 
        

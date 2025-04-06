@@ -70,6 +70,8 @@ class Config(ABC):
         else:
             self.__load__()
 
+        self.SQLITE_DATABASE_URL = f"sqlite:///{self.database_url.absolute()}"
+
     @abstractmethod
     def __load__(self):
         """Load configuration from the given  file path."""
