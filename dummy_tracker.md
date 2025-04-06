@@ -21,7 +21,7 @@
 - **[ ] 15.** Fix tracking user data
 - **[x] 16.** Fix tempfile having items not in the database
 - **[x] 17.** Link the user table and vendor via the user ID
-- **[ ] 18.** Fill the payment table with records from successful checkout
+- **[x] 18.** Fill the payment table with records from successful checkout
 - **[ ] 19.** Fix the vendor/order endpoint
 - **[ ] 20.** Fix vendor withdrawal history endpoint
 - **[ ] 21.** Fix endpoint for reports
