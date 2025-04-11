@@ -9,16 +9,16 @@ load_dotenv()
 
 class LoggerManager:
     def __init__(self, log_file="app.log", log_level=logging.DEBUG, logger_name=None):
-        self.logger = logging.getLogger(logger_name)  # Use a unique logger name
+        self.logger = logging.getLogger(logger_name)  
         self.logger.setLevel(log_level)
 
-        if not self.logger.handlers:  # Prevent duplicate handlers
-            file_handler = logging.FileHandler(log_file)  
-            formatter = logging.Formatter(
-                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-            )
-            file_handler.setFormatter(formatter)
-            self.logger.addHandler(file_handler)
+    
+        file_handler = logging.FileHandler(log_file)  
+        formatter = logging.Formatter(
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        )
+        file_handler.setFormatter(formatter)
+        self.logger.addHandler(file_handler)
 
     def get_logger(self):
         return self.logger

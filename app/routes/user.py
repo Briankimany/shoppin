@@ -71,7 +71,12 @@ def login():
                 if vendor:
                     session['vendor_id'] =vendor.id
                     return redirect (url_for('vendor.dashboard'))
+                
             return redirect(url_for("shop.shop_home"))
+        else:
+            LOG.USER_LOGGER.debug(f"[LOG IN FAILED] {user_obj} :{name} :{password}")
+            login_message = "Invalid credentials. Please try again."
+            return render_template("login/login.html", message=login_message)
 
     return render_template("login/login.html")
 
