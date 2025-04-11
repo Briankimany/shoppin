@@ -262,7 +262,21 @@ class VendorObj:
         except Exception as e:
             print(e)
             return None
-        
+    
+
+    def withdraw(self , amount:float , phone,**kwargs):
+        """
+        Initiates a withdrawal request for the vendor.
+
+        Args:
+            amount (float): Amount to withdraw.
+            payment_method (PaymentMethod): Payment method for the withdrawal.
+
+        Returns:
+            dict: Response from the withdrawal initiation request.
+        """
+        return VendorObj.initiate_withdraw( self.vendor_table.name,  amount, phone, **kwargs )
+    
     @staticmethod
     def get_vendor_product_categories(db_session:Session , vendor_id:int):
         categories = (db_session.query(ProductModel.category).
@@ -315,15 +329,18 @@ class VendorObj:
             ).filter(VendorPayout.vendor_id==vendor_id
             ).order_by(VendorPayout.created_at.desc()
             ).all()
+        
         account_data = VendorTransactionSystem.calculate_total_revenue(db_session=db_session,
                                                                        vendor_id=vendor_id)
+        
         completed = []
         pending = []
         withdrawals = []
+
         for vendor_pay  in vendor_withdrwals:
             if vendor_pay.status == 'completed':
                 completed.append(vendor_pay.amount)
-            elif vendor_pay.status == 'pendig':
+            elif vendor_pay.status == 'pending':
                 pending.append(vendor_pay.amount)
             
             withdrawals.append({'amount':vendor_pay.amount,'method':vendor_pay.method
@@ -338,7 +355,7 @@ class VendorObj:
         return  vendor_balance , withdrawals
 
     @staticmethod
-    def create_vendor_payout_record(db_session:Session , amount:float ,
+    def create_vendor_payout_record(db_session:Session ,amount:float ,
                                     payment_method:PaymentMethod ,
                                     vendor_id:int,
                                     status:str = 'pending'):
@@ -354,3 +371,46 @@ class VendorObj:
         LOG.VENDOR_LOGGER.info(f"withdrwal record initiated {payout}")
         return payout
     
+
+    @staticmethod
+    def initiate_withdraw(vendor_name:int , amount:float , phone:str ,**kwargs):
+        """
+        Initiates a withdrawal request for a vendor.
+        Args:
+            vendor_name (str): Name of the vendor.
+            amount (float): Amount to withdraw.
+            phone (str): Phone number associated with the vendor.
+        Returns:
+            dict: Response from the withdrawal initiation request.
+        Example:
+            >>> response = initiate_withdraw("John Doe", 100.0, "+123456789")
+        """
+
+        url = JSONConfig("config.json").payment_url+"//transfers/initiate/single"
+
+        headers = {"Authorization":"Bearer " + JSONConfig("config.json").authkey ,
+                    "Content-Type":"application/json"
+                   }
+
+        payload = {
+            "records": {
+                "name":vendor_name,
+                'phone':phone,
+                "amount":amount
+            },
+            "requires_approval": "YES"
+        }
+
+        payload.update(kwargs)
+        print(payload)
+
+        LOG.VENDOR_LOGGER.info(f"Initiating withdrawal for {vendor_name} of amount {amount} to {phone}")
+        LOG.VENDOR_LOGGER.info(f"Payload: {payload}")
+
+        response = requests.post(url=url , headers=headers , data=json.dumps(payload))
+        if response.status_code == 200:
+            return response.json()
+        else:
+            LOG.VENDOR_LOGGER.error(f"Failed to initiate withdrawal: {response.content}")
+            return None
+   

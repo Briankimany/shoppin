@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
+
+from models.user_profile import UserProfile
 from models.vendor import Vendor
 from models.product import Product
-from app.routes.vendor import db_session
-from app.data_manager.vendor import VendorObj
-from app.models.user_profile import UserProfile
+from app.routes.vendor import sessionmaker , engine
 
 
 from config.config import JSONConfig
@@ -11,6 +11,9 @@ from pathlib import Path
 from typing import List
 from app.create_database import init_db
 import csv
+
+DbSession = sessionmaker(bind=engine)
+conf = JSONConfig("config.json")
 
 def get_urls_from_csv(csv_path: str) -> list[str]:
     """Read URLs from a single-column CSV and return as list."""
@@ -32,9 +35,22 @@ def set_urls(extra_products:List[Product] ,image_urls):
 
     
 
-def add_muliple_prodct(p:list[Product]):
-    db_session.add_all(p)
-    db_session.commit()
+def add_muliple_prodct(db_session:Session,p:list[Product]):
+
+    """Add multiple products to the database."""
+    products_list =[]
+    for product in p:
+        existing_product = db_session.query(Product).filter(Product.name == product.name).first()
+        if existing_product:
+            print(f"Product with name {product.name} already exists, skipping.")
+            continue
+        else:
+            print(f"Adding product: {product.name}")
+        products_list.append(product)
+
+    if products_list:
+        db_session.add_all(products_list)
+        db_session.commit()
 
 
 
@@ -125,19 +141,34 @@ vendor_data = {
 }
 
 
-def create_users():
+def create_users(db_session:Session):
+    user_list =[]
     for vendor_key, data in vendor_data.items():
         user = UserProfile(**data["user"])
-        db_session.add(user)
+        existing_user = db_session.query(UserProfile).filter(UserProfile.email == user.email).first()
+        if existing_user:
+            print(f"User with email {user.email} already exists, skipping.")
+            continue
+        user_list.append(user)
+    db_session.add_all(user_list)
     db_session.commit()
-def create_vendors():
+    db_session.flush()
+
+def create_vendors(db_session:Session):
+    vendor_list = []
+    print('Adding vendors')
     for vendor_key, data in vendor_data.items():
         vendor = Vendor(**data["vendor"])
-        db_session.add(vendor)
+        existing_vendor = db_session.query(Vendor).filter(Vendor.email == vendor.email).first()
+        if existing_vendor:
+            print(f"Vendor with email {vendor.email} already exists, skipping.")
+            continue        
+        vendor_list.append(vendor)
+    db_session.add_all(vendor_list)
     db_session.commit()
 
 
-def add_products():
+def add_products(db_session:Session):
     vendor1 =db_session.query(Vendor).filter(Vendor.id == 1).first()
     vendor2 =db_session.query(Vendor).filter(Vendor.id == 2).first()
     vendor3 =db_session.query(Vendor).filter(Vendor.id == 3).first()
@@ -241,32 +272,43 @@ def add_products():
 
     image_urls = get_urls_from_csv("studio_urls_c_pad,w_300,h_300.csv")
 
-    add_muliple_prodct(p=set_urls(extra_products1 , image_urls))
-    add_muliple_prodct(p=set_urls(extra_products2 , image_urls))
-    add_muliple_prodct(p=set_urls(extra_products3 , image_urls))
-    add_muliple_prodct(p=set_urls(extra_products4 , image_urls))
+    add_muliple_prodct(db_session ,p=set_urls(extra_products1 , image_urls))
+    add_muliple_prodct(db_session ,p=set_urls(extra_products2 , image_urls))
+    add_muliple_prodct(db_session,p=set_urls(extra_products3 , image_urls))
+    add_muliple_prodct(db_session,p=set_urls(extra_products4 , image_urls))
 
 def main():
-    try:
-        create_users()
-        create_vendors()
-    except Exception as e:
-        if  Path(conf.database_url).exists():
-            db_path = Path(JSONConfig('config.json').database_url)
-            db_path.rename(db_path.with_name(f"{db_path.stem}_BACKUP.DB"))
-            init_db()
-            print("encoutered error resetting all tables")
-        return
-    add_products()
+    with DbSession() as db_session:
+    
+        try:
+            create_users(db_session)
+        except Exception as e:
+            print(f"Error creating users: {e}")
+            db_session.rollback()
+            return
+        try:
+            create_vendors(db_session)
+        except Exception as e:  
+            print(f"Error creating vendors: {e}")
+            db_session.rollback()
+            return
+        
+        try:
+            add_products(db_session)
+            print("Done adding products")
+        except Exception as e:
+            db_session.rollback()
+            print(f"Error adding products: {e}")
 
 
 if __name__ == "__main__":
-    conf = JSONConfig("config.json")
+   
     if not Path(conf.database_url).exists():
-        init_db()
+       print("No db found")
+       init_db()
+       print("Done creating db")
     else:
         print('using existing db')
-    
     main()
 
     

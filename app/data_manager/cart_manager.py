@@ -365,7 +365,7 @@ class OrderManager:
                     url=url + f'/check-status',
                     headers=headers,
                     json={
-                        "SIMULATE": False, 
+                        "SIMULATE": True, 
                           "MAXRETRIES":5,
                           'invoice_id':in_voice_id
 

@@ -12,7 +12,7 @@ from datetime import datetime
 from app.routes.logger import LOG
 from app.services.upload import ImageManager
 from app.models.model_utils import PaymentMethod
-from pprint import pprint
+from config.envrion_variables import IN_DEVELOPMENT
 
 config = JSONConfig('config.json')
 
@@ -271,21 +271,25 @@ def orders():
 
 
 
+
 @vendor_bp.route("/payouts")
 @meet_vendor_requirements
 @session_set
 def payouts():
-
     vendor = VendorObj(session["vendor_id"], db_session)
     vendor_balance , withdrawals = vendor.manage_payouts()
+    print(vendor_balance)
+    print(withdrawals)
     return render_template("vendor/payouts.html",vendor_balance=vendor_balance 
                            ,withdrawals=withdrawals
                            ,payment_methods = list(PaymentMethod))
 
 
+
 @vendor_bp.route("/reports")
 def reports():
     return "helo reports"
+
 
 
 @vendor_bp.route("/process-pay" , methods = ['POST'])
@@ -302,23 +306,40 @@ def process_withdrawal():
             raise ValueError("missing values from {} {} {}".format(amount,method,account_info))
         
         enum_instance = PaymentMethod[method]
+
         VendorObj.create_vendor_payout_record(
             db_session=db_session,
             vendor_id=session['vendor_id'],
             payment_method=enum_instance,
             amount=amount
         )
+        vendor = VendorObj(session['vendor_id'], db_session)
+        response = vendor.withdraw(amount,account_info)
+        if not response:
+            return jsonify({
+                "status": "error",
+                "message": "Withdrawal failed. Please try again later."
+            }), 400
+
         return jsonify({
             "status": "success",
             "message": f"Withdrawal of ${amount:.2f} is being processed!"
         })
+    
     except Exception as e:
         LOG.VENDOR_LOGGER.error(f"Withdrawal error{e}")
+        
+        message = "An error occurred while processing your withdrawal. Please try again later."
+        if  IN_DEVELOPMENT:
+            message = str(e)
+        
+
         return jsonify({
             "status": "error",
-            "message": str(e)
+            "message": message
         }), 400
     
+
 
 @vendor_bp.route("/withdrawal-history-pay")
 def withdrawal_history():
