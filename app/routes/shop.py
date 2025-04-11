@@ -277,7 +277,7 @@ def api_process_payment():
 
 
 @shop_bp.route("/search")
-@bp_error_logger(LOG.SHOP_LOGGER,500 ,'errors.html')
+@bp_error_logger(LOG.SHOP_LOGGER,400 ,'errors.html')
 def search():
     request.get_json()
     return "Search Page (Placeholder)"

@@ -7,7 +7,6 @@ from abc import ABC, abstractmethod
 from dotenv import load_dotenv
 
 load_dotenv()
-authkey = os.getenv("AUTHKEY")
 DEFAULT_SETTINGS = {
     "database_url": "vendor_project.db",
     "log_file": "/var/logs/vendor_project.log",
@@ -53,9 +52,12 @@ image_urls = [
 
 class Config(ABC):
     def __init__(self, json_path: str, default_data = None):
+
         self.json_path = Path(json_path)
+
         self.default_data = default_data if default_data else DEFAULT_SETTINGS 
-        self.authkey = authkey
+        self.authkey = os.getenv("AUTHKEY")
+
         self.UPLOAD_DIR = str(Path().cwd()/"app/static/uploads")
         self.allowed_extensions = ['jpg', 'jpeg', 'png', 'webp' ,'svg']
         self.UPLOAD_IMAGES_DIRECTLY = os.getenv("UPLOAD_IMAGES_DIRECTLY","false") == "true"

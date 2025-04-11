@@ -59,9 +59,6 @@ class RevenueDataHandler:
 def get_quantity(product_id):
     return 2  
 
-
-
-
 class MultiUserSimulator:
     def __init__(self, db_session, session_manager:SessionManager, order_manager:OrderManager):
         self.db = db_session

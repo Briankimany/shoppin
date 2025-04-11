@@ -65,6 +65,7 @@ def login():
             user_obj.self_update_session(data={'user_id':user_obj.user.id})
 
             LOG.USER_LOGGER.info(f"[LOGED IN] {user_obj}")
+            
             if  is_vendor:
                 session['IS_VENDOR'] = None
                 vendor = user_obj.is_vendor()

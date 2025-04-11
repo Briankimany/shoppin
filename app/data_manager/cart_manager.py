@@ -338,32 +338,40 @@ class OrderManager:
             payload = json.dumps({'phone': phone, "amount": amount, 'orderid': orderid})
 
             response = requests.post(url=url + "/pay", data=payload, headers=headers, timeout=7)
-            LOG.ORDER_LOGGER.info(f"Payment request sent for session : {orderid}, Status Code: {response.status_code}")
+            LOG.ORDER_LOGGER.info(f"Payment request sent for session : {orderid}, Status Code: {response.status_code}:{response.content}")
 
             if response.status_code != 200:
                 LOG.ORDER_LOGGER.warning(f"Invalid payment response for session: {orderid}, Response: {response.content}")
                 return False
 
-            data = {'code': response.status_code, 'invoiceid': response.json().get("response")}
-            in_voice_id = data["invoiceid"]["invoice"]["invoice_id"]
-            
+        
+            in_voice_id = response.json().get('response',{}).get('invoice_id' ,None)
+
+            if not in_voice_id:
+                LOG.ORDER_LOGGER.error(f"Invoice ID not found in response for session: {orderid}, Response: {response.content}")
+                return False
+                        
             LOG.ORDER_LOGGER.info(f"Invoice ID {in_voice_id} generated for session: {orderid}. Waiting for status update.")
 
             time.sleep(config.DELAY_BEFORE_STATUS_CHECK)  
+
             LOG.ORDER_LOGGER.info(f"Checking payment status for session: {in_voice_id}")
 
+            from time import perf_counter
+            start = perf_counter()
             for i in range(5):
-                response = requests.get(
-                    url=url + f'/check-status/{in_voice_id}',
+
+                response = requests.post(
+                    url=url + f'/check-status',
                     headers=headers,
                     json={
-                        "SIMULATE": config.SIMULATE, 
-                          "MAXRETRIES": config.MAX_RETIRES,
+                        "SIMULATE": False, 
+                          "MAXRETRIES":5,
                           'invoice_id':in_voice_id
 
                     }
                 )
-
+               
                 status = response.json().get('MESSAGE')
                 LOG.ORDER_LOGGER.info(f"Payment status check {i+1}/5 for Invoice ID: {in_voice_id} - Status: {status}")
 
@@ -375,12 +383,12 @@ class OrderManager:
                     return 'canceled'
                 else:
                     time.sleep(2)
-
-            LOG.ORDER_LOGGER.warning(f"Payment pending for session: {orderid} after multiple checks")
+            
+            LOG.ORDER_LOGGER.info(f"Payment is pending for session: {orderid} after multiple checks: TIME TAKEN {perf_counter()-start}")
             return 'pending'
 
         except Exception as e:
-            LOG.ORDER_LOGGER.error(f"Exception occurred in payment collection for session: {orderid}: {e} Latest response:{response}")
+            LOG.ORDER_LOGGER.error(f"Exception occurred in payment collection for session: {orderid}: error={e} status_code={response.status_code} Latest response:{response.content}")
             return None
 
        
