@@ -356,10 +356,14 @@ class OrderManager:
                 response = requests.get(
                     url=url + f'/check-status/{in_voice_id}',
                     headers=headers,
-                    data=json.dumps({"SIMULATE": config.SIMULATE, "MAXRETRIES": config.MAX_RETIRES})
+                    json={
+                        "SIMULATE": config.SIMULATE, 
+                          "MAXRETRIES": config.MAX_RETIRES,
+                          'invoice_id':in_voice_id
+
+                    }
                 )
 
-                code = response.status_code
                 status = response.json().get('MESSAGE')
                 LOG.ORDER_LOGGER.info(f"Payment status check {i+1}/5 for Invoice ID: {in_voice_id} - Status: {status}")
 

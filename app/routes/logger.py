@@ -40,7 +40,6 @@ def bp_error_logger(logger:LOG, status_code=400 ,return_template = None):
         @wraps(func)
         def wrapper(*args, **kwargs):
             try:
-               
                 return func(*args, **kwargs)
             except Exception as e:
                 error_key = f"{func.__name__}_{str(e)}"
