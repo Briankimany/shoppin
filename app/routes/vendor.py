@@ -9,10 +9,11 @@ from app.data_manager.users_manager import UserManager
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from datetime import datetime
-from app.routes.logger import LOG
+from app.routes.logger import LOG , bp_error_logger
 from app.services.upload import ImageManager
-from app.models.model_utils import PaymentMethod
-from config.envrion_variables import IN_DEVELOPMENT
+from app.models.model_utils import WithDrawAvlailableMethods ,PaymentMethod
+from config.envrion_variables import StatusCodes
+
 
 config = JSONConfig('config.json')
 
@@ -270,19 +271,36 @@ def orders():
     return "order in view"
 
 
-
-
-@vendor_bp.route("/payouts")
+@vendor_bp.route("/payouts", methods=['GET', 'POST'])
 @meet_vendor_requirements
 @session_set
 def payouts():
     vendor = VendorObj(session["vendor_id"], db_session)
-    vendor_balance , withdrawals = vendor.manage_payouts()
-    print(vendor_balance)
-    print(withdrawals)
-    return render_template("vendor/payouts.html",vendor_balance=vendor_balance 
-                           ,withdrawals=withdrawals
-                           ,payment_methods = list(PaymentMethod))
+    vendor_balance, withdrawals = vendor.manage_payouts()
+    
+    # Prepare data for both HTML and JSON responses
+    withdrawals_data = [{
+        'amount': float(w['amount']),
+        'method': w['method'].value,
+        'request': w['request'].isoformat(),
+        'status': w['status']
+    } for w in withdrawals]
+    
+    if request.method == "POST" :
+        return jsonify({
+            'withdrawals': withdrawals_data,
+            'balance': {
+                'available': float(vendor_balance['available']),
+                'pending': float(vendor_balance['pending']),
+                'total': float(vendor_balance['total'])
+            }
+        })
+    
+    return render_template("vendor/payouts.html",
+                        vendor_balance=vendor_balance,
+                        withdrawals=withdrawals,
+                        payment_methods=list(WithDrawAvlailableMethods),
+                        default_account_number=vendor.vendor_table.phone)
 
 
 
@@ -295,50 +313,121 @@ def reports():
 @vendor_bp.route("/process-pay" , methods = ['POST'])
 @meet_vendor_requirements
 @session_set
+@bp_error_logger(LOG.VENDOR_LOGGER , status_code=400)
 def process_withdrawal():
-    try:
-        form_data = request.form
-        amount =float(form_data.get("amount"))
-        method = form_data.get('method')
-        account_info = form_data.get('account_info')
+ 
+    form_data = request.form
+    amount =float(form_data.get("amount"))
+    method = form_data.get('method')
+    account_info = form_data.get('account_info')
 
-        if not all((amount,method,account_info)) :
-            raise ValueError("missing values from {} {} {}".format(amount,method,account_info))
-        
-        enum_instance = PaymentMethod[method]
 
-        VendorObj.create_vendor_payout_record(
-            db_session=db_session,
-            vendor_id=session['vendor_id'],
-            payment_method=enum_instance,
-            amount=amount
-        )
-        vendor = VendorObj(session['vendor_id'], db_session)
-        response = vendor.withdraw(amount,account_info)
-        if not response:
-            return jsonify({
-                "status": "error",
-                "message": "Withdrawal failed. Please try again later."
-            }), 400
+    if account_info.startswith("07"):
+        account_info = "254" + account_info[1:]
 
-        return jsonify({
-            "status": "success",
-            "message": f"Withdrawal of ${amount:.2f} is being processed!"
-        })
+    if not all((amount,method,account_info)) :
+        raise ValueError("missing values from {} {} {}".format(amount,method,account_info))
     
-    except Exception as e:
-        LOG.VENDOR_LOGGER.error(f"Withdrawal error{e}")
-        
-        message = "An error occurred while processing your withdrawal. Please try again later."
-        if  IN_DEVELOPMENT:
-            message = str(e)
-        
+    enum_instance = PaymentMethod[method]
 
+    vendor = VendorObj(session['vendor_id'], db_session)
+
+    verified_to_withdraw = vendor.is_allowed_withdraw(db_session=db_session,vendor_id=session['vendor_id'] ,needed_amount=amount)
+
+    if not "success" in verified_to_withdraw :
+        return jsonify(verified_to_withdraw), 400
+
+    if not verified_to_withdraw:
+        return jsonify({"message":"You are not allowed to withdraw funds"}), 400
+    
+
+    response ,request_successful = vendor.withdraw(amount,account_info)
+
+    LOG.VENDOR_LOGGER.info("[WITHDRAWAL] response from payment gateway: {}".format(response))
+
+    if not response:
+        return jsonify({
+            "message":"error proccessing request",
+            "data":"Try again later"}) , 400
+
+    if not request_successful:
         return jsonify({
             "status": "error",
-            "message": message
+            "message": response['message']
+        }), 400
+
+
+
+    vendor.create_vendor_payout_record(
+        db_session=db_session,
+        vendor_id=session['vendor_id'],
+        payment_method=enum_instance,
+        amount=amount,
+        batch_id=response['tracking_id'],
+        tracking_id=response['reference_ids'][0]
+    )
+
+    return jsonify(
+        {"message": "success",
+         'withdraw_id':response['reference_ids'][0]}
+    ) ,200
+
+
+@vendor_bp.route("/withdrawal-status/<withdraw_id>")
+@meet_vendor_requirements
+@session_set
+@bp_error_logger(LOG.VENDOR_LOGGER , status_code=400)
+def check_withdrawal_status(withdraw_id):
+    
+
+    if not withdraw_id:
+        return jsonify({"message":"missing withdraw id"}), 400
+    
+    response =  VendorObj.check_update_withdraw_status(db_session ,withdraw_id)
+    response = response['data'][0]
+
+    LOG.VENDOR_LOGGER.debug("[WITHDRAWAL] response from payment gateway: {}".format(response))
+    status = "pending"
+    if response['status_code'] in StatusCodes.SUCCESS:
+        status = 'completed'
+        message = "Withdrawal successfull"
+
+    elif response['status_code'] in StatusCodes.CANCELED:
+        message = "Withdrawal canceled"
+
+    elif response['status_code'] in StatusCodes.WAITING:
+        message = "Withdrawal is pending"
+
+    elif response['status_code'] in StatusCodes.CONTACT_ADMIN:
+        message = "Contact admin"
+
+    elif response['status_code'] == "error":
+        message = "Error processing request"
+        return jsonify({
+            "message":message,
+            "status":'error',
         }), 400
     
+    else:
+        message = "With draw is pending"
+    
+    return jsonify({
+            "message":message,
+            "data":"None",
+            "status":status,
+        }) , 200
+
+
+@vendor_bp.route("/pending-withdraws" ,methods = ['POST'])
+@meet_vendor_requirements
+def get_pending_withdrawals():
+    
+    vendor_id = int(session['vendor_id'])
+    pending_ids = VendorObj.get_pending_withdrawals(vendor_id = vendor_id , db_session=db_session)
+    pending_data = {"message":"success","ids":pending_ids if pending_ids else []}
+ 
+    return jsonify(pending_data) ,200
+
 
 
 @vendor_bp.route("/withdrawal-history-pay")

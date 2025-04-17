@@ -1,26 +1,45 @@
-from .database_index import Database , PayoutModel , OrderModel , ProductModel  
-from app.models.order_item import OrderItem , VendorOrder
+from .database_index import Database  , OrderModel , ProductModel  
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 import requests
+
 from config.config import JSONConfig
 import json
 import time
+
 from app.models.vendor import Vendor
-from app.routes.logger import LOG
-from app.models.session_tracking import SessionTracking
-from datetime import datetime
-import humanize
+from app.routes.logger import LOG ,bp_error_logger
+
 from .vendor_transaction import VendorTransactionSystem
-from datetime import timedelta
 from app.models.vendor import Vendor , VendorPayout
 from app.models.model_utils import PaymentMethod
+from app.models.user_profile import UserBalance
+
+from config.envrion_variables import StatusCodes ,StatusNames
+from data_manager.vendor_transaction import VendorTransactionSystem
+
+from contextlib import contextmanager
+from config.envrion_variables import Session as ManagedSession
 
 class VendorObj:
+
+    @classmethod
+    @contextmanager
+    def _scoped_session(cls):
+        db_session = ManagedSession()
+        try:
+            yield db_session
+        except Exception as e:
+            LOG.VENDOR_LOGGER.error(f"[DB-ERROR] exception from scopped session {e}")
+        finally:
+            db_session.close()
+
     """
     Manages vendor-related operations, including updating details, verifying vendors, 
     adding/viewing products, tracking orders, and managing payouts.
     """
+
+    config = JSONConfig("config.json")
 
     def __init__(self, vendor_id, db_session:Session):
         """
@@ -224,46 +243,6 @@ class VendorObj:
             .filter( ProductModel.stock != None ,ProductModel.vendor_id == vendor_id, ProductModel.stock <= threshold).all()
     )
     
-    def collect_payment(self ,phone , amount ,orderid):
-        try:
-            url = self.config.payment_url
-            AUTHKEY = self.config.authkey
-            headers = {"Authorization": f"Bearer {AUTHKEY}" ,
-                    "Content-Type": "application/json"}
-            payload = json.dumps({'phone':phone , "amount":amount , 'orderid':orderid})
-        
-            response = requests.post(url=url +"/pay" , data=payload , headers = headers , timeout=7)
-    
-            data = {'code':response.status_code , 'invoiceid':response.json().get("response")}
-            in_voice_id = data["invoiceid"]["invoice"]["invoice_id"]
-            # print(data)
-            # print(in_voice_id)
-            print("Giving time for request to reach server")
-            time.sleep(5)
-            print("Done starting the status check loop")
-            if response.status_code != 200:
-                print("Got invalid response" , response.content)
-                return False
-            for i in range(5):
-                response = requests.get(url=url +f'/check-status/{in_voice_id}' , 
-                                        headers = headers , data=json.dumps({"SIMULATE":True , "MAXRETRIES":2}))
-
-                code = response.status_code
-                status = response.json().get('MESSAGE')
-                print("response from checking status")
-                print (code , status)
-                if status ==  "COMPLETE":
-                    return 'paid'
-                elif status == "FAILED":
-                    return 'canceled'
-                else:
-                    time.sleep(2)
-            return 'pending'
-        except Exception as e:
-            print(e)
-            return None
-    
-
     def withdraw(self , amount:float , phone,**kwargs):
         """
         Initiates a withdrawal request for the vendor.
@@ -354,26 +333,61 @@ class VendorObj:
         }
         return  vendor_balance , withdrawals
 
+
+    @classmethod
+    def is_allowed_withdraw(cls ,db_session:Session ,vendor_id ,needed_amount:float):
+
+        pending_withdraws = db_session.query(VendorPayout).filter(
+            VendorPayout.vendor_id == vendor_id,
+            VendorPayout.status == 'pending'
+        ).all()
+
+    
+        total_amount = float(sum([withdrawal.amount for withdrawal in pending_withdraws])) +needed_amount
+        vendor_balance = db_session.query(UserBalance).filter(UserBalance.id == vendor_id).first().balance
+
+        tomany_withdraws = len(pending_withdraws) >= cls.config.MAX_NUM_PENDING_WITHDRAWs 
+        amount_exceeds_balance = total_amount >= vendor_balance
+
+        if tomany_withdraws:
+            LOG.VENDOR_LOGGER.info(f"Vendor {vendor_id} has too many pending withdrawals.")
+            return {"message": "Too many pending withdrawals. Please resolve existing requests before submitting a new one."}
+
+        if amount_exceeds_balance:
+            LOG.VENDOR_LOGGER.info(f"Vendor {vendor_id} has insufficient balance for withdrawal.")
+            return {"message": "Withdrawal amount exceeds available balance."}
+
+        
+        return {"success": True}   
+
     @staticmethod
     def create_vendor_payout_record(db_session:Session ,amount:float ,
                                     payment_method:PaymentMethod ,
                                     vendor_id:int,
+                                    batch_id:str,
+                                    tracking_id:str,
                                     status:str = 'pending'):
+        
+ 
+
         payout = VendorPayout(
             vendor_id= vendor_id,
             method = payment_method,
             amount=amount,
-            status = status
+            status = status,
+            batch_id = batch_id,
+            tracking_id = tracking_id
         )
        
         db_session.add(payout)
         db_session.commit()
         LOG.VENDOR_LOGGER.info(f"withdrwal record initiated {payout}")
-        return payout
+        return {"success": True, "payout_id": payout.id}
+    
     
 
-    @staticmethod
-    def initiate_withdraw(vendor_name:int , amount:float , phone:str ,**kwargs):
+    @classmethod
+    def initiate_withdraw(cls,vendor_name:int , amount:float , phone:str ,**kwargs):
         """
         Initiates a withdrawal request for a vendor.
         Args:
@@ -381,14 +395,18 @@ class VendorObj:
             amount (float): Amount to withdraw.
             phone (str): Phone number associated with the vendor.
         Returns:
-            dict: Response from the withdrawal initiation request.
+            tuple: Response from the withdrawal initiation request , True/None
         Example:
             >>> response = initiate_withdraw("John Doe", 100.0, "+123456789")
         """
+        
+        if not cls.config.payment_url or not cls.config.authkey:
+            LOG.VENDOR_LOGGER.error("Payment URL or Auth Key not set in config.json")
+            return None
 
-        url = JSONConfig("config.json").payment_url+"//transfers/initiate/single"
+        url = cls.config.payment_url+"/transfers/initiate/single"
 
-        headers = {"Authorization":"Bearer " + JSONConfig("config.json").authkey ,
+        headers = {"Authorization":"Bearer " +cls.config.authkey ,
                     "Content-Type":"application/json"
                    }
 
@@ -402,15 +420,119 @@ class VendorObj:
         }
 
         payload.update(kwargs)
-        print(payload)
-
+       
+        LOG.VENDOR_LOGGER.info("-"*30)
         LOG.VENDOR_LOGGER.info(f"Initiating withdrawal for {vendor_name} of amount {amount} to {phone}")
         LOG.VENDOR_LOGGER.info(f"Payload: {payload}")
 
         response = requests.post(url=url , headers=headers , data=json.dumps(payload))
+        
         if response.status_code == 200:
-            return response.json()
+            return response.json() ,True
         else:
             LOG.VENDOR_LOGGER.error(f"Failed to initiate withdrawal: {response.content}")
-            return None
+            return None , None
+    
+    @classmethod
+    def check_update_withdraw_status(cls, db_session,withdraw_id):
+        """
+        Check the status of a withdrawal request.
+
+        Args:
+            db_session (Session): SQLAlchemy database session for querying data.
+            withdraw_id (int): Unique identifier of the withdrawal request.
+
+        """
+        
+        url = cls.config.payment_url +"/transfers/transfer-status"
+
+        headers = {"Authorization": "Bearer " + cls.config.authkey,
+                   "Content-Type": "application/json"}
+        payload = {
+            "reference_id": withdraw_id
+        }
+
+        response = requests.get(url=url, headers=headers, data=json.dumps(payload))
+
+        LOG.VENDOR_LOGGER.info(f"In the check_update_withdraw_status method")
+        LOG.VENDOR_LOGGER.info(f"Checking withdrawal status for {withdraw_id}")
+        LOG.VENDOR_LOGGER.info(f"Payload: {payload}")
+        LOG.VENDOR_LOGGER.info(f"Response: {response.status_code}")
+
+        if response.status_code == 200:
+            data = response.json().get('data')[0]
+
+            status = data.get("status_code")
+            LOG.VENDOR_LOGGER.info(f"checking status for {withdraw_id} : response {status ,data.keys()}")
+
+            if status in StatusCodes.SUCCESS:
+                cls.update_withdraw_status(db_session, withdraw_id, StatusNames.COMPLETED)
+
+            elif status in StatusCodes.CANCELED:
+                cls.update_withdraw_status(db_session, withdraw_id, StatusNames.FAILED)
+
+            else:
+                LOG.VENDOR_LOGGER.info(f"Withdrawal {withdraw_id} is still pending.")
+            
+            if status in StatusCodes.CONTACT_ADMIN:
+                cls.update_withdraw_status(db_session, withdraw_id, "contact_admin")
+                LOG.VENDOR_LOGGER.info(f"Withdrawal {withdraw_id} requires admin contact.")
+
+        else:
+            LOG.VENDOR_LOGGER.error(f"Failed to check withdrawal status: {response.content}") 
+
+        return response.json()
+      
+
+    @classmethod
+    def update_withdraw_status(cls,hh,withdraw_id, status):
+
+        """
+        Update the status of a withdrawal request in the database.
+
+        Args:
+            db_session (Session): SQLAlchemy database session for querying data.
+            withdraw_id (int): Unique identifier of the withdrawal request.
+            status (str): New status to set for the withdrawal request.
+        """
+        with cls._scoped_session() as db_session:
+            withdrawal = db_session.query(VendorPayout).filter(VendorPayout.tracking_id == withdraw_id).first()
+            if withdrawal:
+                withdrawal.status = status
+
+                if status == StatusNames.COMPLETED and not withdrawal.updated_user_balance:
+                    amount  = (float(withdrawal.amount) *-1)
+                    print("amount to be updated" , amount ,type(amount))
+                    VendorTransactionSystem.update_vendor_balance(
+                       vendor_id = withdrawal.vendor_id,
+                          amount = amount,
+                          db_session=db_session 
+                    )
+
+                    withdrawal.updated_user_balance = True
+                    db_session.commit()
+
+                else:
+                    LOG.VENDOR_LOGGER.info(f"Withdrawal {withdraw_id} status is not completed, user balance not updated.")
+                
+               
+                LOG.VENDOR_LOGGER.info(f"Withdrawal {withdraw_id} status updated to {status}.")
+            else:
+                LOG.VENDOR_LOGGER.error(f"Withdrawal {withdraw_id} not found.")
    
+    @classmethod
+    def get_pending_withdrawals(cls,db_session:Session ,vendor_id):
+
+        pending = db_session.query(VendorPayout.tracking_id).filter(
+            VendorPayout.status == StatusNames.PENDING,
+            VendorPayout.vendor_id == vendor_id,
+        ).all()
+        pending = [i[0] for i in pending]
+
+        print(f"all waiting {pending}")
+
+        if pending:
+            return  pending
+        return None
+    
+    

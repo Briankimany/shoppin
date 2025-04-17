@@ -5,6 +5,8 @@ from flask import jsonify ,render_template,session
 import os
 from uuid import uuid4
 from dotenv import load_dotenv
+from config.envrion_variables import IN_DEVELOPMENT
+
 load_dotenv()
 
 class LoggerManager:
@@ -53,14 +55,19 @@ def bp_error_logger(logger:LOG, status_code=400 ,return_template = None):
                
                 error_message = f"Error in {func.__name__}: id=({error_id}) {str(e)} :args={args} ,kwargs={kwargs}"
                 logger.error(error_message)
+
                 if return_template:
-                    message = str(e) if os.getenv("IN_DEVELOPMENT") =='true' else None
+                    message = str(e) if not IN_DEVELOPMENT else None
                    
                     return render_template(return_template,message = message ,error_id = error_id)
+                
+                message = f"ERROR {e} " if IN_DEVELOPMENT else "Contact support"
+                
                 return jsonify({
                     "status": "error",
-                    "message": 'review logs',
+                    "message": message,
                     "code": status_code
                 }), status_code
+            
         return wrapper
     return decorator

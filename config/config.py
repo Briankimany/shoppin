@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 DEFAULT_SETTINGS = {
+    "MAX_NUM_PENDING_WITHDRAWs": 3,
     "database_url": "vendor_project.db",
     "log_file": "/var/logs/vendor_project.log",
     "debug": True,
@@ -65,6 +66,8 @@ class Config(ABC):
         self.TEMP_UPLOAD_IMAGE_DIR = Path(self.UPLOAD_DIR)/'temp'
         self.TEMP_UPLOAD_IMAGE_DIR.mkdir(parents= True ,exist_ok=True)
         self.TEMP_UPLOAD_IMAGE_DIR = str(self.TEMP_UPLOAD_IMAGE_DIR)
+
+        self.MAX_NUM_PENDING_WITHDRAWs = self.default_data.get("MAX_NUM_PENDING_WITHDRAWs", 3)
 
         if not self.json_path.exists():
             self.__save__(self.default_data)

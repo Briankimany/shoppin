@@ -6,14 +6,14 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/vendor/payout.css') }}">
 {% endblock %}
 
-
-
 {% block content %}
 <div class="vendor-dashboard-content">
     <header class="dashboard-header">
         <h1>Withdraw Funds</h1>
     </header>
-
+    <div class="account-number-details" id="default-account-number" data-account-number="{{vendor_number}}">
+    </div>
+    
     <div class="withdrawal-container">
         <!-- Balance Summary Card -->
         <div class="balance-card dashboard-card">
@@ -24,15 +24,21 @@
             <div class="card-content">
                 <div class="balance-metric">
                     <span class="metric-label">Available Balance</span>
-                    <span class="metric-value">${{ "%.2f"|format(vendor_balance.available) }}</span>
+                    <span class="metric-value" id="available-balance">
+                        <span class="spinner"></span>
+                    </span>
                 </div>
                 <div class="balance-metric">
                     <span class="metric-label">Pending Withdrawals</span>
-                    <span class="metric-value">${{ "%.2f"|format(vendor_balance.pending) }}</span>
+                    <span class="metric-value" id="pending-balance">
+                        <span class="spinner"></span>
+                    </span>
                 </div>
                 <div class="balance-metric">
                     <span class="metric-label">Total Earned</span>
-                    <span class="metric-value">${{ "%.2f"|format(vendor_balance.total) }}</span>
+                    <span class="metric-value" id="total-balance">
+                        <span class="spinner"></span>
+                    </span>
                 </div>
             </div>
         </div>
@@ -74,10 +80,10 @@
 
                     <div class="form-group" id="account-details" style="display: none;">
                         <label for="account_info">Account Details</label>
-                        <input type="text" 
+                        <input type="number" 
                                id="account_info" 
                                name="account_info" 
-                               placeholder="Enter email or account number">
+                               placeholder="Enter email or account number" value="{{default_account_number}}">
                     </div>
 
                     <button type="submit" class="submit-button">
@@ -96,29 +102,27 @@
                     View All <i class="fas fa-arrow-right"></i>
                 </a> -->
             </div>
-            <div class="card-content">
-                {% if withdrawals %}
-                <div class="transactions-list">
-                    {% set maxlen = 3 if withdrawals|length > 3 else withdrawal_history|length %}
-                    {% for withdrawal in withdrawals[:maxlen] %}
-                    <div class="transaction-item {{ withdrawal.status }}">
-                        <div class="transaction-meta">
-                            <span class="transaction-date">{{ withdrawal.request_date }}</span>
-                        </div>
-                        <div class="transaction-details">
-                            <span class="transaction-amount">${{ "%.2f"|format(withdrawal.amount) }}</span>
-                            <span class="transaction-method">{{ withdrawal.method.value }}</span>
-                            <span class="transaction-status">{{ withdrawal.status }}</span>
+
+            <button id="view-withdrawals-btn" class="btn-secondary">
+                View Withdrawal History
+            </button>
+
+            <div id="withdrawals-modal" class="modal" aria-hidden="true">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Withdrawal History</h3>
+                        <button class="close-modal" aria-label="Close modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="withdrawals-list-container">
+                            <div class="spinner-container">
+                                <div class="spinner"></div>
+                                <p>Loading transactions...</p>
+                            </div>
                         </div>
                     </div>
-                    {% endfor %}
                 </div>
-                {% else %}
-                <div class="empty-state">
-                    <i class="fas fa-inbox"></i>
-                    <p>No withdrawal history yet</p>
-                </div>
-                {% endif %}
+            </div>
             </div>
         </div>
     </div>

@@ -35,9 +35,14 @@ class VendorPayout(Base):
     __tablename__ = "vendor_payouts"
     id = Column(Integer, primary_key=True, autoincrement=True)
     vendor_id = Column(Integer, ForeignKey(Vendor.id), nullable=False)
+    batch_id = Column(String, nullable=False)
+    tracking_id = Column(String(50), unique=True, nullable=False)
     amount = Column(DECIMAL(10, 2), nullable=False)
-    status = Column(String(20), nullable=False)  # pending,  completed, failed
-    method = Column(SQLENUM(PaymentMethod) , nullable=False)  # eg m-pesa ,bank , airtel-money
+
+    status = Column(String(20), nullable=False) 
+    method = Column(SQLENUM(PaymentMethod) , nullable=False) 
+    updated_user_balance= Column(Boolean, default=False)
+
     created_at = Column(TIMESTAMP, server_default=func.now())
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 

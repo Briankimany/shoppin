@@ -119,6 +119,7 @@ def vendor_products(vendor_id):
 
     return render_template("shop/products.html", categories=p ,vendor=vendor.vendor_table)
 
+
 @shop_bp.route("/product/<product_id>")
 @vendor_selected
 @bp_error_logger(LOG.SHOP_LOGGER,500)

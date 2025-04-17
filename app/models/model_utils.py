@@ -11,3 +11,7 @@ class PaymentCategory(str, Enum):
     PRODUCT_SALE = "Product sale"
     VENDOR_FEE = "Vendor fee"
     HOSTING_FEE = "Hosting Fee"
+
+class WithDrawAvlailableMethods(str, Enum):
+    MPESA = "M-pesa"
+   

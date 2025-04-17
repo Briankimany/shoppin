@@ -386,3 +386,195 @@
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+
+
+/* Withdrawal History Modal */
+#withdrawals-modal.modal {
+    display: none;
+    position: fixed;
+    z-index: 1050;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(3px);
+}
+
+/* Modal Content Box */
+#withdrawals-modal .modal-content {
+    background-color: #fff;
+    margin: 2% auto;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+/* Modal Header */
+#withdrawals-modal .modal-header {
+    padding: 20px;
+    background: linear-gradient(135deg, #6e8efb, #4a6cf7);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 12px 12px 0 0;
+}
+
+#withdrawals-modal .modal-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+#withdrawals-modal .close-modal {
+    font-size: 1.8rem;
+    color: white;
+    line-height: 1;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+#withdrawals-modal .close-modal:hover {
+    transform: scale(1.2);
+}
+
+/* Modal Body */
+#withdrawals-modal .modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    max-height: 70vh;
+}
+
+/* Transaction Items */
+#withdrawals-modal .transaction-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 15px;
+    padding: 15px;
+    background: #f9fafc;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: background 0.2s, transform 0.2s;
+}
+
+#withdrawals-modal .transaction-item:hover {
+    background: #f0f4ff;
+    transform: translateX(5px);
+}
+
+#withdrawals-modal .transaction-meta {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+#withdrawals-modal .transaction-details {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+#withdrawals-modal .transaction-amount {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #1e293b;
+}
+
+#withdrawals-modal .transaction-method {
+    background: #e2e8f0;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    color: #475569;
+}
+
+/* Status Badges */
+#withdrawals-modal .transaction-status {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+#withdrawals-modal .transaction-status.completed {
+    background: #dcfce7;
+    color: #166534;
+}
+
+#withdrawals-modal .transaction-status.pending {
+    background: #ffedd5;
+    color: #9a3412;
+}
+
+/* Empty State */
+#withdrawals-modal .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #64748b;
+}
+
+#withdrawals-modal .empty-state i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: #cbd5e1;
+}
+
+/* Animation */
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    #withdrawals-modal .modal-content {
+        width: 95%;
+        margin: 5% auto;
+    }
+
+    #withdrawals-modal .transaction-item {
+        grid-template-columns: 1fr;
+    }
+
+    #withdrawals-modal .transaction-details {
+        justify-content: space-between;
+        margin-top: 10px;
+    }
+}
+
+
+.spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: #3498db;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+[data-loading] .spinner {
+    display: inline-block;
+}
+[data-loading] .metric-value:not(.spinner) {
+    display: none;
+}
+

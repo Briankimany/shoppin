@@ -27,6 +27,18 @@
 - **[ ] 21.** Fix endpoint for reports
 - **[ ] 22.** Add account authentication on creation of account ie send a token to verify account and add a rate limit
 - **[ ] 23.** Add a button in the checkout page that allows user to refresh the status of their cart. This is handy in cases where the user paid but the server was already done checking the status.
+Here is your list reformatted in the specified style:
+
+- **[x] 22.** Cleaned up the config initiation in withdraw; added new enum class `WithDrawAvlailableMethods(str, Enum)` for account info starting with 2547  
+- **[x] 23.** Limited withdraw options using a new config variable `MAX_NUM_PENDING_WITHDRAWs`; capped at 3 pending withdraws if total amount is below threshold  
+- **[x] 24.** Added columns `tracking_id`, `batch_id`, `updated_user_id` to the `vendorpayout` table  
+- **[x] 25.** Modified external API return values for single transfer initiation and bulk initiation  
+- **[x] 26.** Added method `is_allowed_withdraw` to the `Vendor` object class  
+- **[x] 27.** Refactored withdraw logic to initiate request first, then record transaction  
+- **[x] 28.** Removed try block in `process-pay` endpoint in vendor blueprint; replaced with `bp_error_logger` decorator  
+- **[x] 29.** Added new class in `config.environ_variables` to handle withdraw status tracking  
+- **[x] 30.** Added timed status check trigger after initiating a withdraw  
+- **[x] 31.** Implemented withdraw request status check logic  
 
 
 ### **Error Logger & Blueprint System**  
@@ -71,4 +83,3 @@
     - edit_product.html
     - payout.html
     - products.html
-
