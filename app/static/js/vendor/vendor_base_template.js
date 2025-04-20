@@ -78,6 +78,12 @@
     }
     window.redirectTo = redirectTo;
 
+    function redirectToNewTab(element) {
+        const url = element.getAttribute('data-href');
+        window.open(url, '_blank');
+    }
+    window.redirectToNewTab = redirectToNewTab
+
     // Responsive adjustments
     function handleResize() {
         if (window.innerWidth >= 992) {

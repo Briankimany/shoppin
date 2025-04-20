@@ -94,8 +94,107 @@ document.addEventListener('DOMContentLoaded', function() {
             valueSpan.style.display = 'block';
             this.closest('.input-group').querySelector('.edit-trigger').style.display = 'inline-flex';
             
-            // Show success feedback
-            alert(`${field.charAt(0).toUpperCase() + field.slice(1)} updated successfully!`);
+
         });
     });
+
+
+
+document.getElementById('save-all-btn').addEventListener('click', async function() {
+  
+    function showAlert(message, type = 'success') {
+        const alertContainer = document.getElementById('alert-container');
+        const alertId = Date.now();
+        
+        const alertEl = document.createElement('div');
+        alertEl.className = `alert ${type}`;
+        alertEl.id = `alert-${alertId}`;
+        
+        const icons = {
+            success: 'fa-circle-check',
+            error: 'fa-circle-exclamation',
+            warning: 'fa-triangle-exclamation'
+        };
+        
+        alertEl.innerHTML = `
+            <i class="fas ${icons[type] || 'fa-info-circle'} alert-icon"></i>
+            <div class="alert-message">${message}</div>
+            <button class="alert-close" onclick="dismissAlert('${alertId}')">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        alertContainer.appendChild(alertEl);
+        
+        // Trigger animation
+        setTimeout(() => {
+            alertEl.classList.add('show');
+        }, 10);
+        
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            dismissAlert(alertId);
+        }, 5000);
+    }
+    
+    function dismissAlert(id) {
+        const alertEl = document.getElementById(`alert-${id}`);
+        if (alertEl) {
+            alertEl.classList.remove('show');
+            setTimeout(() => {
+                alertEl.remove();
+            }, 300);
+        }
+    }
+
+    const data = {
+        name: document.getElementById('name-input').value,
+        email: document.getElementById('email-input').value,
+        phone: document.getElementById('phone-input').value
+    };
+
+    // Check if password was modified
+    const currentPassword = document.getElementById('current-password').value;
+    const newPassword = document.getElementById('new-password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
+
+    if (currentPassword && newPassword && confirmPassword) {
+        if (newPassword !== confirmPassword) {
+            showAlert('New passwords do not match!'  ,'warning');
+            return;
+        }
+        data.old_password = currentPassword;
+        data.new_password = newPassword;
+    }
+
+    try {
+        // Show loading state
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        this.disabled = true;
+
+        // Make POST request
+        const response = await fetch('/user/edit-profile', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ data: data })
+        });
+
+        if (!response.ok) throw new Error('Failed to save');
+        
+        // Success handling
+        showAlert('Changes saved successfully!' ,'success');
+        window.location.reload(); // Optional: refresh to show changes
+        
+    } catch (error) {
+        console.error('Error:', error);
+        showAlert('Error saving changes: ' + error.message ,'error');
+    } finally {
+        // Reset button state
+        this.innerHTML = '<i class="fas fa-save"></i> Save All Changes';
+        this.disabled = false;
+    }
+});
+
 });

@@ -1,0 +1,38 @@
+{% extends "vendor/base2.html" %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/vendor/orders.css') }}">
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/vendor/orders.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="orders-container">
+    <div class="orders-header">
+        <h1 class="orders-title">Order History</h1>
+        <div class="orders-filter">
+            <button class="export-btn">
+                <i class="fas fa-file-export"></i> Export CSV
+            </button>
+            <label for="limit">Show:</label>
+            <select id="limit" class="limit-select">
+                <option value="5" selected>Last 5 orders</option>
+                <option value="10">Last 10 orders</option>
+                <option value="20">Last 20 orders</option>
+                <option value="50">Last 50 orders</option>
+                <option value="-1">All orders</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="orders-grid">
+       
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}

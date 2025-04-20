@@ -50,7 +50,7 @@
                 </li>
                 
                 <li class="nav-item {% if request.endpoint == 'vendor.track_orders' %}active{% endif %}">
-                    <a href="{{ url_for('vendor.track_orders') }}">
+                    <a href="{{ url_for('vendor.orders') }}" >
                         <i class="fas fa-clipboard-list"></i>
                         <span>Orders</span>
                         <span class="badge">3</span>
@@ -63,32 +63,49 @@
                         <span>Payouts</span>
                     </a>
                 </li>
+                <li class="nav-item {% if request.endpoint == 'vendor.add_details' %}active{% endif %}">
+                    <a href="{{ url_for('vendor.add_details') }}">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Edit profile</span>
+                    </a>
+                </li>
             </ul>
             
             <!-- Quick Actions -->
             <div class="quick-actions">
                 <h3>Quick Actions</h3>
              
-                <button class="quick-action" data-href="{{ url_for('vendor.add_product') }}" onclick="redirectTo(this)"></button>
+                <button class="quick-action" data-href="{{ url_for('vendor.add_product') }}" onclick="redirectTo(this)">
                     <i class="fas fa-plus"></i>
                     <span>New Product</span>
                 </button>
+                   
+                </button>
                 <button class="quick-action" data-href="{{ url_for('vendor.reports') }}" onclick="redirectTo(this)">
-
                     <i class="fas fa-chart-line"></i>
                     <span>View Reports</span>
                 </button>
+                <button class="quick-action" 
+                    data-href="{{ url_for('shop.vendor_products', vendor_id=g.current_user.id) }}" onclick="redirectToNewTab(this)">
+                    <i class="fas fa-store"></i>
+                <span>View Shop</span>
+            </button>
+                
             </div>
         </div>
         
         <div class="nav-footer">
             <div class="user-menu">
-                <div class="user-avatar">
+                <div class="user-avatar"  data-href="">
                     <i class="fas fa-user-circle"></i>
                 </div>
                 <div class="user-info">
-                    <span class="user-name">Vendor Account</span>
-                    <span class="user-email">{{ current_user.email if current_user and current_user.is_authenticated else 'vendor@example.com' }}</span>
+                    <span class="user-name">
+                        <a href="{{ url_for('vendor.add_details') }}">Vendor Account</a>
+                    </span>
+                    <span class="user-email">
+                        {{ current_user.email if current_user and current_user.is_authenticated else 'vendor@example.com' }}
+                    </span>
                 </div>
             </div>
             <div class="social-links">

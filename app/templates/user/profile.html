@@ -1,18 +1,15 @@
 {% extends 'shop/base2.html' %}
 
 
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/user/profile.js') }}"></script>
-{% endblock %}
-
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/user/profile.css') }}">
-{% endblock %}
 
+{% endblock %}
 
 {% block content %}
 <div class="profile-wrapper">
     <div class="profile-card">
+        <!-- Profile header spans both columns -->
         <div class="profile-header">
             <h1 class="profile-title">My Profile</h1>
             <div class="profile-avatar">
@@ -25,6 +22,7 @@
             </div>
         </div>
 
+        <!-- Left Column -->
         <div class="profile-section">
             <h2 class="section-title">Personal Information</h2>
             
@@ -80,6 +78,7 @@
             </div>
         </div>
 
+        <!-- Right Column -->
         <div class="profile-section">
             <h2 class="section-title">Security</h2>
             
@@ -135,21 +134,32 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="profile-meta">
-            <div class="meta-item">
-                <span class="meta-label">Member since</span>
-                <span class="meta-value">{{ user.created_at.strftime('%B %d, %Y') }}</span>
-            </div>
-            <div class="meta-item">
-                <span class="meta-label">Last updated</span>
-                <span class="meta-value">{{ user.updated_at.strftime('%B %d, %Y') if user.updated_at else 'Never' }}</span>
+            <div class="profile-meta">
+                <div class="meta-item">
+                    <span class="meta-label">Member since</span>
+                    <span class="meta-value">{{ user.created_at.strftime('%B %d, %Y') }}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Last updated</span>
+                    <span class="meta-value">{{ user.updated_at.strftime('%B %d, %Y') if user.updated_at else 'Never' }}</span>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+<div class="form-actions-main">
+    <button id="save-all-btn" class="btn btn-primary">
+        <i class="fas fa-save"></i> Save All Changes
+    </button>
+</div>
+
+    <div id="alert-container" class="alert-container"></div>
 
 
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/user/profile.js') }}"></script>
 {% endblock %}
