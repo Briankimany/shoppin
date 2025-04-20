@@ -1,3 +1,4 @@
+
 {% extends "vendor/base2.html" %}
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/vendor/update_vendor_details.js') }}"></script>
@@ -6,47 +7,96 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/vendor/update_details.css') }}">
 {% endblock %}
 
-
 {% block content %}
-<div class="container">
+<div class="wide-form-container">
     <h2>Edit Vendor Details</h2>
-    <form id="vendorForm">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" value="{{ name }}" readonly>
+    <form id="vendorForm" class="spread-form">
+        <!-- First Row -->
+        <div class="form-row">
+            <div class="form-field wide">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" value="{{ name }}" readonly>
+            </div>
+        </div>
 
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" value="{{data.get('email')}}" required>
+        <!-- Second Row -->
+        <div class="form-row">
+            <div class="form-field">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" value="{{data.get('email')}}" required>
+            </div>
+            
+            <div class="form-field">
+                <label for="phone">Phone</label>
+                <input type="text" id="phone" name="phone" value="{{data.get('phone')}}" required>
+            </div>
+            
+            <div class="form-field">
+                <label for="store_name">Store Name</label>
+                <input type="text" id="store_name" name="store_name" value="{{data.get('store_name')}}" required>
+            </div>
+        </div>
 
-        <label for="phone">Phone:</label>
-        <input type="text" id="phone" name="phone" value="{{data.get('phone')}}" required>
+        <!-- Logo Section -->
+        <div class="form-row">
+            <div class="form-field wide">
+                <label>Store Logo</label>
+                <div class="logo-section">
+                    {% if data.get('store_logo') %}
+                        <div class="current-logo-container">
+                            <img src="{{ data.get('store_logo') }}" alt="Current Logo" class="current-logo">
+                            <span>Current Logo</span>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="logo-options">
+                        <div class="logo-url-option">
+                            <label for="store_logo">Image URL</label>
+                            <input type="text" id="store_logo" name="store_logo" placeholder="https://example.com/image.jpg" value="{{data.get('store_logo', none)}}">
+                        </div>
+                        
+                        <div class="logo-upload-option">
+                            <label for="store_logo_file">Upload New Logo</label>
+                            <label class="upload-btn">
+                                <i class="fas fa-cloud-upload-alt"></i> Select File
+                                <input type="file" id="store_logo_file" name="store_logo_file" accept="image/*">
+                            </label>
+                            <span class="file-name" id="file-name">No file selected</span>
+                        </div>
+                    </div>
+                    
+                    <img id="preview" class="logo-preview">
+                </div>
+            </div>
+        </div>
 
-        <label for="store_name">Store Name:</label>
-        <input type="text" id="store_name" name="store_name"  value="{{data.get('store_name')}}" required>
+        <!-- Payment and Description -->
+        <div class="form-row">
+            <div class="form-field">
+                <label for="payment_type">Payment Type</label>
+                <select id="payment_type" name="payment_type" required>
+                
+                    <option value="Pre-delivery" {% if data.get('payment_type') == 'Pre-delivery' %}selected{% endif %}>Pre-delivery</option>
+                    <option value="Post-delivery" {% if data.get('payment_type') == 'Post-delivery' %}selected{% endif %}>Post-delivery</option>
+                </select>
+            </div>
+        </div>
 
-        {% if data.get('store_logo', None) %}
-            <img src="{{ data.get('store_logo') }}" alt="Store Logo">
-        {% endif %}
-        <label for="store_logo">Store Logo URL:</label>
-        <input type="text" id="store_logo" name="store_logo" placeholder="Enter image URL" value="{{data.get('store_logo' , none)}}">
-        
-        <label for="store_logo_file">Or Upload Store Logo:</label>
-        <input type="file" id="store_logo_file" name="store_logo_file" accept="image/*">
-        
-        <img id="preview" style="max-width: 200px; display: none; margin-top: 10px;">
-        
-              
-        <label for="payment_type">Payment Type:</label>
-        <select id="payment_type" name="payment_type" required >
-            <option value="Pre-delivery">Pre-delivery</option>
-            <option value="Post-delivery">Post-delivery</option>
-        </select>
-        <label for="store_description">Store Description:</label>
-        <textarea id="store_description" name="store_description">{% if data.get("store_description") %}{{ data.get("store_description") }}{% endif %}</textarea>
-        
-        <button onclick="uploadImageThenSubmit()">Submit</button>  
-        <button type="button" onclick="uploadImageThenSubmit()">Save Changes</button>
-      
+        <div class="form-row">
+            <div class="form-field wide">
+                <label for="store_description">Store Description</label>
+                <textarea id="store_description" name="store_description" rows="5">{% if data.get("store_description") %}{{ data.get("store_description") }}{% endif %}</textarea>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="form-actions">
+            <button id="submit-btn" type="button" onclick="uploadImageThenSubmit()" class="btn-submit">
+                <span class="btn-text">Save Changes</span>
+                <span class="spinner"><i class="fas fa-circle-notch fa-spin"></i></span>
+            </button>
+            <div id="alert-box"></div>
+        </div>
     </form>
 </div>
-
 {% endblock %}

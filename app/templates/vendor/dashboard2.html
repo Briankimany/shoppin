@@ -98,10 +98,10 @@
             <div class="orders-list">
                 {% for order in data.recent_orders %}
                 <div class="order-item {{ order.status }}">
-                    <div class="order-id">#{{ order.id }}</div>
+                    <div class="order-id">{{ order.id }}</div>
                     <div class="order-meta">
                         <span class="customer">{{ order.customer }}</span>
-                        <span class="amount">${{ "%.2f"|format(order.total) }}</span>
+                        <span class="amount">Ksh {{ "%.2f"|format(order.total) }}</span>
                     </div>
                     <div class="order-footer">
                         <span class="status-badge">{{ order.status|title }}</span>

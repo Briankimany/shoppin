@@ -1,0 +1,243 @@
+
+    :root {
+ --neon-blue: #0ff0fc;
+ --neon-purple: #ff00ff;
+ --dark-bg: #0a0a12;
+ --darker-bg: #050508;
+ --panel-bg: rgba(15, 15, 30, 0.8);
+ --text-primary: #e0e0ff;
+ --text-secondary: #a0a0c0;
+}
+
+body {
+ background: var(--dark-bg);
+ font-family: 'Segoe UI', 'Roboto', sans-serif;
+ color: var(--text-primary);
+ padding: 20px;
+ background-image: 
+     radial-gradient(circle at 10% 20%, rgba(15, 240, 252, 0.05) 0%, transparent 20%),
+     radial-gradient(circle at 90% 80%, rgba(255, 0, 255, 0.05) 0%, transparent 20%);
+}
+
+.card {
+ background: var(--panel-bg);
+ border: 1px solid rgba(255, 255, 255, 0.1);
+ border-radius: 8px;
+ box-shadow: 
+     0 0 15px rgba(0, 255, 252, 0.1),
+     0 0 30px rgba(0, 5, 15, 0.5);
+ backdrop-filter: blur(8px);
+ margin-bottom: 20px;
+}
+
+.card-header {
+ background: linear-gradient(90deg, rgba(10, 10, 30, 0.8), rgba(30, 0, 30, 0.8));
+ border-bottom: 1px solid rgba(0, 255, 252, 0.2);
+ font-weight: 600;
+ letter-spacing: 0.5px;
+}
+
+h1, h5 {
+ color: var(--neon-blue);
+ text-shadow: 0 0 8px rgba(0, 255, 252, 0.3);
+}
+
+.ip-table {
+ --neon-glow: 0 0 10px var(--neon-blue);
+ border-collapse: separate;
+ border-spacing: 0 5px;
+}
+
+.ip-table th {
+ background: rgba(0, 0, 0, 0.4);
+ color: var(--neon-purple);
+ text-transform: uppercase;
+ font-size: 0.7rem;
+ letter-spacing: 1px;
+ border: none;
+}
+
+.ip-table td {
+ background: rgba(20, 20, 40, 0.6);
+ border: 1px solid rgba(0, 255, 252, 0.1);
+ border-left: 3px solid var(--neon-blue);
+ transition: all 0.3s ease;
+}
+
+.ip-table tr:hover td {
+ background: rgba(30, 30, 60, 0.8);
+ transform: translateX(5px);
+ box-shadow: var(--neon-glow);
+}
+
+.status-badge {
+ box-shadow: 0 0 5px currentColor;
+}
+
+.status-online { color: var(--neon-blue); }
+.status-proxy { color: var(--neon-purple); }
+.status-offline { color: #ff0000; }
+
+.btn-primary {
+ background: linear-gradient(45deg, #0066ff, #00ccff);
+ border: none;
+ box-shadow: 0 0 10px rgba(0, 204, 255, 0.5);
+ transition: all 0.3s;
+}
+
+.btn-primary:hover {
+ transform: translateY(-2px);
+ box-shadow: 0 0 20px rgba(0, 204, 255, 0.8);
+}
+
+.btn-outline-secondary {
+ border-color: var(--neon-purple);
+ color: var(--neon-purple);
+}
+
+.btn-outline-secondary:hover {
+ background: rgba(255, 0, 255, 0.1);
+ box-shadow: 0 0 10px var(--neon-purple);
+}
+
+#search-input {
+ background: rgba(10, 10, 30, 0.8);
+ border: 1px solid var(--neon-blue);
+ color: white;
+}
+
+#search-input:focus {
+ box-shadow: 0 0 10px var(--neon-blue);
+ border-color: var(--neon-blue);
+}
+
+.modal-content {
+ background: var(--darker-bg);
+ border: 1px solid var(--neon-blue);
+ box-shadow: 0 0 30px rgba(0, 255, 252, 0.3);
+}
+
+.detail-row {
+ border-bottom: 1px dashed rgba(0, 255, 252, 0.2);
+ padding: 8px 0;
+}
+
+.detail-label {
+ color: var(--neon-blue);
+ min-width: 100px;
+ display: inline-block;
+}
+
+/* Animated background pulse (optional) */
+@keyframes pulse {
+ 0% { opacity: 0.1; }
+ 50% { opacity: 0.3; }
+ 100% { opacity: 0.1; }
+}
+
+body::after {
+ content: "";
+ position: fixed;
+ top: 0;
+ left: 0;
+ right: 0;
+ bottom: 0;
+ background: 
+     linear-gradient(45deg, transparent 48%, var(--neon-blue) 49%, var(--neon-purple) 51%, transparent 52%);
+ background-size: 10px 10px;
+ opacity: 0.1;
+ pointer-events: none;
+ animation: pulse 10s infinite;
+ z-index: -1;
+}
+
+/* ===== MOBILE RESPONSIVENESS ===== */
+@media (max-width: 768px) {
+ /* Adjust layout for small screens */
+ .columns-container {
+     flex-direction: column;
+ }
+ 
+ .ip-column {
+     min-width: 100%;
+     padding: 0;
+     margin-bottom: 15px;
+ }
+ 
+ /* Optimize tables for touch */
+ .ip-table {
+     font-size: 0.8rem;
+ }
+ 
+ .ip-table td, .ip-table th {
+     padding: 8px 5px;
+ }
+ 
+ /* Scale down glows to avoid blinding users */
+ .ip-table tr:hover td {
+     box-shadow: 0 0 5px var(--neon-blue);
+     transform: translateX(2px);
+ }
+ 
+ /* Make buttons easier to tap */
+ .btn {
+     padding: 10px 15px;
+     font-size: 0.9rem;
+ }
+ 
+ /* Modal adjustments */
+ .modal-dialog {
+     margin: 10px;
+ }
+ 
+ /* Reduce header sizes */
+ h1 {
+     font-size: 1.8rem;
+ }
+ 
+ h5 {
+     font-size: 1.2rem;
+ }
+ 
+ /* Touch-friendly search bar */
+ #search-input {
+     padding: 12px;
+     font-size: 1rem;
+ }
+ 
+ /* Disable heavy animations on mobile for performance */
+ body::after {
+     animation: none;
+     opacity: 0.05;
+ }
+}
+
+/* ===== ANDROID-SPECIFIC TWEAKS ===== */
+/* Prevent zoom-on-focus for inputs */
+@viewport {
+ width: device-width;
+ zoom: 1;
+ user-zoom: fixed;
+}
+
+input, textarea, select {
+ font-size: 16px !important; /* Prevents iOS zoom but helps Android readability */
+}
+
+/* Hide scrollbar but keep functionality */
+.ip-column::-webkit-scrollbar {
+ display: none;
+}
+
+/* Active state for buttons (feedback when tapped) */
+.btn:active {
+ transform: scale(0.98) !important;
+ opacity: 0.9;
+}
+
+/* Optimize status badges for small screens */
+.status-badge {
+ width: 8px;
+ height: 8px;
+ margin-right: 3px;
+}
