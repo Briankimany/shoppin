@@ -35,6 +35,7 @@ class LOG:
     ORDER_LOGGER = LoggerManager(parent_dir/"order.logs", logger_name="ORDER").get_logger()
     PAYMENT_LOGGER = LoggerManager(parent_dir/"payment.logs", logger_name="PAYMENT").get_logger()
     ADMIN_LOGGER = LoggerManager(parent_dir/"admin.logs", logger_name="ADMIN").get_logger()
+    IP_BP  = LoggerManager(parent_dir/"ip-address_logs.log" ,logger_name='IPS').get_logger()
 
 
 def bp_error_logger(logger:LOG, status_code=400 ,return_template = None):

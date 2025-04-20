@@ -10,14 +10,6 @@ class SessionTracking(Base):
     expires_at = Column(DateTime, nullable=False, default=lambda: datetime.utcnow() + timedelta(hours=12))
     cart_id = Column(Integer, ForeignKey(Cart.id), nullable=False)
     user_id = Column(Integer, ForeignKey(UserProfile.id), nullable=True)
-    ip_address = Column(String, nullable=True)
-    country = Column(String, nullable=True)
-    region = Column(String, nullable=True)
-    city = Column(String, nullable=True)
-    browser = Column(String, nullable=True)
-    device = Column(String, nullable=True)
-    consent_given = Column(Boolean, default=False)
-
 
     def __repr__(self):
         return (

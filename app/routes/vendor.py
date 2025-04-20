@@ -23,9 +23,6 @@ db_session = Session()
 vendor_bp = Blueprint("vendor", __name__, url_prefix="/vendor")
 
 
-
-
-
 @vendor_bp.before_request
 def load_current_user():
     user_id = session.get('vendor_id')
@@ -88,27 +85,45 @@ def vendorhome():
     return render_template("vendor/home.html")
 
 @vendor_bp.route("/update-details" , methods = ['POST' , "GET"])
+# @bp_error_logger(logger=LOG.VENDOR_LOGGER)
+@meet_vendor_requirements
 @session_set
 def add_details():
-    name = session.get("user_name" , None)
-    if not name:
-        return redirect (url_for("vendor.login"))
+    vendor_id = session['vendor_id']
 
-    user_obj = UserManager(db_session=db_session , user=name)
+    user_obj = UserManager(db_session=db_session , user=int(vendor_id))
+    vendor_ = VendorObj(db_session=db_session , vendor_id=session['vendor_id'])
+
+    name = user_obj.user.name
+    is_vendor =  vendor_.vendor_table != None
+
+    extra_data = {'name':user_obj.user.name , 'phone':user_obj.user.phone ,'email':user_obj.user.email}
+   
+
     if request.method == "POST":
+        print("post requstt to udata")
         data = request.get_json().get('data')
 
-        data['name'] = name
+        message = "{} Vendor (id={} ,details={})".format(
+            "Registering" if not is_vendor else "Updating",
+            user_obj.user.id,
+            data
+        )
+        LOG.VENDOR_LOGGER.info(message)
+        
+        data['id'] = vendor_id
         vendor_ = VendorObj.register_vendor(db_session=db_session ,data=data)
-        session['vendor_id'] = vendor_.vendor_id
-    if 'vendor_id' in session:
-        vendor_ = VendorObj(db_session=db_session , vendor_id=session.get('vendor_id'))
-        extra_data = {'name':name , 'email':vendor_.vendor_table.email , 'phone':vendor_.vendor_table.phone ,
-                      'store_logo':vendor_.vendor_table.store_logo , 'store_description':vendor_.vendor_table.store_description
-                      ,'store_name':vendor_.vendor_table.store_name}
-    else:
-        extra_data = {'name':user_obj.user.name , 'phone':user_obj.user.phone ,'email':user_obj.user.email}
-    return render_template("vendor/update_details.html" , name=name , data=extra_data )
+        vendor_.reload()
+        vendor_data = vendor_.get_vendor_dict()
+        
+        return jsonify(vendor_data) , 200
+        
+    vendor_data = vendor_.get_vendor_dict()
+    if not is_vendor:
+        vendor_data.update(extra_data)
+
+    return render_template("vendor/update_details.html" , name=name , data=vendor_data )
+
 
 @vendor_bp.route("/dashboard")
 @meet_vendor_requirements
@@ -121,7 +136,6 @@ def dashboard():
         "vendor/dashboard2.html",
         data = data
     )
-
 
 @vendor_bp.route("/add_product", methods=["GET", "POST"])
 @meet_vendor_requirements
@@ -149,6 +163,7 @@ def add_product():
 @session_set
 def product_details(product_id):
     return edit_product(product_id)
+
 
 @vendor_bp.route("/edit_product/<int:product_id>", methods=["GET", "POST"])
 @meet_vendor_requirements
@@ -197,7 +212,7 @@ def vendor_products():
                          db_session=db_session).get_product('vendor_id',
                                                             value=session['vendor_id'] , occurrence='all')
     categories = VendorObj.get_vendor_product_categories(db_session , session.get("vendor_id"))
-    print(categories)
+
     return render_template("vendor/products.html",products=products , categories=categories)
 
 
@@ -209,7 +224,6 @@ methods = ["POST", "GET"] if os.getenv("CUSTOM_DEBUG_MODE", "").lower() in ("tru
 @session_set
 def upload_image():
 
-    
     if request.method == 'GET':
         return render_template("upload.html")
 
@@ -260,16 +274,6 @@ def upload_image():
     }), 200
 
 
-# ==================
-# to be worked on ||
-# ==================
-
-@vendor_bp.route("/orders")
-@meet_vendor_requirements
-@session_set
-def orders():
-    return "order in view"
-
 
 @vendor_bp.route("/payouts", methods=['GET', 'POST'])
 @meet_vendor_requirements
@@ -303,11 +307,37 @@ def payouts():
                         default_account_number=vendor.vendor_table.phone)
 
 
+@vendor_bp.route("/orders" ,methods = ['POST','GET'])
+@meet_vendor_requirements
+@session_set
+def orders():
 
-@vendor_bp.route("/reports")
-def reports():
-    return "helo reports"
+    if request.method == 'POST':
+        limit = request.args.get("limit",None)
+        if limit:
+            limit = int(limit)
+            if limit < 0:
+                limit = None
 
+
+        data = VendorObj.get_recent_orders(
+            vendor_id=session['vendor_id'],
+            limit=limit
+        )
+        return jsonify({'message':"success",'data':data})
+    
+    return render_template("vendor/orders.html")
+
+
+@vendor_bp.route("/orderd/<orderid>")
+@meet_vendor_requirements
+@session_set
+def details_order(orderid):
+    data = VendorObj.specific_order_details(
+        vendor_id=int(session['vendor_id']),
+        order_id=int(orderid)
+    )
+    return jsonify(data)
 
 
 @vendor_bp.route("/process-pay" , methods = ['POST'])
@@ -428,6 +458,14 @@ def get_pending_withdrawals():
  
     return jsonify(pending_data) ,200
 
+
+# ==================
+# to be worked on ||
+# ==================
+
+@vendor_bp.route("/reports")
+def reports():
+    return "helo reports"
 
 
 @vendor_bp.route("/withdrawal-history-pay")

@@ -1,9 +1,9 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify ,g
 
-from app.models.user_profile import UserProfile as User 
+from datetime import datetime
 from app.data_manager.users_manager import UserManager
 from config.config import JSONConfig
-from app.routes.routes_utils import session_set 
+from app.routes.routes_utils import session_set  ,meet_user_requirements
 from app.routes.logger import LOG
 from app.routes.mail import send_reset_email
 from app.data_manager.token_manager import ResetTokenManager
@@ -25,18 +25,56 @@ db_session = Session()
 user_bp = Blueprint("user", __name__, url_prefix="/user")
 user_obj = UserManager(db_session=db_session , user=None)
 
+
 def force_user_reload(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         global user_obj 
         if user_obj:
-            if "user_id" in session:
-                user_obj.reload_object(session["user_id"] , token=session.get("session_token"))
+            if "user_id" in session or 'vendor_id' in session:
+                user_id = session.get("user_id") or session.get("vendor_id")
+                user_obj.reload_object(int(user_id), token=session.get("session_token"))
             if "session_token"  in session:
                 user_obj.session_tkn = session.get('session_token') 
         return func(*args, **kwargs)
     
     return wrapper
+
+
+@user_bp.before_request
+def load_current_user():
+    global user_obj
+    user_id = session.get('user_id') or session.get('vendor_id')
+    if user_id:
+        user_id = int(user_id)
+
+    if user_id:
+        user_obj.reload_object(user=user_id)
+        g.current_user = user_obj.user
+        if not g.current_user:
+            session.clear()
+        else:
+            g.current_user.is_authenticated = True
+    else:
+        g.current_user = None
+
+@user_bp.context_processor
+def inject_user():
+    user = getattr(g, 'current_user', None)
+
+    user_id = session.get('user_id') or session.get('vendor_id')
+    if user_id:
+        user_id = int(user_id)
+
+    user_obj.reload_object(user_id)
+    is_vendor = user_obj.is_vendor() != None
+    return {
+        'current_user': user,
+        'is_authenticated':True,
+        'now': datetime.now(),
+        'is_vendor':is_vendor
+    }
+
 
 
 @user_bp.route("/")
@@ -111,6 +149,7 @@ def register():
 
 
 @user_bp.route("/logout")
+@meet_user_requirements
 @session_set
 def logout():
     """Logs out the user"""
@@ -118,17 +157,17 @@ def logout():
     return redirect(url_for("shop.shop_home"))
 
 @user_bp.route("/profile")
+@meet_user_requirements
 @session_set
 def profile():
     """User profile page"""
-    if  'user_id' not in session:
-        return redirect(url_for("user.login"))
-    else:
-        user_obj.reload_object(user=session.get('user_id'))
+
+    user_obj.reload_object(user=int(session['user_id']))
     return render_template("user/profile.html", user=user_obj.user)
 
 
 @user_bp.route("/edit-profile" , methods = ["POST"])
+@meet_user_requirements
 @session_set
 def edit_profile():
     """
@@ -138,6 +177,7 @@ def edit_profile():
     name = data.get('name')
     email = data.get("email")
     phone = data.get("phone")
+    
     new_data = {'name': name ,'phone':phone , 'email':email}
     LOG.USER_LOGGER.info("***"*10)
     if "old_password" in data.keys() and "new_password" in data.keys():
@@ -150,7 +190,7 @@ def edit_profile():
             return "Done" , 401
 
     LOG.USER_LOGGER.info(f"data from edit -profile: {new_data}")
-    user_obj.reload_object(user= session['user_id'])
+    user_obj.reload_object(user= int(session['user_id']))
     user_obj.update_data(data = new_data)
     return "Done" , 200
 
@@ -168,7 +208,9 @@ def orders():
 @session_set
 def get_order_items(order_id):
     items = user_obj.get_my_previous_order_items(order_id)
-    print(items)
+
+    from pprint import pprint
+    pprint(items)
 
     return jsonify(items)
 
@@ -207,6 +249,7 @@ def forgot_password():
     response = None
     return render_template("user/forgot_password.html" , message=response)
 
+
 @user_bp.route("/reset-password" , methods = ['POST'])
 def reser_user_password():
     email = request.get_json().get("email")  
@@ -227,3 +270,4 @@ def reser_user_password():
     else:
         time.sleep(3)
     return jsonify(response) ,200
+

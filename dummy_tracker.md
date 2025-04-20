@@ -1,56 +1,100 @@
 ### **Track Changes**
 
-#### **Vendor Backend**
-- **[x] 1.** Add login and register functionality
-- **[ ] 2.** Add the remove item method
-- **[x] 3.** Add the "meet vendor requirements" decorator
-- **[x] 4.** Implement image uploading
-- **[x] 5.** Fix vendor tracking of individual products from users buying from multiple vendors
-- **[x] 6.** Remove duplicate HTML files
-- **[x] 7.** Fix the ability to add products after an initial checkout fails
-- **[x] 8.** Reduce stock quantity after successful checkout (update the values after setting the order to "paid")
-- **[x] 9.** Group products in the vendor's edit page, shop
-- **[x] 10.** Automatic upload of images to the remote server and clear space in the static folder
-           - Images are stored on PythonAnywhere until manual triggering to upload to Cloudinary
-- **[x] 11.** Password resetting:
-    - Mailgun emailing
-    - Gmail
-- **[ ] 12.** Add edit profile functionality
-- **[ ] 13.** Fix order preview on user pages
-- **[ ] 14.** Fix the update detail endpoint for vendors
-- **[ ] 15.** Fix tracking user data
-- **[x] 16.** Fix tempfile having items not in the database
-- **[x] 17.** Link the user table and vendor via the user ID
-- **[x] 18.** Fill the payment table with records from successful checkout
-- **[ ] 19.** Fix the vendor/order endpoint
-- **[ ] 20.** Fix vendor withdrawal history endpoint
-- **[ ] 21.** Fix endpoint for reports
-- **[ ] 22.** Add account authentication on creation of account ie send a token to verify account and add a rate limit
-- **[ ] 23.** Add a button in the checkout page that allows user to refresh the status of their cart. This is handy in cases where the user paid but the server was already done checking the status.
-Here is your list reformatted in the specified style:
+---
 
-- **[x] 22.** Cleaned up the config initiation in withdraw; added new enum class `WithDrawAvlailableMethods(str, Enum)` for account info starting with 2547  
-- **[x] 23.** Limited withdraw options using a new config variable `MAX_NUM_PENDING_WITHDRAWs`; capped at 3 pending withdraws if total amount is below threshold  
-- **[x] 24.** Added columns `tracking_id`, `batch_id`, `updated_user_id` to the `vendorpayout` table  
-- **[x] 25.** Modified external API return values for single transfer initiation and bulk initiation  
-- **[x] 26.** Added method `is_allowed_withdraw` to the `Vendor` object class  
-- **[x] 27.** Refactored withdraw logic to initiate request first, then record transaction  
-- **[x] 28.** Removed try block in `process-pay` endpoint in vendor blueprint; replaced with `bp_error_logger` decorator  
-- **[x] 29.** Added new class in `config.environ_variables` to handle withdraw status tracking  
-- **[x] 30.** Added timed status check trigger after initiating a withdraw  
-- **[x] 31.** Implemented withdraw request status check logic  
+### **Core Systems**
+#### **Error Logger & Blueprint System**  
+1. [x] Universal `@bp_error_logger` decorator for all blueprints  
+2. [x] Blueprint-specific logging (e.g., `LOG.SHOP_LOGGER`)   
+3. [x] error template (`error.html`)
+   - [x] Styled error message display  
+   - [x] "Go Back" button  
+   - [x] Error code visibility  
+4. [x] Debug/production mode safety (hide sensitive errors)  
+5. [x] Customizable HTTP status codes per route  
 
+#### **Database & Models**
+1. [x] Added `ClientAccessLog` table (replaces IP columns in `session_tracking`)
+   - [x] `consent_given` (Boolean, default=False)  
+   - [x] `accessed_at` (DateTime)
+2. [x] Added to `vendorpayout`:
+   - [x] `tracking_id`, `batch_id`, `updated_user_id` columns
+3. [x] Fixed tempfile items not in database 
 
-### **Error Logger & Blueprint System**  
-- **[x] 1.** Universal `@bp_error_logger` decorator for all blueprints  
-- **[x] 2.** Blueprint-specific logging (e.g., `LOG.SHOP_LOGGER`)   
-- **[x] 3.** Production-ready error template (`error.html`):  
-    - **[x]** Styled error message display  
-    - **[x]** "Go Back" button  
-    - **[x]** Error code visibility  
-- **[x] 5.** Debug/production mode safety (hide sensitive errors)  
-- **[x] 6.** Customizable HTTP status codes per route  
+---
 
+### **Vendor Backend**
+#### **Core Functionality**
+1. [x] Login/register system
+2. [ ] Remove item method
+3. [x] `@meet_vendor_requirements` decorator
+4. [x] Image uploading system
+   - [x] Cloudinary integration 
+5. [x] Multi-vendor product tracking 
+
+#### **Order Management**
+1. [x] Fix adding products after failed checkout 
+2. [x] Stock reduction on successful checkout 
+3. [x] Group products in vendor UI 
+4. [x] Vendor/order endpoint fixes 
+5. [x] Formatted order history (`get_format_recent_orders`)
+6. [x] Detailed order breakdowns (`specific_order_details`)
+
+#### **Payments & Withdrawals**
+1. [x] Payment table records (#18)
+2. [x] Withdraw system improvements:
+   - [x] `WithDrawAvailableMethods` enum 
+   - [x] `MAX_NUM_PENDING_WITHDRAWs` limit 
+   - [x] Status check automation 
+3. [ ] Withdraw email notifications 
+4. [ ] Vendor withdrawal history endpoint 
+
+---
+
+### **User Features**
+1. [x] Profile system:
+   - [x] Edit functionality 
+   - [x] Vendor portal link 
+2. [x] Order system:
+   - [x] Preview fixes 
+   - [ ] Status refresh button
+3. [x] Password reset:
+   - [x] Gmail integration
+   - [ ] Mailgun integration
+
+---
+
+### **Frontend Improvements**
+1. [x] Modern CSS:
+   - [x] Order history cards
+   - [x] Vendor update forms
+2. [x] Quick actions:
+   - [x] Shop/profile links 
+3. [x] Responsive fixes
+
+---
+
+### **Security & Compliance**
+1. [ ] Account verification:
+   - [ ] Email token system (#22)
+   - [ ] Rate limiting
+2. [x] GDPR:
+   - [x] Consent tracking
+   - [x] Data access logging
+
+---
+
+### **Bug Fixes**
+1. [x] Order status typo (`pendig` → `pending`)
+2. [x] User-vendor linking 
+3. [ ] Report endpoints 
+
+---
+
+### **Technical Debt**
+1. [ ] Mailgun email integration
+2. [ ] Withdrawal history UI
+3. [ ] Report generation system
 
 
 #### **HTML Restructuring**
@@ -83,3 +127,4 @@ Here is your list reformatted in the specified style:
     - edit_product.html
     - payout.html
     - products.html
+

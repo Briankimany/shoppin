@@ -338,6 +338,7 @@ class OrderManager:
             payload = json.dumps({'phone': phone, "amount": amount, 'orderid': orderid})
 
             response = requests.post(url=url + "/pay", data=payload, headers=headers, timeout=7)
+            LOG.ORDER_LOGGER.info(f"The response is {response}")
             LOG.ORDER_LOGGER.info(f"Payment request sent for session : {orderid}, Status Code: {response.status_code}:{response.content}")
 
             if response.status_code != 200:
@@ -388,7 +389,10 @@ class OrderManager:
             return 'pending'
 
         except Exception as e:
-            LOG.ORDER_LOGGER.error(f"Exception occurred in payment collection for session: {orderid}: error={e} status_code={response.status_code} Latest response:{response.content}")
+            if response:
+                LOG.ORDER_LOGGER.error(f"Exception occurred in payment collection for session: {orderid}: error={e} status_code={response.status_code} Latest response:{response.content}")
+            else:
+                LOG.ORDER_LOGGER.error(f"Exception occurred in payment collection for session: {orderid}: error={e}")
             return None
 
        

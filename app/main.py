@@ -1,12 +1,14 @@
 # main.py
 from flask import Flask,  session 
+from flask_cors import CORS
 
-from app.routes.vendor import vendor_bp 
+from app.routes.vendor import vendor_bp
 from app.routes.shop import shop_bp
 from app.routes.user import user_bp
 from app.routes.info import info_bp
 from app.routes.mail import mail_bp
 from app.routes.admin import admin_bp
+from app.routes.users_ips import ip_bp
 
 from app.services.mail import mail
 
@@ -18,6 +20,7 @@ from pathlib import Path
 
 load_dotenv()
 app = Flask(__name__ ,static_folder= str(Path().cwd()/"app/static"))
+CORS(app)
 
 app.secret_key = os.getenv("APP_SECRET_KEY")
 app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
@@ -36,6 +39,7 @@ app.register_blueprint(user_bp)
 app.register_blueprint(info_bp)
 app.register_blueprint(mail_bp)
 app.register_blueprint(admin_bp)
+app.register_blueprint(ip_bp)
 
 
 @app.route("/log")

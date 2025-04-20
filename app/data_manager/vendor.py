@@ -10,13 +10,15 @@ import time
 from app.models.vendor import Vendor
 from app.routes.logger import LOG ,bp_error_logger
 
-from .vendor_transaction import VendorTransactionSystem
 from app.models.vendor import Vendor , VendorPayout
 from app.models.model_utils import PaymentMethod
 from app.models.user_profile import UserBalance
+from app.models.order_item import VendorOrder ,OrderItem
+from app.models.product import Product
 
 from config.envrion_variables import StatusCodes ,StatusNames
-from data_manager.vendor_transaction import VendorTransactionSystem
+from app.data_manager.vendor_transaction import VendorTransactionSystem
+
 
 from contextlib import contextmanager
 from config.envrion_variables import Session as ManagedSession
@@ -25,14 +27,19 @@ class VendorObj:
 
     @classmethod
     @contextmanager
-    def _scoped_session(cls):
+    def _scoped_session(cls ,raise_exception = False):
         db_session = ManagedSession()
         try:
             yield db_session
         except Exception as e:
-            LOG.VENDOR_LOGGER.error(f"[DB-ERROR] exception from scopped session {e}")
+            LOG.VENDOR_LOGGER.error(f"[DB-ERROR] exception from VendorObj-scopped session {e}")
+            
+            if raise_exception:
+                raise Exception(e)
         finally:
             db_session.close()
+
+
 
     """
     Manages vendor-related operations, including updating details, verifying vendors, 
@@ -55,7 +62,11 @@ class VendorObj:
         self.vendor_table = self.db.get_vendor(vendor_id=vendor_id)
         self.config = JSONConfig(json_path="config.json")
         
-
+    def __str__(self):
+        return "<vendor=({}) ,table=({})".format(self.vendor_id ,self.vendor_table)
+    def __repr__(self):
+        return self.__str__()
+    
     @staticmethod
     def get_all_vendors(db_session:Session):
         return Database(db_session).get_all_vendors()
@@ -66,9 +77,8 @@ class VendorObj:
     
     @staticmethod
     def register_vendor(db_session:Session , data={}):
-        LOG.VENDOR_LOGGER.info(f"Creating/updating a new vendor data: {data}")
         try:
-            vendor =VendorObj.get_vendor_by(db_session ,'name' , data.get('name'))
+            vendor =VendorObj.get_vendor_by(db_session ,'id' , data.get('id'))
             if vendor:
                 vendorobj = VendorObj(vendor_id=vendor.id , db_session=db_session)
             
@@ -103,7 +113,21 @@ class VendorObj:
         """
         self.db.update_vendor(self.vendor_id, update_data)
         return "Vendor details updated."
+    
+    def get_vendor_dict(self):
+        vendor_table = self.vendor_table
+        vendor_data = {
+            'name': vendor_table.name if vendor_table else '',
+            'email': vendor_table.email if vendor_table else '',
+            'phone': vendor_table.phone if vendor_table else '',
+            'store_logo': vendor_table.store_logo if vendor_table else '',
+            'store_description': vendor_table.store_description if vendor_table else '',
+            'store_name': vendor_table.store_name if vendor_table else '',
+            'payment_type':vendor_table.payment_type if vendor_table else ''
+        }
 
+        return vendor_data
+    
     def verify(self):
         """
         Verifies the vendor if not already verified.
@@ -113,7 +137,7 @@ class VendorObj:
         """
         vendor = self.db.get_vendor(self.vendor_id)
         if vendor and vendor.verified:
-            return False  # Already verified
+            return False  
         return self.db.verify_vendor(self.vendor_id)
 
     def add_product(self, name, price, product_type, description=None, stock=None, category=None, image_url=None, preview_url=None):
@@ -197,15 +221,6 @@ class VendorObj:
         return self.db.get_product_by_key_val(key=product_key, val=value, occurrence=occurrence)
 
 
-    def track_orders(self):
-        """
-        Retrieves all orders associated with the vendor.
-
-        Returns:
-            list: A list of order objects.
-        """
-        return self.db.get_vendor_orders(self.vendor_id)
-
     def manage_payouts(self):
         return VendorObj.get_vendor_withdrawal_records(
             db_session=self.db_session,vendor_id=self.vendor_id
@@ -215,16 +230,6 @@ class VendorObj:
         return VendorObj.get_vendor_dashboard_data(db_session=self.db_session , 
                                            vendor_id=self.vendor_id,stock_threshold=stock_threshold)
 
-    def get_recent_orders(self, limit=5):
-        """Fetch recent orders."""
-        vendor_id = self.vendor_id
-        return (
-            self.db.session.query(OrderModel)
-                        .filter_by(vendor_id=vendor_id)
-                        .order_by(OrderModel.created_at.desc())
-                        .limit(limit)
-                        .all()
-        )
 
     def record_payout(self ,payment_method,amount ,status:str = 'pending'):
         return VendorObj.create_vendor_payout_record(
@@ -235,14 +240,6 @@ class VendorObj:
             status=status
         )
 
-    def get_low_stock_products(self , threshold=5):
-        """Fetch low-stock products."""
-        vendor_id = self.vendor_id
-        return (
-            self.db.session.query(ProductModel.name, ProductModel.stock)
-            .filter( ProductModel.stock != None ,ProductModel.vendor_id == vendor_id, ProductModel.stock <= threshold).all()
-    )
-    
     def withdraw(self , amount:float , phone,**kwargs):
         """
         Initiates a withdrawal request for the vendor.
@@ -535,4 +532,47 @@ class VendorObj:
             return  pending
         return None
     
+    @classmethod
+    def get_recent_orders(cls ,vendor_id ,limit=None):
+
+        with cls._scoped_session() as db_session:
+            orders = VendorTransactionSystem.get_format_recent_orders(
+                db_session=db_session,
+                vendor_id=vendor_id,
+                limit=limit
+            )
+        return orders
+
+    @classmethod
+    def specific_order_details(cls,vendor_id:int ,order_id:int):
+        
+        assert type(vendor_id) == int
+        assert type(order_id) == int
+        with cls._scoped_session(True) as db_session:
+            orders = db_session.query(
+                OrderItem.quantity.label("quantity"),
+                OrderItem.price_at_purchase.label("price"),
+                Product.name.label("name"),
+                Product.stock.label("stock")
+               
+            ).join(OrderModel , OrderItem.order_id == OrderModel.id
+            ).join(VendorOrder , OrderItem.id == VendorOrder.orderitem
+            ).join(Product , OrderItem.product_id == Product.id
+            ).filter(OrderModel.id == order_id ,VendorOrder.vendorid == vendor_id
+            ).all()
+        
+            data = []
+            for i in orders:
+                print(i ,'\n')
+                data.append(
+                    {"product-name":i.name,
+                     "quantity":i.quantity,
+                     "price":i.price,
+                     "stock":i.stock
+                     }
+                )
+            return data
+        
+            
+        
     

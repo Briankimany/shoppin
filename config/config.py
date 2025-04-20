@@ -17,7 +17,8 @@ DEFAULT_SETTINGS = {
     "DELAY_BEFORE_STATUS_CHECK":2,
     "MAX_RETIRES":3,
     "SIMULATE": True,
-    "allowed_extensions":['jpg', 'jpeg', 'png', 'webp' ,'svg']
+    "allowed_extensions":['jpg', 'jpeg', 'png', 'webp' ,'svg'],
+    "ip_url" :"http://ip-api.com/json/{}?fields=713241"
 }
 PATHS_LIST = ['uploads_dir_path' ,'TEMP_UPLOAD_IMAGE_DIR']
 
@@ -68,6 +69,8 @@ class Config(ABC):
         self.TEMP_UPLOAD_IMAGE_DIR = str(self.TEMP_UPLOAD_IMAGE_DIR)
 
         self.MAX_NUM_PENDING_WITHDRAWs = self.default_data.get("MAX_NUM_PENDING_WITHDRAWs", 3)
+
+        
 
         if not self.json_path.exists():
             self.__save__(self.default_data)

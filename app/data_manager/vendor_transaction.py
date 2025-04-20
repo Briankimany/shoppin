@@ -2,13 +2,14 @@
 from datetime import datetime, timedelta
 from sqlalchemy import func ,case
 from sqlalchemy.orm import Session
+
 from app.models.product import Product as ProductModel
 from app.models.order import Order as OrderModel
 from app.models.order_item import OrderItem , VendorOrder
 from app.models.user_profile import UserBalance
 from app.models.vendor import Vendor as VendorModel
 import humanize
-from app.models.session_tracking import SessionTracking
+
 
 
 
@@ -85,7 +86,7 @@ class VendorTransactionSystem:
     @staticmethod # done 
     def get_recent_orders(vendor_id: int, db_session: Session, limit: int = 3) -> list:
         """Get recent orders with simplified query"""
-        return db_session.query(
+        query= db_session.query(
             OrderModel,
             func.sum(OrderItem.price_at_purchase * OrderItem.quantity).label('total')
         ).join(VendorOrder, VendorOrder.orderid == OrderModel.id
@@ -93,7 +94,23 @@ class VendorTransactionSystem:
         ).filter(VendorOrder.vendorid == vendor_id
         ).group_by(OrderModel.id
         ).order_by(OrderModel.created_at.desc()
-        ).limit(limit).all()
+        )
+
+        if limit:
+            return query.limit(limit).all()
+        return query.all()
+    
+    @classmethod
+    def get_format_recent_orders(cls,vendor_id , db_session ,limit:int = 3):
+        
+        return  [{
+            'id': f"ORD-{order.id}",
+            'total': float(total),
+            'status': order.status,
+            'time_ago': humanize.naturaltime(datetime.now() - order.created_at),
+            'customer': f"{order.phone_number[:-2]}.."
+        } for order, total in cls.get_recent_orders(vendor_id, db_session ,limit)]
+
 
     @staticmethod #done
     def get_low_stock_items(vendor_id: int, db_session: Session, threshold: int = 10) -> list:
@@ -104,7 +121,8 @@ class VendorTransactionSystem:
         ).order_by(ProductModel.stock.asc()).all()
 
     @classmethod  # done
-    def get_vendor_dashboard(cls, vendor_id: int, db_session: Session , status = 'paid',stock_threshold=10) -> dict:
+    def get_vendor_dashboard(cls, vendor_id: int, db_session: Session , 
+                             status = 'paid',stock_threshold=10 ,limit :int=3) -> dict:
         """Assemble complete dashboard data"""
         dashboard = {}
             
@@ -124,13 +142,11 @@ class VendorTransactionSystem:
         })
 
         # 3. Recent orders
-        dashboard['recent_orders'] = [{
-            'id': f"ORD-{order.id}",
-            'total': float(total),
-            'status': order.status,
-            'time_ago': humanize.naturaltime(datetime.now() - order.created_at),
-            'customer': f"{order.phone_number[:-2]}.."
-        } for order, total in cls.get_recent_orders(vendor_id, db_session)]
+        dashboard['recent_orders'] = cls.get_format_recent_orders(
+            vendor_id=vendor_id,
+            db_session=db_session,
+            limit=limit
+        )
 
         # 4. Low stock items
         dashboard['low_stock_items'] = [{

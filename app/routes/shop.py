@@ -13,8 +13,8 @@ from functools import wraps
 from datetime import datetime
 
 from app.data_manager.payments import PaymentManager , PaymentCategory , PaymentMethod
-
 from app.routes.routes_utils import session_set
+
 config = JSONConfig("config.json")
 engine = create_engine(f"sqlite:///{config.database_url.absolute()}")
 Session = sessionmaker(bind=engine)
@@ -46,7 +46,11 @@ def vendor_selected(func):
 
 @shop_bp.before_request
 def load_current_user():
-    user_id = session.get('user_id')
+    global user_obj
+    user_id = session.get('user_id') or session.get('vendor_id')
+    if user_id:
+        user_id = int(user_id)
+
     if user_id:
         user_obj.reload_object(user=user_id)
         g.current_user = user_obj.user
@@ -60,13 +64,18 @@ def load_current_user():
 @shop_bp.context_processor
 def inject_user():
     user = getattr(g, 'current_user', None)
-    print("the current user is ",user)
+    user_id = session.get('user_id') or session.get('vendor_id')
+    if user_id:
+        user_id = int(user_id)
+
+    user_obj.reload_object(user_id)
+    is_vendor = user_obj.is_vendor() != None
     return {
         'current_user': user,
         'is_authenticated':True,
-        'now': datetime.now()
+        'now': datetime.now(),
+        'is_vendor':is_vendor
     }
-
 
 
 @shop_bp.route('/')
@@ -259,7 +268,9 @@ def api_process_payment():
     ))
     if status:
         order.update_order(order.order.id , status =status)
+
     if status == 'paid':
+        
         cart_status = session_manager.update_cart(cart_id=cart_id , attribute="is_active" , new_value=False)
         order.update_stock(order_id = order.order.id)
         vendor_data =order.divide_to_vendors(order_id=order.order.id)

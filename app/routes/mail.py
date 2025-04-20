@@ -18,7 +18,7 @@ def unsubscribe():
 
 def send_email(to, subject, template):
     """Send email using Flask-Mail"""
-    with current_app.app_context():  # Required for blueprints
+    with current_app.app_context():  
         try:
             msg = Message(
                 subject,

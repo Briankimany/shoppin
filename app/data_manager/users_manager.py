@@ -84,10 +84,10 @@ class UserManager:
         return True
     
     def get_order_from_session_tkn(self , session_tkn:str , status='pending' , num_orders=3):
-        if status == "pendig":
+        if status == "pending":
             orders = self.db_session.query(Order).filter(Order.session == session_tkn , Order.status == status ).all()
         elif status == "all":
-            print(str(self))
+          
             orders = UserManager.get_k_latest_orders(db_session=self.db_session , k = num_orders , 
                                                     user_id=self.user.id if self.user else None ,session_tkn=session_tkn)
         return orders
@@ -201,9 +201,9 @@ class UserManager:
             return user
 
         query = None
-        if isinstance(user, int):  # Query by ID
+        if isinstance(user, int): 
             query = db_session.query(UserProfile).filter(UserProfile.id == user)
-        elif isinstance(user, str):  # Query by name, email, or phone
+        elif isinstance(user, str):  
             query = db_session.query(UserProfile).filter(
                 or_(
                     UserProfile.name == user,

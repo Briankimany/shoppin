@@ -1,4 +1,6 @@
-# main.py
+
+from flask import session , redirect , url_for
+
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from functools import wraps
@@ -6,8 +8,7 @@ from functools import wraps
 from app.data_manager.session_manager import SessionManager
 from config.config import JSONConfig
 from app.data_manager.users_manager import UserManager
-from flask import session , redirect , url_for
-
+from app.routes.logger import LOG
 
 config = JSONConfig('config.json')
 engine = create_engine(f"sqlite:///{config.database_url.absolute()}")
@@ -15,8 +16,6 @@ Session = sessionmaker(bind=engine)
 db_session = Session()
 session_manager = SessionManager(db_session)
 user_obj = UserManager(db_session , user=None)
-
-from app.routes.logger import LOG
 
 
 def get_or_create_session():
@@ -42,15 +41,36 @@ def get_or_create_session():
 def meet_vendor_requirements(func):
     @wraps(func)
     def decorated_func(*args , **kwargs):
+        user_id = session.get('user_id')
+        if  user_id:
+            is_vendor = UserManager.verify_is_vendor(db_session=db_session ,user_name=int(user_id))
+            if  is_vendor:
+                session['vendor_id'] = user_id
+                
         if "vendor_id" not in session:
             return redirect (url_for("vendor.login"))
         return func(*args , **kwargs)
     return decorated_func
-    
+
+def meet_user_requirements(func):
+    @wraps(func)
+    def decorated_func(*args , **kwargs):
+        vendor_id = session.get('vendor_id')
+        if  vendor_id:
+            session['user_id'] = vendor_id
+        if "user_id" not in session:
+            return redirect (url_for("user.login"))
+        return func(*args , **kwargs)
+    return decorated_func
+
+
+
 def session_set(func):
     @wraps(func)
     def decorated_func(*args , **kwargs):
         get_or_create_session()
         return func(*args , **kwargs)
     return decorated_func
+
+
 

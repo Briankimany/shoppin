@@ -1,7 +1,9 @@
 from app.models.vendor import Vendor as VendorModel
-from app.models.vendor import VendorPayout as PayoutModel
+from app.models.vendor import VendorPayout as PayoutModel 
 from app.models.product import Product as ProductModel
 from app.models.order import Order as OrderModel
+
+
 from sqlalchemy.orm import Session
 
 class Database:
@@ -27,7 +29,7 @@ class Database:
             for key, value in update_data.items():
                 if hasattr(vendor , key):
                     setattr(vendor, key, value)
-        
+ 
             self.session.commit()
             return True
         return False

@@ -13,6 +13,7 @@ from app.models.cart import Cart , CartItem
 from app.models.order_item import OrderItem
 from app.models.images import ImageUpload
 from app.models.payment import Payment
+from app.models.client_access_history import ClientAccessLog
 
 
 config = JSONConfig("config.json")
