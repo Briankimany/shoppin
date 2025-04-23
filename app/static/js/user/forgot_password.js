@@ -29,7 +29,7 @@ document.getElementById('submit-btn').addEventListener('click', async function()
     try {
         const response = await fetch("/user/reset-password", {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers:getHeaders(),
             body: JSON.stringify({ email: emailInput.value.trim() })
         });
 

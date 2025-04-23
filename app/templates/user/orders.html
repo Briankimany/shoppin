@@ -45,7 +45,7 @@
                     <tr class="order-row" data-status="{{ order.status }}">
                         <td>{{ order.created_at }}</td>
                       
-                        <td>${{ "%.2f"|format(order.total_amount) }}</td>
+                        <td>Ksh {{ "%.2f"|format(order.total_amount) }}</td>
                         <td>
                             <span class="status-badge {{ order.status }}">
                                 {{ order.status.capitalize() }}

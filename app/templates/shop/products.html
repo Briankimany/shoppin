@@ -49,9 +49,9 @@
                     <div class="product-info">
                         <h3 class="product-name">{{ product.name }}</h3>
                         <div class="price-container">
-                            <span class="current-price">${{ "%.2f"|format(product.price) }}</span>
+                            <span class="current-price">Ksh{{ "%.2f"|format(product.price) }}</span>
                             {% if product.original_price %}
-                            <span class="original-price">${{ "%.2f"|format(product.original_price) }}</span>
+                            <span class="original-price">Ksh{{ "%.2f"|format(product.original_price) }}</span>
                             {% endif %}
                         </div>
                         <div class="product-actions">

@@ -33,9 +33,7 @@ document.getElementById('resetForm').addEventListener('submit', async (e) => {
     try {
         const response = await fetch(window.location.href, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: getHeaders(),
             body: JSON.stringify({
                 new_password: newPassword,
                 user_id: userId,

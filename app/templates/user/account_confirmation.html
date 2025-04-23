@@ -1,0 +1,190 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Verify Your Account</title>
+
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --danger-color: #e74c3c;
+            --text-color: #2c3e50;
+            --light-text: #7f8c8d;
+            --bg-color: #f9f9f9;
+            --card-bg: #ffffff;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .verification-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 2rem;
+            margin: 1rem;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .verification-icon {
+            font-size: 4rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        p {
+            margin-bottom: 1.5rem;
+            color: var(--light-text);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin: 0.5rem;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+        }
+
+        .status-message {
+            margin-top: 1.5rem;
+            padding: 0.8rem;
+            border-radius: var(--border-radius);
+            display: none;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        @media (max-width: 600px) {
+            .verification-container {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .verification-icon {
+                font-size: 3rem;
+            }
+
+            .btn {
+                padding: 0.7rem 1.2rem;
+                font-size: 0.9rem;
+                width: 100%;
+                margin: 0.5rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="verification-container">
+        <div class="verification-icon">✉️</div>
+        <h1>Verify Your Email Address</h1>
+        <p>We've sent a verification link to <strong>{{ user_email }}</strong>. Please check your inbox and click the link to verify your account.</p>
+        <p>If you didn't receive the email, click the button below to request a new verification link.</p>
+        
+        <button id="resendBtn" class="btn">Resend Verification Email</button>
+        <a href="/logout" class="btn btn-danger">Not My Account</a>
+        
+        <div id="statusMessage" class="status-message"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const resendBtn = document.getElementById('resendBtn');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            resendBtn.addEventListener('click', function() {
+                // Disable button to prevent multiple clicks
+                resendBtn.disabled = true;
+                resendBtn.textContent = 'Sending...';
+                
+                // Clear any previous messages
+                statusMessage.style.display = 'none';
+                
+                // Get CSRF token from meta tag (make sure your Flask template includes this)
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+                
+                fetch('send-verification', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        statusMessage.textContent = 'Verification email sent successfully!';
+                        statusMessage.className = 'status-message success';
+                    } else {
+                        statusMessage.textContent = data.message || 'Error sending verification email';
+                        statusMessage.className = 'status-message error';
+                    }
+                    statusMessage.style.display = 'block';
+                    
+                    // Re-enable button after 30 seconds
+                    setTimeout(() => {
+                        resendBtn.disabled = false;
+                        resendBtn.textContent = 'Resend Verification Email';
+                    }, 30000);
+                })
+                .catch(error => {
+                    statusMessage.textContent = 'Network error. Please try again later.';
+                    statusMessage.className = 'status-message error';
+                    statusMessage.style.display = 'block';
+                    resendBtn.disabled = false;
+                    resendBtn.textContent = 'Resend Verification Email';
+                });
+            });
+        });
+    </script>
+ 
+</body>
+</html>

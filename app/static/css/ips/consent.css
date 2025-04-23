@@ -1,0 +1,98 @@
+/* Consent Modal Styles */
+.consent-modal {
+    position: fixed;
+    bottom: -100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    transition: bottom 0.3s ease-out;
+    z-index: 9999;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.consent-modal.visible {
+    bottom: 0;
+}
+
+.consent-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.consent-text {
+    flex: 1;
+    min-width: 300px;
+}
+
+.consent-title {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.consent-message {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #666;
+    line-height: 1.5;
+}
+
+.consent-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-shrink: 0;
+}
+
+.consent-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    font-size: 0.9rem;
+    min-width: 120px;
+}
+
+.accept-btn {
+    background: #4CAF50;
+    color: white;
+}
+
+.decline-btn {
+    background: transparent;
+    color: #666;
+    border: 1px solid #ddd;
+}
+
+.accept-btn:hover {
+    background: #3e8e41;
+}
+
+.decline-btn:hover {
+    background: #f5f5f5;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .consent-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .consent-buttons {
+        width: 100%;
+    }
+    
+    .consent-btn {
+        flex: 1;
+    }
+}

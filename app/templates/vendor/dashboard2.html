@@ -67,8 +67,10 @@
                 <i class="fas fa-chart-line"></i>
             </div>
             <div class="metric-details">
+                <p class="metric-label">Weekly Revenue</p>
+                <p class="metric-value">Ksh{{ "%.2f"|format(data.total_revenue) }}</p>
                 <p class="metric-label">Total Revenue</p>
-                <p class="metric-value">${{ "%.2f"|format(data.total_revenue) }}</p>
+                <p class="metric-value">Ksh{{ "%.2f"|format(data.account_balance) }}</p>
             </div>
         </div>
 

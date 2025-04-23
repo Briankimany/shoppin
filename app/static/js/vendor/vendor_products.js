@@ -36,3 +36,51 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+// Delete Product Function
+function deleteProduct(productId) {
+    const modal = document.getElementById('deleteModal');
+    const toast = document.getElementById('notificationToast');
+    
+    // Show modal
+    modal.style.display = 'flex';
+  
+    // Set up confirm button
+    modal.querySelector('.btn-confirm').onclick = async () => {
+      try {
+        
+      
+        const csrfToken = getCsrfToken();
+        console.log("the csrf token is "+csrfToken);
+        const response = await fetch(`/vendor/delete_product/${productId}`, {
+          method: 'DELETE',
+          headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
+        });
+  
+        if (response.ok) {
+          showNotification('Product deleted successfully!', 'success');
+          // Remove the table row
+          document.querySelector(`tr[data-product-id="${productId}"]`)?.remove();
+        } else {
+          throw new Error('Deletion failed');
+        }
+      } catch (error) {
+        showNotification('Error: ' + error.message, 'error');
+      } finally {
+        modal.style.display = 'none';
+      }
+    };
+  
+    // Set up cancel button
+    modal.querySelector('.btn-cancel').onclick = () => {
+      modal.style.display = 'none';
+    };
+  }
+  
+ 
+
+
+

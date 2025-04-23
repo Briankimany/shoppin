@@ -21,26 +21,27 @@ document.addEventListener("DOMContentLoaded", function() {
         document.querySelectorAll(".quantity-input").forEach(input => {
             quantities[input.dataset.productId] = input.value;
         });
+        disableButtonWithSpinner(this);
         
         fetch("/shop/update_cart", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-               
-            },
+            headers:getHeaders(),
             body: JSON.stringify({ quantities })
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 location.reload();
+                showAlert("Cart updated",'success');
             } else {
-                alert("Failed to update cart: " + (data.message || "Please try again"));
+                showAlert("Failed to update cart: " + (data.message || "Please try again") ,'error');
             }
         })
         .catch(error => {
             console.error("Error:", error);
-            alert("An error occurred while updating your cart");
+            showAlert("An error occurred while updating your cart",'error');
+        }).finally(() => {
+            enableButton(this); 
         });
     });
     
@@ -54,42 +55,26 @@ document.addEventListener("DOMContentLoaded", function() {
             cartItem.style.opacity = "0.5";
             this.disabled = true;
             
-            fetch("/cart/remove", {
+            disableButtonWithSpinner(this);
+            fetch("cart/remove", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                 
-                },
+                headers: getHeaders(),
                 body: JSON.stringify({ product_id: productId })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    cartItem.style.transition = "all 0.3s ease";
-                    cartItem.style.height = cartItem.offsetHeight + "px";
-                    cartItem.offsetHeight; // Trigger reflow
-                    cartItem.style.margin = "0";
-                    cartItem.style.padding = "0";
-                    cartItem.style.height = "0";
-                    cartItem.style.opacity = "0";
-                    
-                    setTimeout(() => {
-                        cartItem.remove();
-                        if (!document.querySelector(".cart-item")) {
-                            location.reload();
-                        }
-                    }, 300);
+                    location.reload();
+                    showAlert("Item removed ",'success')
                 } else {
-                    alert("Failed to remove item: " + (data.message || "Please try again"));
-                    cartItem.style.opacity = "1";
-                    button.disabled = false;
+                    showAlert("Failed to remove item: " + (data.message || "Please try again"),'warning');
                 }
             })
             .catch(error => {
                 console.error("Error:", error);
-                alert("An error occurred while removing the item");
-                cartItem.style.opacity = "1";
-                button.disabled = false;
+                showAlert("An error occurred while removing the item",'error');
+            }).finally(() => {
+                enableButton(this); 
             });
         });
     });

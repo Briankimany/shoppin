@@ -1,9 +1,12 @@
 
-
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('registerForm');
+    const loginForm = document.getElementById('registerForm');
     const togglePassword = document.querySelector('.toggle-password');
     const passwordInput = document.getElementById('password');
+    const identifierInput = document.getElementById('identifier');
+    const identifierError = document.getElementById('identifier-error');
+    const passwordError = document.getElementById('password-error');
+
     const strengthBar = document.getElementById('strength-bar');
     const strengthText = document.getElementById('strength-text');
     const requirements = {
@@ -13,19 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
         special: document.getElementById('special-req')
     };
 
-    // Toggle password visibility
-    togglePassword.addEventListener('click', function() {
-        const icon = this.querySelector('i');
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            icon.classList.replace('fa-eye', 'fa-eye-slash');
-        } else {
-            passwordInput.type = 'password';
-            icon.classList.replace('fa-eye-slash', 'fa-eye');
-        }
-    });
 
-    // Password strength checker
     passwordInput.addEventListener('input', function() {
         const password = this.value;
         let strength = 0;
@@ -68,65 +59,80 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Form validation
-    form.addEventListener('submit', function(e) {
+    // Toggle password visibility (unchanged)
+    togglePassword.addEventListener('click', function() {
+        const icon = this.querySelector('i');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    });
+
+    // New fetch-based form submission
+    loginForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+       
+        
+        try {
+            const formData = new FormData(loginForm);
+            const response = await fetch(loginForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: getHeaders(false),
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                showAlert(error.data ,error.message ,3500);
+            }
+            const data = await response.json();
+            showAlert(data.data,data.message ,5000)
+           
+            if (data.url){
+                window.location.href = data.url;
+            }
+           
+        
+        } catch (error) {
+            showAlert("Error "+error, type='error' ,duration = 3500);
+            console.error('Login error:', error);
+        }
+    });
+
+    // Extracted validation function
+    function validateForm() {
         let isValid = true;
         
-        // Validate username
-        const nameInput = document.getElementById('name');
-        if (!nameInput.value.trim()) {
-            showError(nameInput, 'name-error', 'Please enter a username');
-            isValid = false;
-        } else if (nameInput.value.length < 3) {
-            showError(nameInput, 'name-error', 'Username must be at least 3 characters');
-            isValid = false;
-        }
-        
-        // Validate email
-        const emailInput = document.getElementById('email');
-        if (!emailInput.value.trim()) {
-            showError(emailInput, 'email-error', 'Please enter an email address');
-            isValid = false;
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
-            showError(emailInput, 'email-error', 'Please enter a valid email address');
-            isValid = false;
-        }
-        
+   
         // Validate password
         if (!passwordInput.value.trim()) {
-            showError(passwordInput, 'password-error', 'Please enter a password');
-            isValid = false;
-        } else if (passwordInput.value.length < 8) {
-            showError(passwordInput, 'password-error', 'Password must be at least 8 characters');
+            passwordInput.classList.add('input-error', 'shake');
+            passwordError.style.display = 'block';
             isValid = false;
         }
-        
-        if (!isValid) {
-            e.preventDefault();
-        }
-    });
-
-    // Clear errors when typing
-    document.querySelectorAll('.form-control').forEach(input => {
-        input.addEventListener('input', function() {
-            const errorId = this.id + '-error';
-            const errorElement = document.getElementById(errorId);
-            if (errorElement) {
-                this.classList.remove('is-invalid', 'shake');
-                errorElement.style.display = 'none';
-            }
-        });
-    });
-
-    function showError(input, errorId, message) {
-        input.classList.add('is-invalid', 'shake');
-        const errorElement = document.getElementById(errorId);
-        errorElement.textContent = message;
-        errorElement.style.display = 'block';
         
         // Remove shake animation after it completes
-        input.addEventListener('animationend', () => {
-            input.classList.remove('shake');
-        }, { once: true });
+        [identifierInput, passwordInput].forEach(input => {
+            input.addEventListener('animationend', () => {
+                input.classList.remove('shake');
+            }, { once: true });
+        });
+        
+        return isValid;
+    }
+
+    // Clear errors when typing (unchanged)
+    identifierInput.addEventListener('input', clearError.bind(null, identifierInput, identifierError));
+    passwordInput.addEventListener('input', clearError.bind(null, passwordInput, passwordError));
+    
+    function clearError(input, errorElement) {
+        if (input.value.trim()) {
+            input.classList.remove('input-error');
+            errorElement.style.display = 'none';
+        }
     }
 });

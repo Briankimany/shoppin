@@ -3,10 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="ip-updated" content='{{ip_updated}}'>
+  
     <title>{% block title %}Playpit Shop{% endblock %}</title>
     
     <script src="{{ url_for('static', filename='js/shop/base.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/user-ips/user_ips.js') }}"></script>
+   
     <link rel="stylesheet" href="{{ url_for('static', filename='css/shop/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ips/consent.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/user_notification.css') }}">
 
     {% block styles %}{% endblock %}
     {% block scripts %}{% endblock %}
@@ -14,7 +22,9 @@
 
 </head>
 <body>
-   
+    <div id="alert-container" class="alert-container"></div>
+    
+
     <div class="main-content">
     <header>
         <div class="nav-container">

@@ -8,46 +8,61 @@
 <script src="{{ url_for('static', filename='js/vendor/edit_product.js') }}"></script>
 {% endblock %}
 
-
-
 {% block content %}
 <div class="edit-product-container">
     <h1>Edit Product: {{ product.name }}</h1>
+    <div hidden data-product-id="{{ product.id }}"></div>
+
 
     <div class="edit-form-wrapper">
-        <form id="productForm" method="post" class="edit-product-form" enctype="multipart/form-data"  action="/vendor//edit_product/{{ product.id }}">
+        <form id="productForm" class="edit-product-form" enctype="multipart/form-data">
+       
             <!-- Product Name -->
-            <label for="name">Product Name</label>
-            <input type="text" id="name" name="name" value="{{ product.name }}" required>
+            <div class="form-group">
+                <label for="name">Product Name</label>
+                <input type="text" id="name" name="name" value="{{ product.name }}" required>
+            </div>
 
             <!-- Description -->
-            <label for="description">Description</label>
-            <textarea id="description" name="description">{{ product.description }}</textarea>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description">{{ product.description }}</textarea>
+            </div>
 
             <!-- Price -->
-            <label for="price">Price ($)</label>
-            <input type="number" id="price" name="price" step="0.01" value="{{ product.price }}" required>
+            <div class="form-group">
+                <label for="price">Price (Ksh)</label>
+                <input type="number" id="price" name="price" step="1" value="{{ product.price }}" required>
+            </div>
 
             <!-- Stock -->
-            <label for="stock">Stock</label>
-            <input type="number" id="stock" name="stock" value="{{ product.stock }}" required>
+            <div class="form-group">
+                <label for="stock">Stock</label>
+                <input type="number" id="stock" name="stock" value="{{ product.stock }}" required>
+            </div>
 
             <!-- Category -->
-            <label for="category">Category</label>
-            <input type="text" id="category" name="category" value="{{ product.category }}">
+            <div class="form-group">
+                <label for="category">Category</label>
+                <input type="text" id="category" name="category" value="{{ product.category }}">
+            </div>
 
             <!-- Image URL Field -->
-            <label for="image_url">Image URL</label>
-            <input type="text" id="image_url" name="image_url" value="{{ product.image_url }}">
+            <div class="form-group">
+                <label for="image_url">Image URL</label>
+                <input type="text" id="image_url" name="image_url" value="{{ product.image_url }}">
+            </div>
 
             <!-- Image Upload -->
-            <label for="image_upload">Or Upload Image:</label>
-            <input type="file" id="image_upload" name="image_upload" accept="image/*">
+            <div class="form-group">
+                <label for="image_upload">Or Upload Image:</label>
+                <input type="file" id="image_upload" name="image_upload" accept="image/*">
+            </div>
             
             <!-- Image Preview -->
-            <div id="image_preview" style="margin-top: 10px;">
+            <div id="image_preview" class="image-preview">
                 {% if product.image_url %}
-                <img src="{{ product.image_url }}" style="max-width: 200px;">
+                <img src="{{ product.image_url }}" alt="Current product image">
                 {% endif %}
             </div>
 

@@ -35,7 +35,7 @@
             <span class="stock-status out-of-stock">Out of Stock</span>
         {% endif %}
 
-        <div class="product-price">${{ "%.2f"|format(product.price) }}</div>
+        <div class="product-price">Ksh{{ "%.2f"|format(product.price) }}</div>
 
         <div class="product-meta">
             <p><strong>Category:</strong> {{ product.category if product.category else "Uncategorized" }}</p>

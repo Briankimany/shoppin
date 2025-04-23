@@ -50,22 +50,22 @@
                 <h3>Request Withdrawal</h3>
             </div>
             <div class="card-content">
-                <form method="POST" id="withdrawal-form">  <!-- Added ID -->
+                <form method="POST" id="withdrawal-form"> 
            
                     <div class="form-group">
                         <label for="amount">Withdrawal Amount (Ksh)</label>
                         <div class="input-group">
-                            <span class="input-prefix">$</span>
+                            <span class="input-prefix">Ksh</span>
                             <input type="number" 
                                    id="amount" 
                                    name="amount" 
-                                   min="10" 
+                                   min="50" 
                                    max="{{ vendor_balance.available }}" 
-                                   step="0.01" 
-                                   placeholder="0.00"
+                                   step="10" 
+                                   placeholder="100"
                                    required>
                         </div>
-                        <small class="form-note">Minimum withdrawal: Ksh 100.00</small>
+                        <small class="form-note">Minimum withdrawal: Ksh 50.00</small>
                     </div>
 
                     <div class="form-group">

@@ -8,8 +8,10 @@
 {% endblock %}
 
 {% block content %}
+
 <div class="wide-form-container">
     <h2>Edit Vendor Details</h2>
+   
     <form id="vendorForm" class="spread-form">
         <!-- First Row -->
         <div class="form-row">
@@ -86,9 +88,10 @@
             <div class="form-field wide">
                 <label for="store_description">Store Description</label>
                 <textarea id="store_description" name="store_description" rows="5">{% if data.get("store_description") %}{{ data.get("store_description") }}{% endif %}</textarea>
+             
             </div>
         </div>
-
+        
         <!-- Submit Button -->
         <div class="form-actions">
             <button id="submit-btn" type="button" onclick="uploadImageThenSubmit()" class="btn-submit">

@@ -102,51 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 document.getElementById('save-all-btn').addEventListener('click', async function() {
   
-    function showAlert(message, type = 'success') {
-        const alertContainer = document.getElementById('alert-container');
-        const alertId = Date.now();
-        
-        const alertEl = document.createElement('div');
-        alertEl.className = `alert ${type}`;
-        alertEl.id = `alert-${alertId}`;
-        
-        const icons = {
-            success: 'fa-circle-check',
-            error: 'fa-circle-exclamation',
-            warning: 'fa-triangle-exclamation'
-        };
-        
-        alertEl.innerHTML = `
-            <i class="fas ${icons[type] || 'fa-info-circle'} alert-icon"></i>
-            <div class="alert-message">${message}</div>
-            <button class="alert-close" onclick="dismissAlert('${alertId}')">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-        
-        alertContainer.appendChild(alertEl);
-        
-        // Trigger animation
-        setTimeout(() => {
-            alertEl.classList.add('show');
-        }, 10);
-        
-        // Auto-dismiss after 5 seconds
-        setTimeout(() => {
-            dismissAlert(alertId);
-        }, 5000);
-    }
-    
-    function dismissAlert(id) {
-        const alertEl = document.getElementById(`alert-${id}`);
-        if (alertEl) {
-            alertEl.classList.remove('show');
-            setTimeout(() => {
-                alertEl.remove();
-            }, 300);
-        }
-    }
-
+  
     const data = {
         name: document.getElementById('name-input').value,
         email: document.getElementById('email-input').value,
@@ -175,17 +131,15 @@ document.getElementById('save-all-btn').addEventListener('click', async function
         // Make POST request
         const response = await fetch('/user/edit-profile', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers:getHeaders(),
             body: JSON.stringify({ data: data })
         });
 
         if (!response.ok) throw new Error('Failed to save');
         
         // Success handling
-        showAlert('Changes saved successfully!' ,'success');
-        window.location.reload(); // Optional: refresh to show changes
+        showAlert('Changes saved successfully!' ,'success' ,3500);
+        
         
     } catch (error) {
         console.error('Error:', error);

@@ -34,36 +34,31 @@
         loadingContainer.style.display = "flex";
 
         // Make payment request
-        fetch("/shop/api-pay", {
+        fetch("api-pay", {
             method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
- 
-            },
+            headers: getHeaders(),
             body: JSON.stringify({ 
                 phone: phoneNumber, 
                 amount: amount 
             })
         })
         .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
             return response.json();
         })
         .then(data => {
             loadingContainer.style.display = "none";
 
+            showAlert(data.data , data.message);
             if (data.success || data.message === "success") {
                 statusMessage.textContent = "Payment successful! Redirecting...";
                 statusMessage.className = "status-message success";
                 statusMessage.style.display = "block";
-                
+
                 setTimeout(() => {
                     window.location.href = "/shop/";
                 }, 2000);
             } else {
-                statusMessage.textContent = data.message || "Payment processing failed";
+                statusMessage.textContent = data.data || "Payment processing failed";
                 statusMessage.className = "status-message error";
                 statusMessage.style.display = "block";
             }
