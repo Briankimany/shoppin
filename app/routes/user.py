@@ -229,6 +229,7 @@ def profile():
 
 
 @user_bp.route("/edit-profile" , methods = ["POST"])
+@bp_error_logger(LOG.USER_LOGGER)
 @meet_user_requirements
 @session_set
 def edit_profile():
@@ -253,8 +254,10 @@ def edit_profile():
 
     LOG.USER_LOGGER.info(f"data from edit -profile: {new_data}")
     user_obj.reload_object(user= int(session['user_id']))
-    user_obj.update_data(data = new_data)
-    return "Done" , 200
+
+    data_updated = user_obj.update_data(data = new_data)
+    return jsonify({"message":"success" if data_updated else "error" ,"data":"Completed edits"}) ,200 if data_updated else 400
+
 
 
 @user_bp.route("/orders")

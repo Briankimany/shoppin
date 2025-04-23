@@ -215,8 +215,8 @@ def edit_product(product_id):
 @session_set
 def delete_product(product_id):
     vendor = VendorObj(session["vendor_id"], db_session)
-    # vendor.remove_product(product_id ,session['vendor_id'])
-    LOG.VENDOR_LOGGER.info("Vendor {} deleting product {}".format(vendor.vendor_table ,product_id))
+    product_deactivated = vendor.remove_product(product_id ,session['vendor_id'])
+    LOG.VENDOR_LOGGER.info("Vendor {} deleting product {} Deactivated {}".format(vendor.vendor_table ,product_id ,product_deactivated))
     return jsonify({"message":True ,"Prodcut deleted":"done"})
 
 

@@ -8,6 +8,7 @@ from app.models.order import Order
 from app.models.order_item import OrderItem
 from app.models.product import Product
 from .vendor import VendorObj
+from .client_access_manager import session_scope
 
 class UserManager:
     def __init__(self , db_session:Session , user = None):
@@ -28,16 +29,6 @@ class UserManager:
         if token:
             self.session_tkn = token
         return self
-    
-    def update_details(self, data:dict):
-        if not self.user:
-            return "Invalid mode of operation"
-        for k , v in data.items():
-            if hasattr(self.user , k):
-                setattr(self.user ,k , v)
-            else:
-                print("INVALID USER INPUT PARAMS")
-        self.db_session.commit()
 
     def get_user(self, user):
         
@@ -77,15 +68,19 @@ class UserManager:
         return self.user
     
     def update_data(self , data):
-        for k , v in data.items():
-            LOG.USER_LOGGER.info(f" attribute {k}: {v} for user {self.user.name}")
-            if hasattr(self.user , k):
-                setattr(self.user , k , v)
-            else:
-                LOG.USER_LOGGER.info(f"invalid attribute {k}: {v} for user {self.user.name}")
-                return False
-        self.db_session.commit()
-        return True
+        
+        user_id = self.user.id
+        with session_scope(commit=False,logger=LOG.USER_LOGGER,func=self.update_data) as db_session:
+            user = self.get_user_(db_session=db_session,user=user_id)
+            for k , v in data.items():
+                LOG.USER_LOGGER.info(f" attribute {k}: {v} for user {self.user.name}")
+                if hasattr(user , k):
+                    setattr(user , k , v)
+                else:
+                    LOG.USER_LOGGER.info(f"invalid attribute {k}: {v} for user {self.user.name}")
+                    return False
+            db_session.commit()
+            return True
     
     def get_order_from_session_tkn(self , session_tkn:str , status='pending' , num_orders=3):
         if status == "pending":

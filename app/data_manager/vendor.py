@@ -598,6 +598,7 @@ class VendorObj:
             LOG.VENDOR_LOGGER.info("Deactivating product (id={} ,product={})".format(product_id,product))
             product.is_active = False
             db_session.commit()
+            return True
 
         
     

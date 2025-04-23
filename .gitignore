@@ -19,3 +19,4 @@ venv
 /migrations
 *.ini
 /md-files
+.venv2/
