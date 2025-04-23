@@ -53,7 +53,7 @@ async function submitVendorForm() {
     try {
         const response = await fetch("/vendor/update-details", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: getHeaders(),
             body: JSON.stringify({ data: formData })
         });
 
@@ -61,11 +61,11 @@ async function submitVendorForm() {
         console.log("data is "+data);
 
         if (data.error) {
-            showAlert("error","unable to process request");
+            showNotification("unable to process request","error");
             return;
         }
         
-        showAlert('Updated details');
+        showNotification('Updated details' ,'success');
         toggleButtonLoading(false);
         for (const field of fields) {
             if (data[field] !== undefined) {
@@ -74,7 +74,7 @@ async function submitVendorForm() {
         }
 
     } catch (error) {
-        console.error("Error:", error);
+       
         toggleButtonLoading(false);
     }
 }
@@ -110,7 +110,8 @@ function uploadImageThenSubmit() {
 
         fetch("/vendor/upload", {
             method: "POST",
-            body: formData
+            body: formData,
+            headers:getHeaders(false)
         })
         .then(response => response.json())
         .then(data => {
@@ -118,7 +119,7 @@ function uploadImageThenSubmit() {
                 urlInput.value = data.image_url; // Set uploaded image URL
                 submitVendorForm(); // Now call the existing function
             } else {
-                alert("Image upload failed.");
+                showNotification("Image upload failed.",'error');
             }
         })
         .catch(error => console.error("Upload error:", error));

@@ -23,7 +23,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         try {
             const limit = limitSelect.value;
-            const response = await fetch(`/vendor/orders?limit=${limit}`,{method:"POST"});
+            const response = await fetch(`/vendor/orders?limit=${limit}`,
+                {method:"POST",
+                 headers :getHeaders()
+                });
             const data = await response.json();
             
             if (response.ok) {
@@ -218,7 +221,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function exportToCSV() {
         if (ordersData.length === 0) {
-            alert('No orders to export');
+            showNotification('No orders to export' ,'error');
             return;
         }
         
@@ -244,7 +247,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
         } catch (error) {
             console.error('Error exporting CSV:', error);
-            alert('Failed to export CSV: ' + error.message);
+            showNotification('Failed to export CSV: ' + error.message ,'error');
         }
     }
 });

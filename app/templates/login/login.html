@@ -3,16 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Login </title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     
     <link rel="stylesheet" href="{{ url_for('static', filename='css/login/login.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ips/consent.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/user_notification.css') }}">
+
+    <script src="{{ url_for('static', filename='js/shop/base.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/user-ips/user_ips.js') }}"></script>
     <script src="{{ url_for('static', filename='js/login/login.js') }}"></script>
 
 </head>
 <body>
+    <div id="alert-container" class="alert-container"></div>
+
     <div class="login-container">
         <div class="login-header">
             <div class="login-logo">
@@ -69,19 +77,6 @@
                 Sign In
             </button>
         </form>
-
-        <div class="divider">OR</div>
-
-        <div class="social-login">
-            <button type="button" class="social-button">
-                <i class="fab fa-google" style="color: #DB4437;"></i>
-                Continue with Google
-            </button>
-            <button type="button" class="social-button">
-                <i class="fab fa-facebook-f" style="color: #1877F2;"></i>
-                Continue with Facebook
-            </button>
-        </div>
 
         <div class="login-footer">
             Don't have an account? 

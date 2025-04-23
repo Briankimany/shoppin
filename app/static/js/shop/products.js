@@ -67,19 +67,19 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
     
-    // Add to Cart Functionality
+
+ 
     document.querySelectorAll('.add-to-cart-btn').forEach(button => {
         button.addEventListener('click', function(e) {
-            e.stopPropagation(); // Prevent link navigation
+            e.stopPropagation();
             const productId = this.getAttribute('data-product-id');
             const quantityInput = document.getElementById(`quantity-${productId}`);
             const quantity = quantityInput.value;
             
+            disableButtonWithSpinner(this);
             fetch("/shop/add_to_cart", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers:getHeaders(),
                 body: JSON.stringify({
                     product_id: productId,
                     quantity: quantity
@@ -88,33 +88,21 @@ document.addEventListener("DOMContentLoaded", function() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showNotification("Added to cart successfully!");
+                    showAlert("Added to cart successfully!");
                 } else {
-                    showNotification("Failed to add to cart: " + data.error, false);
+                    showAlert("Failed to add to cart: " + data.error, 'error');
                 }
             })
             .catch(error => {
-                console.error("Error:", error);
-                showNotification("An error occurred", false);
+                showAlert("An error occurred " , 'error');
+            })
+            .finally(() => {
+                enableButton(this); 
             });
+           
         });
     });
     
-    // Cart Notification
-    function showNotification(message, isSuccess = true) {
-        const notification = document.getElementById('cart-notification');
-        const messageEl = document.getElementById('notification-message');
-        
-        messageEl.textContent = message;
-        notification.style.backgroundColor = isSuccess ? 'var(--success-color)' : 'var(--error-color)';
-        notification.classList.add('show');
-        
-        setTimeout(() => {
-            notification.classList.remove('show');
-        }, 3000);
-    }
-    
-    // Make sure buttons and inputs remain clickable
     document.querySelectorAll('.quantity-input, .qty-btn, .add-to-cart-btn').forEach(el => {
         el.style.zIndex = '3';
         el.style.position = 'relative';

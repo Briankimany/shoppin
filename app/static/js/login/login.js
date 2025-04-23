@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', function() {
     const loginForm = document.getElementById('loginForm');
     const togglePassword = document.querySelector('.toggle-password');
@@ -7,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const identifierError = document.getElementById('identifier-error');
     const passwordError = document.getElementById('password-error');
 
-    // Toggle password visibility
+    // Toggle password visibility (unchanged)
     togglePassword.addEventListener('click', function() {
         const icon = this.querySelector('i');
         if (passwordInput.type === 'password') {
@@ -19,57 +18,71 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Form validation
-    loginForm.addEventListener('submit', function(e) {
+    // New fetch-based form submission
+    loginForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        if (!validateForm()) return;
+        
+        try {
+            const formData = new FormData(loginForm);
+            const response = await fetch(loginForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: getHeaders(false),
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                showAlert(error.data ,error.message ,3500);
+            }
+            const data = await response.json();
+            showAlert(data.data,data.message ,3000)
+           
+            window.location.href = data.url;
+        
+        } catch (error) {
+            showAlert("Error "+error, type='error' ,duration = 3500);
+            console.error('Login error:', error);
+        }
+    });
+
+    // Extracted validation function
+    function validateForm() {
         let isValid = true;
         
         // Validate identifier
         if (!identifierInput.value.trim()) {
-            identifierInput.classList.add('input-error');
+            identifierInput.classList.add('input-error', 'shake');
             identifierError.style.display = 'block';
-            identifierInput.classList.add('shake');
             isValid = false;
-        } else {
-            identifierInput.classList.remove('input-error');
-            identifierError.style.display = 'none';
         }
         
         // Validate password
         if (!passwordInput.value.trim()) {
-            passwordInput.classList.add('input-error');
+            passwordInput.classList.add('input-error', 'shake');
             passwordError.style.display = 'block';
-            passwordInput.classList.add('shake');
             isValid = false;
-        } else {
-            passwordInput.classList.remove('input-error');
-            passwordError.style.display = 'none';
         }
         
         // Remove shake animation after it completes
-        const inputs = [identifierInput, passwordInput];
-        inputs.forEach(input => {
+        [identifierInput, passwordInput].forEach(input => {
             input.addEventListener('animationend', () => {
                 input.classList.remove('shake');
             }, { once: true });
         });
         
-        if (!isValid) {
-            e.preventDefault();
-        }
-    });
+        return isValid;
+    }
 
-    // Clear errors when typing
-    identifierInput.addEventListener('input', function() {
-        if (this.value.trim()) {
-            this.classList.remove('input-error');
-            identifierError.style.display = 'none';
-        }
-    });
+    // Clear errors when typing (unchanged)
+    identifierInput.addEventListener('input', clearError.bind(null, identifierInput, identifierError));
+    passwordInput.addEventListener('input', clearError.bind(null, passwordInput, passwordError));
     
-    passwordInput.addEventListener('input', function() {
-        if (this.value.trim()) {
-            this.classList.remove('input-error');
-            passwordError.style.display = 'none';
+    function clearError(input, errorElement) {
+        if (input.value.trim()) {
+            input.classList.remove('input-error');
+            errorElement.style.display = 'none';
         }
-    });
+    }
 });

@@ -37,7 +37,11 @@ document.addEventListener('DOMContentLoaded', function() {
         container.innerHTML = '<div class="spinner"></div>';
 
         try {
-            const response = await fetch('/vendor/payouts',{method:"POST"});
+            const response = await fetch('/vendor/payouts',
+                {
+                method:"POST",
+                headers :getHeaders()
+                });
             const data = await response.json();
 
             if (!data.withdrawals.length) {
@@ -81,7 +85,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const container = document.querySelector('.card-content');
         try {
             container.setAttribute('data-loading', 'true');
-            const response = await fetch('/vendor/payouts',{method:"POST"});
+            const response = await fetch('/vendor/payouts',
+                {method:"POST",
+                headers:getHeaders()
+            });
             const data = await response.json();
             
             document.getElementById('available-balance').textContent = `Ksh${data.balance.available.toFixed(2)}`;
@@ -120,26 +127,30 @@ document.addEventListener('DOMContentLoaded', function() {
         if (form) {
             form.addEventListener('submit', async function(e) {
                 e.preventDefault();
-                const notification = createNotification();
                 
                 try {
                     toggleFormLoading(true);
+                    showNotification("withdrawing ",'success');
                     const response = await fetch("/vendor/process-pay", {
                         method: "POST",
-                        body: new FormData(form),
-                        headers: { 'Accept': 'application/json' }
+                        body: JSON.stringify(Object.fromEntries(new FormData(form))),
+                        headers: getHeaders(),
+                   
                     });
                     
                     const result = await response.json();
-                    showNotification(notification, result.message, response.ok ? "success" : "error");
+                    showNotification(result.message, response.ok ? "success" : "error");
                     
                     if (response.ok) {
                         form.reset();
                         fetchAndUpdateBalances();
                         pollWithdrawalStatus(result.withdraw_id);
                     }
+                    else{
+                        showNotification(result.message ,'error')
+                    }
                 } catch (error) {
-                    showNotification(notification, "Network error", "error");
+                    showNotification("Network error", "error");
                 } finally {
                     toggleFormLoading(false);
                 }
@@ -167,16 +178,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function pollWithdrawalStatus(id, maxAttempts = 2) {
         let attempts = 0;
-        const interval = setInterval(async () => {
+        const interval = setInterval( () => {
             if (attempts++ >= maxAttempts) {
                 clearInterval(interval);
                 return;
             }
 
             try {
-                const response = await fetch(`/vendor/withdrawal-status/${id}`);
+                const response =  fetch('/vendor/withdrawal-status',{
+                    method:"POST",
+                    headers:getHeaders(),
+                    body:JSON.stringify({id:id})
+                });
 
-                const data = await response.json();
+                const data =  response.json();
                 console.log("the status respponse from checking vendor withdraw status "+data);
                 
                 if (data.status === "completed") {
@@ -195,20 +210,6 @@ document.addEventListener('DOMContentLoaded', function() {
         div.className = 'error-message';
         input.parentNode.appendChild(div);
         return div;
-    }
-
-    function createNotification() {
-        const div = document.createElement("div");
-        div.className = "withdrawal-notification";
-        document.body.appendChild(div);
-        return div;
-    }
-    
-    function showNotification(element, message, type) {
-        element.textContent = message;
-        element.style.display = "block";
-        element.style.backgroundColor = type === "success" ? "#4CAF50" : "#f44336";
-        setTimeout(() => element.style.display = "none", 5000);
     }
 
     function toggleFormLoading(loading) {
@@ -231,8 +232,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function updatePreviousWithdrawals() {
    
-
-    const response = await fetch('/vendor/pending-withdraws', { method: "POST" });
+    const response = await fetch('/vendor/pending-withdraws', { method: "POST", 
+        headers:getHeaders()
+    });
     const data = await response.json(); 
     const ids = data.ids; 
     if (!response.ok) {

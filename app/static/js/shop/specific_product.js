@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", function() {
             
             // Validate quantity
             if (quantity < 1 || quantity > maxQuantity) {
-                alert(`Please enter a quantity between 1 and ${maxQuantity}`);
+                showAlert(`Please enter a quantity between 1 and ${maxQuantity}`,'warning');
                 quantityInput.focus();
                 return;
             }
@@ -27,10 +27,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
             fetch("/shop/add_to_cart", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Requested-With": "XMLHttpRequest"
-                },
+                headers: getHeaders(),
                 body: JSON.stringify({
                     product_id: productId,
                     quantity: quantity
@@ -39,28 +36,14 @@ document.addEventListener("DOMContentLoaded", function() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    const messageDiv = document.getElementById("cart-message");
-                    messageDiv.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                        </svg>
-                        Added to cart successfully!
-                    `;
-                    messageDiv.style.display = "flex";
-                    messageDiv.style.alignItems = "center";
-                    messageDiv.style.gap = "0.5rem";
-                    
-                    setTimeout(() => {
-                        messageDiv.style.display = "none";
-                    }, 3000);
+                    showAlert("added to cart",'success',3000);
                 } else {
-                    alert("Failed to add to cart: " + (data.error || "Please try again"));
+                    showAlert("Failed to add to cart: " + (data.error || "Please try again"),'warning',3000);
                 }
             })
             .catch(error => {
                 console.error("Error:", error);
-                alert("An error occurred. Please try again.");
+                showAlert(error,'error');
             })
             .finally(() => {
                 button.disabled = false;
@@ -92,15 +75,3 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 
-// Simple spinner animation
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-    .animate-spin {
-        animation: spin 1s linear infinite;
-    }
-`;
-document.head.appendChild(style);

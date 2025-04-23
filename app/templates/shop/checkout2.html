@@ -31,7 +31,7 @@
                                         <span class="product-name">{{ item["name"] }}</span>
                                     </td>
                                     <td class="qty-cell">{{ item["quantity"] }}</td>
-                                    <td class="price-cell">${{ "%.2f"|format(item["price"]) }}</td>
+                                    <td class="price-cell">Ksh{{ "%.2f"|format(item["price"]) }}</td>
                                     <td class="action-cell">
                                         <a href="{{ url_for('shop.specific_product', product_id=item['product_id']) }}" 
                                            class="modify-btn"
@@ -47,7 +47,7 @@
             <tfoot>
                 <tr class="total-row">
                     <td colspan="3" class="total-label">Total:</td>
-                    <td colspan="2" class="total-amount">${{ "%.2f"|format(cart_summary["TotalCost"]) }}</td>
+                    <td colspan="2" class="total-amount">Ksh{{ "%.2f"|format(cart_summary["TotalCost"]) }}</td>
                 </tr>
             </tfoot>
         </table>

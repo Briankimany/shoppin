@@ -1,0 +1,63 @@
+
+{% extends "mail/base.html" %}
+
+{% block styles %}
+<style>
+    .activation-box {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 25px;
+        background: #ffffff;
+        border-radius: 8px;
+        text-align: center;
+    }
+    
+    h1 {
+        color: #2c3e50;
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+    
+    p {
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+    
+    .activation-button {
+        display: inline-block;
+        padding: 12px 30px;
+        background: #3498db;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: bold;
+        margin: 15px 0;
+    }
+    
+    .countdown {
+        color: #e74c3c;
+        font-weight: bold;
+    }
+    
+    .small-text {
+        font-size: 12px;
+        color: #95a5a6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="activation-box">
+    <h1>Activate Your Account</h1>
+    
+    <p>Welcome! Please click the button below to activate your account. This link will expire in <span class="countdown">{{ expiration_hours }} hours</span>.</p>
+    
+    <a href="{{ activation_link }}" class="activation-button">Activate Account</a>
+    
+    <p class="small-text">If you didn't request this account, you can safely ignore this email.</p>
+    
+    <p>Having trouble? Copy this link into your browser:<br>
+    <small>{{ activation_link }}</small></p>
+</div>
+{% endblock %}

@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", function() {
         try {
             // Fetch order details
             const response = await fetch(`/user/orders/${orderId}/items`);
-            if (!response.ok) throw new Error('Failed to fetch order details');
+            if (!response.ok) showAlert('Failed to fetch order details' ,'error' , 5000);
             
             const data = await response.json();
             

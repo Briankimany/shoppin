@@ -1,0 +1,47 @@
+
+{% extends "vendor/base2.html" %}
+
+{% block styles %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/errors.css') }}">
+{% endblock %}
+
+{% block title %}Security Verification Failed{% endblock %}
+
+{% block content %}
+<div class="error-container">
+  <div class="error-card">
+    <div class="error-icon">
+      <i class="fas fa-shield-alt"></i>
+    </div>
+    <h1>Security Verification Failed</h1>
+    <p class="error-description">
+      We couldn't verify your request. This is usually caused by:
+    </p>
+    <ul class="error-reasons">
+      <li>Your session expired</li>
+      <li>You submitted a form from another website</li>
+      <li>You left the page open for too long</li>
+    </ul>
+
+    <div class="error-details">
+      <h3>Technical Details:</h3>
+      <div class="detail-box">
+        <p><strong>Error Type:</strong> CSRF Validation Failure</p>
+        {% if error.description %}
+        <p><strong>Message:</strong> {{ error.description }}</p>
+        {% endif %}
+        <p><small>Request ID: {{ request.id if request.id else 'N/A' }}</small></p>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <a href="{{ url_for('vendor.dashboard') }}" class="btn btn-primary">
+        <i class="fas fa-home"></i> Return to Dashboard
+      </a>
+      <button onclick="window.location.reload()" class="btn btn-secondary">
+        <i class="fas fa-sync-alt"></i> Try Again
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %}

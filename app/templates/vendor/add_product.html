@@ -1,6 +1,5 @@
 {% extends "vendor/base2.html" %}
 
-
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/vendor/add_product.css') }}">
 {% endblock %}
@@ -8,7 +7,6 @@
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/vendor/add_product.js') }}"></script>
 {% endblock %}
-
 
 {% block content %}
 <div class="add-product-container">
@@ -19,70 +17,81 @@
             <!-- Product Name -->
             <div class="form-group">
                 <label for="name">Product Name</label>
-                <input type="text" id="name" name="name" placeholder="Enter product name" required>
+                <input type="text" id="name" name="name" class="form-control" placeholder="Enter product name" required>
             </div>
 
-            <!-- Enhanced Category Selection -->
+            <!-- Category Selection -->
             <div class="form-group">
                 <label for="category">Category</label>
                 <div class="category-selector">
-                    <select id="category" name="category" class="filter-select" required>
+                    <select id="category" name="category" class="form-control" required>
                         <option value="" disabled selected>Select a category...</option>
                         {% for category in categories %}
                             <option value="{{ category }}">{{ category }}</option>
                         {% endfor %}
                         <option value="__new__">＋ Create New Category</option>
                     </select>
-                    <div id="newCategoryWrapper" class="new-category-wrapper">
+                    <div id="newCategoryWrapper" class="new-category-wrapper" style="display:none;">
                         <input type="text" id="newCategoryInput" name="new_category" 
-                               placeholder="New category name" class="category-input" 
-                               pattern=".{2,}" title="Category name must be at least 2 characters">
+                               class="form-control" placeholder="New category name">
                     </div>
                 </div>
             </div>
 
-            <!-- Product Description -->
-            <div class="form-group full-width">
+            <!-- Description -->
+            <div class="form-group">
                 <label for="description">Description</label>
-                <textarea id="description" name="description" placeholder="Product description"></textarea>
+                <textarea id="description" name="description" class="form-control" placeholder="Product description"></textarea>
             </div>
 
-            <!-- Pricing and Stock -->
+            <!-- Add this right before your submit button -->
             <div class="form-group">
-                <label for="price">Price ($)</label>
-                <input type="number" id="price" name="price" min="0" step="0.01" placeholder="0.00" required>
+                <label for="product_type">Product Type</label>
+                <select id="product_type" name="product_type" class="form-control">
+                    <option value="0" selected>Physical Product</option>
+                    <option value="1">Service</option>
+                </select>
             </div>
+        <!-- Price and Stock -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="price">Price (Ksh)</label>
+                    <input type="number" id="price" name="price" class="form-control" min="0" step="0.01" placeholder="0.00" required>
+                </div>
 
-            <div class="form-group">
-                <label for="stock">Stock</label>
-                <input type="number" id="stock" name="stock" min="0" placeholder="0" required>
-            </div>
-
-            <!-- Media Handling -->
-            <div class="form-group">
-                <label for="image_url">Image URL</label>
-                <input type="url" id="image_url" name="image_url" placeholder="https://example.com/image.jpg">
-            </div>
-
-            <div class="form-group">
-                <label for="image_upload">Or Upload Image:</label>
-                <div class="file-upload-wrapper">
-                    <input type="file" id="image_upload" name="image_upload" accept="image/*">
-                    <div id="image_preview" class="image-preview"></div>
+                <div class="form-group">
+                    <label for="stock">Stock</label>
+                    <input type="number" id="stock" name="stock" class="form-control" min="0" placeholder="0" required>
                 </div>
             </div>
 
+            <!-- Image URL -->
+            <div class="form-group">
+                <label for="image_url">Image URL</label>
+                <input type="url" id="image_url" name="image_url" class="form-control" placeholder="https://example.com/image.jpg">
+            </div>
+
+            <!-- Image Upload -->
+            <div class="form-group">
+                <label for="image_upload">Or Upload Image:</label>
+                <input type="file" id="image_upload" name="image_upload" class="form-control" accept="image/*">
+                <div id="image_preview" class="image-preview"></div>
+            </div>
+
+            <!-- Preview URL -->
             <div class="form-group">
                 <label for="preview_url">Preview URL</label>
-                <input type="url" id="preview_url" name="preview_url" placeholder="https://example.com/preview.jpg">
+                <input type="url" id="preview_url" name="preview_url" class="form-control" placeholder="https://example.com/preview.jpg">
             </div>
 
-            <!-- Form Submission -->
-            <div class="form-group full-width form-actions">
-                <button type="submit" class="add-button">Add Product</button>
+            <!-- Submit Button -->
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Add Product</button>
             </div>
         </form>
+        <button onclick="fillDummyData()" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; padding: 10px; background: #4CAF50; color: white; border: none; border-radius: 4px;">
+            Fill Test Data
+        </button>
     </div>
 </div>
-
 {% endblock %}
