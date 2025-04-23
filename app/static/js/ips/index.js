@@ -1,5 +1,19 @@
 
 document.addEventListener('DOMContentLoaded', function() {
+
+    function getCsrfToken(){
+        return document.querySelector('meta[name="csrf-token"]').content;
+        }
+    function getHeaders(get_content_type=true){
+        if (!get_content_type){
+            return {'X-CSRFToken': getCsrfToken()}
+        }
+         return {
+            'X-CSRFToken': getCsrfToken(),
+            'Content-Type': 'application/json'
+          };
+    }
+
     // Elements
     const ipColumnsContainer = document.getElementById('ip-columns-container');
     const loadingSpinner = document.getElementById('loading-spinner');
@@ -29,9 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
             showLoading();
             const response = await fetch('/ips/get-data', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: getHeaders(),
                 body: JSON.stringify({})
             });
 
