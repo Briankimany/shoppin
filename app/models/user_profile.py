@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, TIMESTAMP  , ForeignKey ,DateTime
+from sqlalchemy import Column, Integer, String, TIMESTAMP  , ForeignKey ,DateTime ,Boolean ,text 
 from datetime import datetime
 from sqlalchemy.sql import func
 from .base import Base
@@ -7,12 +7,16 @@ class UserProfile(Base):
     __tablename__ = 'user_table'
     
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String, nullable=True , unique = True)  
+    name = Column(String, nullable=True , unique = True)
+    first_name = Column(String , nullable = True ,unique=False)
+    second_name = Column(String , nullable = True , unique = False)  
     email = Column(String, unique=True, nullable=True) 
     phone = Column(String, unique=False, nullable=True) 
     password_hash = Column(String, nullable=True)  
+    activated = Column(Boolean , server_default = text("FALSE") ,nullable = False)
     created_at = Column(TIMESTAMP, server_default=func.now())
-
+    
+   
     def __repr__(self):
         return (
             f"<UserProfile(id={self.id}, name='{self.name}', email='{self.email}', "
@@ -23,15 +27,23 @@ class UserProfile(Base):
         return self.__repr__()
 
 
-
-class ResetToken(Base):
-    __tablename__ = 'reset_tokens'
-    
+class TokenBase(Base):
+    __abstract__ = True
     id = Column(Integer, primary_key=True, autoincrement=True)
-    session_token = Column(String(255))
-    reset_token = Column(String(255), unique=True, nullable=False)
     user_id = Column(Integer, ForeignKey('user_table.id'), nullable=False)
+    session_token = Column(String(255) )
     expires_at = Column(TIMESTAMP )
+
+
+class ResetToken(TokenBase):
+    __tablename__ = 'reset_tokens'
+    reset_token = Column(String(255), unique=True ,nullable = False)
+
+class AccountActivation(TokenBase):
+    __tablename__ = "account_activations"
+    token = Column(String(255),unique = True,nullable = False)
+
+
 
 class UserBalance(Base):
     __tablename__ = "users_balance"

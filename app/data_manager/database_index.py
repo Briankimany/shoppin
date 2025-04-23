@@ -4,7 +4,28 @@ from app.models.product import Product as ProductModel
 from app.models.order import Order as OrderModel
 
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session ,sessionmaker
+
+from sqlalchemy import create_engine
+from contextlib import contextmanager
+
+
+from config.config import JSONConfig
+config = JSONConfig("config.json")
+engine = create_engine(f"sqlite:///{config.database_url.absolute()}")
+DbSession = sessionmaker(bind=engine)
+
+@contextmanager
+def session_scope(commit=False):
+    session = DbSession()
+    try:
+        yield session
+        session.commit() if commit else None
+    except Exception:
+        session.rollback()
+    finally:
+        session.close()
+
 
 class Database:
     def __init__(self, session:Session):
@@ -38,18 +59,24 @@ class Database:
         return self.update_vendor(vendor_id, {"verified": True})
 
     def add_product(self, product_data):
-        new_product = ProductModel(**product_data)
-        self.session.add(new_product)
-        self.session.commit()
-        return new_product.id
+        with session_scope() as db_session:
+            new_product = ProductModel(**product_data)
+            product_exist = db_session.query(ProductModel).filter(ProductModel == new_product).first()
+            if product_exist:
+                return product_exist.id
+            
+            db_session.add(new_product)
+            db_session.commit()
+            return new_product.id
+        
     def modify_product(self , product_id  , product_details:dict):
-        product = self.session.query(ProductModel).where(ProductModel.id == product_id).first()
-        if not product:
-            return f"No prodict with id {product_id}"
-        for k ,v in product_details.items():
-
-            setattr(product , k , v)
-        self.session.commit()
+        with session_scope() as db_session:
+            product = db_session.query(ProductModel).where(ProductModel.id == product_id).first()
+            if not product:
+                return f"No prodict with id {product_id}"
+            for k ,v in product_details.items():
+                setattr(product , k , v)
+            db_session.commit()
 
         return "Product modified"
     
@@ -69,6 +96,7 @@ class Database:
         return self.session.query(PayoutModel).filter_by(vendor_id=vendor_id).all()
     
     def get_product_by_key_val(self, key, val, occurrence="first"):
-        query = self.session.query(ProductModel).where(getattr(ProductModel, key) == val)
+        conditions = getattr(ProductModel ,key) == val ,ProductModel.is_active == True
+        query = self.session.query(ProductModel).filter(*conditions)
         return query.first() if occurrence == "first" else query.all()
 

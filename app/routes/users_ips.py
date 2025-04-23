@@ -7,7 +7,7 @@ from app.data_manager.client_access_manager import ClientAccessManager
 
 from config.config import JSONConfig
 from app.routes.logger import LOG ,bp_error_logger
-from app.routes.routes_utils import session_set ,meet_vendor_requirements
+from app.routes.routes_utils import session_set ,meet_vendor_requirements ,get_user_ip
 
 config = JSONConfig('config.json')
 
@@ -33,7 +33,8 @@ def log_geo_data(ip_addr):
         "user_agent": request.headers.get("User-Agent", ""),
         "browser": f"{ua.browser.family} {ua.browser.version_string}",
         "device": ua.device.family,
-        "os": ua.os.family
+        "os": ua.os.family,
+        "consent_given":True
     })
 
 @ip_bp.route("/get-data", methods=["POST"])
@@ -42,7 +43,9 @@ def log_geo_data(ip_addr):
 @session_set
 def fetch_data():
 
-    ip_addr = request.headers.get('X-Real-IP')
+    ip_addr = get_user_ip()
+
+    print(f'ip is {ip_addr}')
     geo_info = get_geo_info(ip_addr)
 
     user_agent = request.headers.get('User-Agent', '')
@@ -61,14 +64,14 @@ def update():
     data = request.get_json()
     ip_addr = data.get('ip') if data else None
     if not ip_addr:
-        ip_addr = request.headers['X-Real-IP']
+        ip_addr =get_user_ip()
 
     geo = get_geo_info(ip_addr)
     LOG.IP_BP.info(f"Geo data: {geo}")
 
     ip_exists = ClientAccessManager.get_by_ip(ip_addr) !=None
     if ip_exists:
-        return jsonify({"message":"failed to update ip-exists" ,"data":"None"})
+        return jsonify({"message":"failed to update ip-exists" ,"data":None})
 
     log_geo_data(ip_addr)
     return jsonify({"message": "success" ,"data":geo}), 200

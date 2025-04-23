@@ -5,55 +5,60 @@ from app.models.cart import Cart as CartModel ,CartItem
 from app.models.cart import Cart
 from app.models.product import Product as ProductModel
 from app.models.order import Order
+
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta , timezone
 import requests
 from app.models.user_profile import UserProfile
 
+from .client_access_manager import session_scope
+from app.routes.logger import LOG
 
 class SessionManager:
     def __init__(self, db_session: Session):
         self.db_session = db_session
 
-    def create_new_session(self,user_id=None, ip_address=None, browser=None, device=None, consent_given=False):
+    def create_new_session(self,user_id=None , expire_after:int = 24):
         """Creates a new session and ensures a cart is linked to it."""
-  
+       
         new_token = SessionManager.generate_token()
-        
-        # Create a new cart
-        new_cart = Cart(user_id=user_id ,session_tkn = new_token)
-        self.db_session.add(new_cart)
-        self.db_session.commit()  # Ensure cart ID is generated
-        
-        # Create a session record linked to the cart
-        new_session = SessionTracking(
-            token=new_token,
-            expires_at=datetime.utcnow() + timedelta(hours=12),
-            cart_id=new_cart.id, 
-            user_id=user_id,
-            ip_address=ip_address,
-            browser=browser,
-            device=device,
-            consent_given=consent_given
-        )
-        self.db_session.add(new_session)
-        self.db_session.commit()
-        
-        return new_session.token  # Return session token for reference
+        LOG.SESSIONS_LOGGER.info("-"*35)
+        LOG.SESSIONS_LOGGER.info("Creating new session token..")
+        with session_scope(commit=True ,raise_exception=True ,logger=LOG.SESSIONS_LOGGER) as db_session:
+           
+            new_cart = Cart(user_id=user_id ,session_tkn = new_token)
+
+            LOG.SESSIONS_LOGGER.debug(f"Cart created succesfully {new_cart}")
+            db_session.add(new_cart)
+            db_session.commit()
+            LOG.SESSIONS_LOGGER.debug(f"added cart succesfully {new_cart} ")
+
+            new_session = SessionTracking(
+                token=new_token,
+                expires_at=datetime.now(timezone.utc) + timedelta(hours=expire_after),
+                cart_id=new_cart.id, 
+                user_id=user_id,
+            )
+            LOG.SESSIONS_LOGGER.debug(f"Creating new session  {new_session}")
+            db_session.add(new_session)
+            LOG.SESSIONS_LOGGER.debug(f"session added {new_session}")
+
+            return new_session.token 
 
     def verify_session_token(self , session_token):
-        tkn = self.db_session.query(SessionTracking).filter(SessionTracking.token == session_token).first()
-        
-        if tkn:
-            now = datetime.now()
-            expiry_time = tkn.expires_at
-            is_expired = now >=expiry_time
-            if is_expired:
-                return False
+
+        with session_scope() as db_session:
+            tkn = db_session.query(SessionTracking).filter(SessionTracking.token == session_token).first()
+            if tkn:
+                now = datetime.now()
+                expiry_time = tkn.expires_at
+                is_expired = now >=expiry_time
+                if is_expired:
+                    return False
+                else:
+                    return True
             else:
-                return True
-        else:
-            return False
+                return False
             
 
     def create_cart(self , user_id, session_tkn):

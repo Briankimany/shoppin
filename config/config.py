@@ -18,7 +18,8 @@ DEFAULT_SETTINGS = {
     "MAX_RETIRES":3,
     "SIMULATE": True,
     "allowed_extensions":['jpg', 'jpeg', 'png', 'webp' ,'svg'],
-    "ip_url" :"http://ip-api.com/json/{}?fields=713241"
+    "ip_url" :"http://ip-api.com/json/{}?fields=713241",
+    "session_days":30
 }
 PATHS_LIST = ['uploads_dir_path' ,'TEMP_UPLOAD_IMAGE_DIR']
 

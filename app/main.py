@@ -1,6 +1,8 @@
 # main.py
-from flask import Flask,  session 
+from flask import Flask,  session  ,jsonify ,request ,render_template
 from flask_cors import CORS
+from flask_wtf.csrf import CSRFError
+from config.envrion_variables import IN_DEVELOPMENT
 
 from app.routes.vendor import vendor_bp
 from app.routes.shop import shop_bp
@@ -11,18 +13,27 @@ from app.routes.admin import admin_bp
 from app.routes.users_ips import ip_bp
 
 from app.services.mail import mail
-
+from app.routes.extensions import csrf 
 
 import os
 from dotenv import load_dotenv
 from pathlib import Path
 
 
+
 load_dotenv()
 app = Flask(__name__ ,static_folder= str(Path().cwd()/"app/static"))
-CORS(app)
-
 app.secret_key = os.getenv("APP_SECRET_KEY")
+
+csrf.init_app(app)
+
+@app.errorhandler(CSRFError)
+def handle_csrf_error(error):
+    if not IN_DEVELOPMENT:
+        return jsonify({"message":"error","data":error})
+    return render_template('user_csrf.html', error=error), 400
+
+
 app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
 app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
 app.config['MAIL_USE_TLS'] = True 
@@ -58,3 +69,10 @@ def help():
 @app.route("/index")
 def index():
     return "index"
+
+@app.route("/test" ,methods = ['DELETE'])
+def test():
+    print("testing the result")
+    print(request.remote_addr)
+    return jsonify({"message":"success"})
+

@@ -20,10 +20,14 @@ class UserManager:
 
     def reload_object(self , user , token= None):
 
+        if type(user) == str:
+            if user.isdigit():
+                user = int(user)
+            
         self.user = self.get_user(user=user)
         if token:
             self.session_tkn = token
-        return self.user
+        return self
     
     def update_details(self, data:dict):
         if not self.user:
@@ -143,11 +147,22 @@ class UserManager:
             return user
         
     @staticmethod
-    def verify_unique_name(db_session : Session , suggested_name:str):
-        names = db_session.query(UserProfile).all()
-        names = [i.name for i in names]
-        names = [i.lower()for i in names]
-        return suggested_name.lower() not in names , names
+    def verify_unique_name(db_session : Session , suggested_name:str,email):
+        
+        get_unique = lambda attribute , value: db_session.query(UserProfile).filter(getattr(UserProfile,attribute)==value).first()
+
+        passed = True
+        msg=''
+        if get_unique('name', suggested_name):
+            msg += f"1. The username '{suggested_name}' is already in use.\n"
+            passed = False
+
+        if get_unique('email', email):
+            msg += f"2. The email address '{email}' is already registered."
+            passed = False
+        
+        return passed , msg
+    
     @staticmethod
     def update_session_value(db_session:Session , session_tkn ,data:dict):
         session = db_session.query(SessionTracking).filter(SessionTracking.token == session_tkn).first()

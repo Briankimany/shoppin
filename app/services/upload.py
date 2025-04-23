@@ -22,7 +22,6 @@ cloudinary.config(
 
 from cloudinary.utils import cloudinary_url
 import cloudinary.uploader
-import cloudinary.api
 
 from app.models.images import ImageUpload
 from sqlalchemy.orm import Session

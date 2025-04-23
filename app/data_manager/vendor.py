@@ -70,6 +70,7 @@ class VendorObj:
     @staticmethod
     def get_all_vendors(db_session:Session):
         return Database(db_session).get_all_vendors()
+    
     @staticmethod
     def get_vendor_by(db_session: Session ,key , value):
         vendor = db_session.query(Vendor).filter(getattr(Vendor , key) == value).first()
@@ -160,6 +161,7 @@ class VendorObj:
         product = {k: v for k, v in locals().items() if k != "self" and v is not None}
         product["vendor_id"] = self.vendor_id  # Ensure vendor association
         return self.db.add_product(product)
+    
     def modify_products(self, products_data:list[dict]):
         """
         Modifies multiple products based on provided data.
@@ -218,6 +220,7 @@ class VendorObj:
                 - A list of matching product objects if 'all'.
                 - None if no match is found.
         """
+        
         return self.db.get_product_by_key_val(key=product_key, val=value, occurrence=occurrence)
 
 
@@ -365,8 +368,6 @@ class VendorObj:
                                     tracking_id:str,
                                     status:str = 'pending'):
         
- 
-
         payout = VendorPayout(
             vendor_id= vendor_id,
             method = payment_method,
@@ -382,7 +383,6 @@ class VendorObj:
         return {"success": True, "payout_id": payout.id}
     
     
-
     @classmethod
     def initiate_withdraw(cls,vendor_name:int , amount:float , phone:str ,**kwargs):
         """
@@ -449,7 +449,14 @@ class VendorObj:
             "reference_id": withdraw_id
         }
 
-        response = requests.get(url=url, headers=headers, data=json.dumps(payload))
+        try:
+            response = requests.get(url=url, headers=headers,
+                                    data=json.dumps(payload),
+                                    timeout = 10)
+        except Exception as e:
+            LOG.VENDOR_LOGGER.error(f"[CONN-ERROR]Unable to reach withdrawal server {e}")
+            return 
+        
 
         LOG.VENDOR_LOGGER.info(f"In the check_update_withdraw_status method")
         LOG.VENDOR_LOGGER.info(f"Checking withdrawal status for {withdraw_id}")
@@ -573,6 +580,24 @@ class VendorObj:
                 )
             return data
         
-            
+    @classmethod
+    def remove_product(cls , product_id ,vendor_id):
+        LOG.VENDOR_LOGGER.info("[DEL] for product {}".format(product_id))
+
+        with cls._scoped_session() as db_session:
+            product = db_session.query(
+                ProductModel
+            ).filter(
+                ProductModel.id == product_id ,
+                Product.vendor_id == vendor_id
+            ).first()
+
+            if not product:
+                LOG.VENDOR_LOGGER.warning("No prodcut found ..")
+                return None
+            LOG.VENDOR_LOGGER.info("Deactivating product (id={} ,product={})".format(product_id,product))
+            product.is_active = False
+            db_session.commit()
+
         
     

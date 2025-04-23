@@ -1,6 +1,6 @@
 # product.py
-from sqlalchemy import Column, Integer, String, Text, Numeric, ForeignKey, DateTime
-from datetime import datetime
+from sqlalchemy import Column, Integer, String, Text, Numeric, ForeignKey, DateTime ,Boolean ,text
+from datetime import datetime ,timezone
 from .base import Base
 from .vendor import Vendor
 
@@ -17,8 +17,9 @@ class Product(Base):
     image_url = Column(String)
     preview_url = Column(String)
 
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    is_active = Column(Boolean ,server_default=text("TRUE") ,nullable=False)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 
 
     def __repr__(self):

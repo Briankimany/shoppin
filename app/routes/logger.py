@@ -28,6 +28,7 @@ class LoggerManager:
 class LOG:
     parent_dir = Path().cwd() / "LOGS"
     parent_dir.mkdir(parents=True , exist_ok= True)
+
     USER_LOGGER = LoggerManager(parent_dir/"user_bp.logs", logger_name="USER").get_logger()
     MAIN_LOGGER = LoggerManager(parent_dir/"main_bp.logs", logger_name="MAIN").get_logger()
     SHOP_LOGGER = LoggerManager(parent_dir/"shop_bp.logs", logger_name="SHOP").get_logger()
@@ -36,6 +37,8 @@ class LOG:
     PAYMENT_LOGGER = LoggerManager(parent_dir/"payment.logs", logger_name="PAYMENT").get_logger()
     ADMIN_LOGGER = LoggerManager(parent_dir/"admin.logs", logger_name="ADMIN").get_logger()
     IP_BP  = LoggerManager(parent_dir/"ip-address_logs.log" ,logger_name='IPS').get_logger()
+    MAIL_LOGGER =  LoggerManager(parent_dir/"emails.log" ,logger_name='MAIL').get_logger()
+    SESSIONS_LOGGER = LoggerManager(parent_dir/"sessions.log" ,logger_name='SESSION').get_logger()
 
 
 def bp_error_logger(logger:LOG, status_code=400 ,return_template = None):
@@ -54,12 +57,11 @@ def bp_error_logger(logger:LOG, status_code=400 ,return_template = None):
                 else:
                     error_id = session['TEMP_ERROR_DICT'][error_key]
                
-                error_message = f"Error in {func.__name__}: id=({error_id}) {str(e)} :args={args} ,kwargs={kwargs}"
+                error_message = f"Error in {func.__name__}: id=({error_id}) {str(e.args)} :args={args} ,kwargs={kwargs}"
                 logger.error(error_message)
 
                 if return_template:
-                    message = str(e) if not IN_DEVELOPMENT else None
-                   
+                    message = str(e) if IN_DEVELOPMENT else None
                     return render_template(return_template,message = message ,error_id = error_id)
                 
                 message = f"ERROR {e} " if IN_DEVELOPMENT else "Contact support"

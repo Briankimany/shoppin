@@ -14,26 +14,39 @@ from app.services.upload import ImageManager
 from app.models.model_utils import WithDrawAvlailableMethods ,PaymentMethod
 from config.envrion_variables import StatusCodes
 
+from flask_wtf.csrf import CSRFError
+from app.routes.extensions import csrf
+from config.envrion_variables import IN_DEVELOPMENT
 
 config = JSONConfig('config.json')
 
 engine = create_engine(f"sqlite:///{config.database_url.absolute()}")
 Session = sessionmaker(bind=engine)
 db_session = Session()
-vendor_bp = Blueprint("vendor", __name__, url_prefix="/vendor")
 
+
+vendor_bp = Blueprint("vendor", __name__, url_prefix="/vendor")
 
 @vendor_bp.before_request
 def load_current_user():
-    user_id = session.get('vendor_id')
-    if user_id:
-        g.current_user = VendorObj(session.get('vendor_id') ,db_session).vendor_table
+    userid = session.get('vendor_id')
+    if userid:
+        g.current_user = VendorObj(userid,db_session).vendor_table
         if not g.current_user:
             session.clear()
         else:
             g.current_user.is_authenticated = True
     else:
         g.current_user = None
+
+def handle_csrf_error(error):
+    load_current_user()
+    if not IN_DEVELOPMENT:
+        return jsonify({"message":"error","data":error})
+    return render_template('csrf_error.html', error=error), 400
+
+vendor_bp.register_error_handler(CSRFError ,handle_csrf_error)
+
 
 @vendor_bp.context_processor
 def inject_user():
@@ -85,7 +98,7 @@ def vendorhome():
     return render_template("vendor/home.html")
 
 @vendor_bp.route("/update-details" , methods = ['POST' , "GET"])
-# @bp_error_logger(logger=LOG.VENDOR_LOGGER)
+@bp_error_logger(logger=LOG.VENDOR_LOGGER)
 @meet_vendor_requirements
 @session_set
 def add_details():
@@ -101,7 +114,7 @@ def add_details():
    
 
     if request.method == "POST":
-        print("post requstt to udata")
+      
         data = request.get_json().get('data')
 
         message = "{} Vendor (id={} ,details={})".format(
@@ -143,18 +156,26 @@ def dashboard():
 def add_product():
     categories = VendorObj.get_vendor_product_categories(db_session , session.get("vendor_id"))
     if request.method == "POST":
-        name = request.form.get("name")
-        description = request.form.get("description")
-        price = request.form.get("price", type=float)
-        stock = request.form.get("stock", type=int)
-        category = request.form.get("category")
-        image_url = request.form.get("image_url")
-        preview_url = request.form.get("preview_url")
-        product_type = request.form.get("product_type", type=int)
+        product_data = {
+            "name": request.form.get("name"),
+            "description": request.form.get("description"),
+            "price": request.form.get("price", type=float),
+            "stock": request.form.get("stock", type=int),
+            "category": request.form.get("category"),
+            "image_url": request.form.get("image_url"),
+            "preview_url": request.form.get("preview_url"),
+            "product_type": request.form.get("product_type", type=int)
+        }
+        ignore_keys = ['preview_url','product_type']
 
+        if not all([product_data[i] for i in product_data if i not in ignore_keys]):
+            return  jsonify({"message":"error",'data':'None values detected'})  ,400
+        
+        LOG.VENDOR_LOGGER.debug(f"[prod-add] adding {product_data}")
         vendor = VendorObj(session["vendor_id"], db_session)
-        vendor.add_product(name=name, description=description, price=price, stock=stock, category=category, image_url=image_url, preview_url=preview_url, product_type=product_type)
+        vendor.add_product(**product_data)
 
+        return jsonify({"message":"success",'data':'Product added succesfully'})
     return render_template("vendor/add_product.html",categories=categories)
 
 
@@ -181,18 +202,22 @@ def edit_product(product_id):
             "image_url": request.form.get("image_url"),
             "preview_url": request.form.get("preview_url"),
         }
+
+        LOG.VENDOR_LOGGER.debug(f"[prod-update] data ={updated_data}")
         vendor.modify_products([{"id": product_id, "data": updated_data}])
+        return jsonify({"message":"success",'data':'products updated'})
     return render_template("vendor/edit_product.html", product_id=product_id , product=product)
 
 
-@vendor_bp.route("/delete_product/<int:product_id>", methods=["POST"])
+@vendor_bp.route("/delete_product/<int:product_id>", methods=["DELETE"])
 @meet_vendor_requirements
+@bp_error_logger(LOG.VENDOR_LOGGER ,500)
 @session_set
 def delete_product(product_id):
-
     vendor = VendorObj(session["vendor_id"], db_session)
-    vendor.remove_product(product_id)
-    return redirect(url_for("vendor.dashboard"))
+    # vendor.remove_product(product_id ,session['vendor_id'])
+    LOG.VENDOR_LOGGER.info("Vendor {} deleting product {}".format(vendor.vendor_table ,product_id))
+    return jsonify({"message":True ,"Prodcut deleted":"done"})
 
 
 
@@ -220,6 +245,7 @@ def vendor_products():
 
 methods = ["POST", "GET"] if os.getenv("CUSTOM_DEBUG_MODE", "").lower() in ("true", "1", "yes")  else ["POST"]
 @vendor_bp.route('/upload', methods=methods)
+@bp_error_logger(LOG.VENDOR_LOGGER)
 @meet_vendor_requirements
 @session_set
 def upload_image():
@@ -341,16 +367,17 @@ def details_order(orderid):
 
 
 @vendor_bp.route("/process-pay" , methods = ['POST'])
+@bp_error_logger(LOG.VENDOR_LOGGER , status_code=420)
 @meet_vendor_requirements
 @session_set
-@bp_error_logger(LOG.VENDOR_LOGGER , status_code=400)
 def process_withdrawal():
  
-    form_data = request.form
+    form_data = request.get_json()
     amount =float(form_data.get("amount"))
     method = form_data.get('method')
     account_info = form_data.get('account_info')
 
+    LOG.VENDOR_LOGGER.info("intititing withdraw")
 
     if account_info.startswith("07"):
         account_info = "254" + account_info[1:]
@@ -361,8 +388,10 @@ def process_withdrawal():
     enum_instance = PaymentMethod[method]
 
     vendor = VendorObj(session['vendor_id'], db_session)
-
+    
+    LOG.VENDOR_LOGGER.debug("vendor {} is withdrawing {}".format(vendor , amount))
     verified_to_withdraw = vendor.is_allowed_withdraw(db_session=db_session,vendor_id=session['vendor_id'] ,needed_amount=amount)
+    LOG.VENDOR_LOGGER.debug("Verified to withdraw {}".format(verified_to_withdraw))
 
     if not "success" in verified_to_withdraw :
         return jsonify(verified_to_withdraw), 400
@@ -386,8 +415,6 @@ def process_withdrawal():
             "message": response['message']
         }), 400
 
-
-
     vendor.create_vendor_payout_record(
         db_session=db_session,
         vendor_id=session['vendor_id'],
@@ -403,17 +430,20 @@ def process_withdrawal():
     ) ,200
 
 
-@vendor_bp.route("/withdrawal-status/<withdraw_id>")
+
+@vendor_bp.route("/withdrawal-status" ,methods=['POST'])
 @meet_vendor_requirements
 @session_set
-@bp_error_logger(LOG.VENDOR_LOGGER , status_code=400)
-def check_withdrawal_status(withdraw_id):
-    
-
+@bp_error_logger(LOG.VENDOR_LOGGER , status_code=500)
+def check_withdrawal_status():
+    withdraw_id = request.get_json().get("id")
     if not withdraw_id:
-        return jsonify({"message":"missing withdraw id"}), 400
+        return jsonify({"message":"missing withdraw id"}), 403
+    
     
     response =  VendorObj.check_update_withdraw_status(db_session ,withdraw_id)
+    if not response:
+        return jsonify({"message":"error",'data':'none'}) , 503
     response = response['data'][0]
 
     LOG.VENDOR_LOGGER.debug("[WITHDRAWAL] response from payment gateway: {}".format(response))

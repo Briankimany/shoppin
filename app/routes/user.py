@@ -1,29 +1,21 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify ,g
 
-from datetime import datetime
 from app.data_manager.users_manager import UserManager
-from config.config import JSONConfig
-from app.routes.routes_utils import session_set  ,meet_user_requirements
-from app.routes.logger import LOG
-from app.routes.mail import send_reset_email
-from app.data_manager.token_manager import ResetTokenManager
-from functools import wraps
 
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
+from app.routes.routes_utils import session_set  ,meet_user_requirements ,inject_user_data ,db_session ,bp_error_logger
+from app.routes.logger import LOG
+from app.routes.mail import MailService
+from app.data_manager.token_manager import ResetTokenManager ,AcctivationTokenManager
+from functools import wraps
 import time
 
+from .views.user import VerifyAccount
 
-
-
-config = JSONConfig('config.json')
-
-engine = create_engine(f"sqlite:///{config.database_url.absolute()}")
-Session = sessionmaker(bind=engine)
-db_session = Session()
 
 user_bp = Blueprint("user", __name__, url_prefix="/user")
 user_obj = UserManager(db_session=db_session , user=None)
+
+user_bp.add_url_rule('/account-verification' ,view_func=VerifyAccount.as_view("account_verification"))
 
 
 def force_user_reload(func):
@@ -33,7 +25,7 @@ def force_user_reload(func):
         if user_obj:
             if "user_id" in session or 'vendor_id' in session:
                 user_id = session.get("user_id") or session.get("vendor_id")
-                user_obj.reload_object(int(user_id), token=session.get("session_token"))
+                user_obj=user_obj.reload_object(int(user_id), token=session.get("session_token"))
             if "session_token"  in session:
                 user_obj.session_tkn = session.get('session_token') 
         return func(*args, **kwargs)
@@ -60,21 +52,7 @@ def load_current_user():
 
 @user_bp.context_processor
 def inject_user():
-    user = getattr(g, 'current_user', None)
-
-    user_id = session.get('user_id') or session.get('vendor_id')
-    if user_id:
-        user_id = int(user_id)
-
-    user_obj.reload_object(user_id)
-    is_vendor = user_obj.is_vendor() != None
-    return {
-        'current_user': user,
-        'is_authenticated':True,
-        'now': datetime.now(),
-        'is_vendor':is_vendor
-    }
-
+    return inject_user_data()
 
 
 @user_bp.route("/")
@@ -82,69 +60,152 @@ def home():
     return "".join([f"<br> {k}: {v}</br>" for k,v in session.items()])
 
 
+def send_activation_link(return_json = True):
+    user_id = session['user_id']
+    token = AcctivationTokenManager.create_account_activation(expire_after=1
+                                                            ,session_token=session['session_token'],
+                                                            user_id=int(user_id))
+    LOG.USER_LOGGER.debug(f"Token generated {token}")
+
+    data = MailService.send_account_activation_link(
+        activation_url=url_for("user.account_verification" ,
+                            dst=url_for('user.profile' ,_external=True),token=token ,_external=True),
+        recepient=user_obj.user.email,
+        return_json=return_json
+    )
+    LOG.USER_LOGGER.debug(f"Response from sending email {data.get_json()if return_json else data}")
+    LOG.USER_LOGGER.debug("-"*35)
+
+    return data
+
+
+
+@user_bp.route('/send-verification', methods=['POST' ,'GET'])
+@force_user_reload
+@session_set
+def verify_account():
+
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify( {"message":"error",'data':"invalid request"})
+
+    user_obj.reload_object(int(user_id))
+
+    LOG.USER_LOGGER.debug  ("*"*35)
+    LOG.USER_LOGGER.debug(f"Account verification for {user_obj.user.email}")
+
+    if request.method == 'GET':
+        LOG.USER_LOGGER.debug("Displaying account confirmation page")
+        LOG.USER_LOGGER.debug  ("*"*35)
+        return render_template("user/account_confirmation.html" ,user_email = user_obj.user.email)
+
+    else:
+        return send_activation_link()
+
+
+
+
 @user_bp.route("/login", methods=["GET", "POST"])
+@bp_error_logger(LOG.USER_LOGGER)
+@session_set
 def login():
     """User login"""
+    LOG.USER_LOGGER.debug("-"*35)
+
     if request.method == "POST":
         name = request.form["identifier"]
         password = request.form["password"] 
+
+        LOG.USER_LOGGER.debug("[login] Attempted login name: {} passwd: {} ".format(name , password))
         verified = user_obj.verify_password(password=password , user=name)  
-        is_vendor = session.get('IS_VENDOR' , None) == True
-       
+        LOG.USER_LOGGER.debug(f"[login] Verified = {verified}")
+
         if verified:
             user_obj.reload_object(user=name)
+                
             session["user_id"] = user_obj.user.id
             session['user_name'] =name
-            previous_token = user_obj.get_tkn_from_user_id()
-            if previous_token:
-                session['session_token'] = previous_token.token
-                
-            user_obj.session_tkn = session['session_token']
-            user_obj.self_update_session(data={'user_id':user_obj.user.id})
-
-            LOG.USER_LOGGER.info(f"[LOGED IN] {user_obj}")
+        
+            if not user_obj.user.activated == True:
+                is_vendor = False
+                LOG.USER_LOGGER.debug("Account not verified")
+                url = url_for('user.verify_account',_external=False)
             
-            if  is_vendor:
-                session['IS_VENDOR'] = None
-                vendor = user_obj.is_vendor()
-                if vendor:
-                    session['vendor_id'] =vendor.id
-                    return redirect (url_for('vendor.dashboard'))
+            else:
+                previous_token = user_obj.get_tkn_from_user_id() ## make sure its not expired
+
+                if previous_token:
+                    session['session_token'] = previous_token.token
+                    
+                user_obj.session_tkn = session['session_token']
+                user_obj.self_update_session(data={'user_id':user_obj.user.id})
+
+                LOG.USER_LOGGER.info(f"[LOGED IN] {user_obj}")
                 
-            return redirect(url_for("shop.shop_home"))
+                is_vendor = user_obj.verify_is_vendor(db_session=db_session,user_name=int(session["user_id"]))
+
+                if  is_vendor:
+                    session['IS_VENDOR'] = None
+                    session['vendor_id'] =session['user_id']
+                    url= url_for('vendor.dashboard' ,_external=False)
+                else:
+                    url = url_for("shop.shop_home", _external=False)
+
+            data ={"message":"success",'data':f"redirecting to {'portal' if is_vendor else 'Our shops'}",'url':url}
+
         else:
             LOG.USER_LOGGER.debug(f"[LOG IN FAILED] {user_obj} :{name} :{password}")
-            login_message = "Invalid credentials. Please try again."
-            return render_template("login/login.html", message=login_message)
-
+            url = url_for("user.login",_external=False)
+            data = {"message":"error" ,'data':"Invalid name/email or password",'url':url}
+        LOG.USER_LOGGER.debug("-"*35)
+        return jsonify(data)
+    
+    LOG.USER_LOGGER.debug("-"*35)
     return render_template("login/login.html")
 
 
 @user_bp.route("/register", methods=["GET", "POST"])
 @session_set
+@session_set
 def register():
     """User registration"""
     if request.method == "POST":
+        LOG.USER_LOGGER.debug("-"*35)
+        
         email = request.form["email"]
         password = request.form["password"]
         name = request.form['name']
+        first_name = request.form['first_name']
+        second_name = request.form['second_name']
         phone = request.form['phone']
-        unique_name , names =  user_obj.verify_unique_name(db_session=db_session , suggested_name=name)
-        session['names']=names
+
+        unique_name , msg =  user_obj.verify_unique_name(db_session=db_session , suggested_name=name ,email=email)
+    
         if unique_name:
-            user_obj.self_register( data={"name":name,"email":email,"password_hash":password , 'phone':phone})
+            LOG.USER_LOGGER.debug("[REG] Registering {} email: {} phone {}".format(name , email,phone))
+            user_obj.self_register( data={"name":name,
+                                          "first_name":first_name,
+                                          "second_name":second_name,
+                                          "email":email,
+                                          "password_hash":password ,
+                                            'phone':phone})
         else:
-            return render_template("login/register.html" , message = "enter a unique name")
+            return jsonify({"message":"warning" ,"data":msg})
 
         session["user_id"] = user_obj.user.id  
         session['user_name'] = user_obj.user.name
         user_obj.session_tkn = session['session_token']
         user_obj.self_update_session(data={'user_id':user_obj.user.id})
-       
-        if session.get('vendor_register' , None):
-            session['vendor_register'] = None
-            return redirect (url_for ("vendor.add_details"))
-        return redirect(url_for("shop.shop_home"))
+
+        email_sent = send_activation_link(False)
+        url = url_for('user.verify_account',_external=True)
+
+        data ={"message":"success" if email_sent else 'error',
+               'data':'Ready for verification' if email_sent else 'An error occured and could not verify email','url':url}
+        LOG.USER_LOGGER.debug(f"[VER-DATA] {data}")
+
+        return jsonify(data)
+
     return render_template("login/register.html")
 
 
@@ -155,6 +216,7 @@ def logout():
     """Logs out the user"""
     session.clear()
     return redirect(url_for("shop.shop_home"))
+
 
 @user_bp.route("/profile")
 @meet_user_requirements
@@ -220,6 +282,11 @@ def validate_token(token):
  
     token_record = ResetTokenManager.verify_token(db_session=db_session,
                                                 reset_token=token)
+    
+    destination = request.args.get('dst')
+    if destination:
+        return redirect (destination)
+    
     if not token_record:
         return render_template("user/password_reset_error.html") ,400
     
@@ -251,8 +318,9 @@ def forgot_password():
 
 
 @user_bp.route("/reset-password" , methods = ['POST'])
+@session_set
 def reser_user_password():
-    email = request.get_json().get("email")  
+    email = request.get_json().get("email") 
     user = UserManager.get_user_(db_session=db_session ,user=email)
     response = {
         "success": True,
@@ -260,14 +328,16 @@ def reser_user_password():
         "cooldown": 6 
         }
     if user:
+        LOG.USER_LOGGER.debug("[PASS-RESET] Initiating password reset for {}".format(email))
         reset_token = ResetTokenManager.create_token(db_session=db_session ,
                                                         session_token=session.get("session_token"),
                                                         user_id=user.id ,expires_in_hours=1)
         
         
         reset_link = url_for("user.validate_token", token=reset_token.reset_token, _external=True)
-        send_reset_email(recipient=user.email, reset_link=reset_link)
+        MailService.send_reset_email(recipient=user.email, reset_link=reset_link)
     else:
+        LOG.USER_LOGGER.info("[PASS-RESET] invalid email : {}".format(email))
         time.sleep(3)
     return jsonify(response) ,200
 

@@ -13,13 +13,12 @@ from functools import wraps
 from datetime import datetime
 
 from app.data_manager.payments import PaymentManager , PaymentCategory , PaymentMethod
-from app.routes.routes_utils import session_set
+from app.routes.routes_utils import session_set ,get_user_ip ,inject_user_data
 
 config = JSONConfig("config.json")
 engine = create_engine(f"sqlite:///{config.database_url.absolute()}")
 Session = sessionmaker(bind=engine)
 db_session = Session()
-
 
 shop_bp = Blueprint("shop", __name__, url_prefix="/shop")
 
@@ -35,13 +34,11 @@ class Category:
 def vendor_selected(func):
     @wraps(func)
     def decorated_func(*args, **kwargs):
-        print("Checking if vendor is selected...")
         if "vendor_id" not in session:
             LOG.SHOP_LOGGER.warning("Vendor ID missing! Redirecting to shop home.")
             return redirect(url_for("shop.shop_home"))
-        return func(*args, **kwargs)  # Ensure the wrapped function still executes
+        return func(*args, **kwargs) 
     return decorated_func
-
 
 
 @shop_bp.before_request
@@ -52,7 +49,7 @@ def load_current_user():
         user_id = int(user_id)
 
     if user_id:
-        user_obj.reload_object(user=user_id)
+        user_obj=user_obj.reload_object(user=user_id)
         g.current_user = user_obj.user
         if not g.current_user:
             session.clear()
@@ -63,40 +60,31 @@ def load_current_user():
 
 @shop_bp.context_processor
 def inject_user():
-    user = getattr(g, 'current_user', None)
-    user_id = session.get('user_id') or session.get('vendor_id')
-    if user_id:
-        user_id = int(user_id)
+    return inject_user_data()
 
-    user_obj.reload_object(user_id)
-    is_vendor = user_obj.is_vendor() != None
-    return {
-        'current_user': user,
-        'is_authenticated':True,
-        'now': datetime.now(),
-        'is_vendor':is_vendor
-    }
 
 
 @shop_bp.route('/')
-@session_set
 @bp_error_logger(LOG.SHOP_LOGGER,500)
+@session_set
 def shop_home():
+    tkn = session.get("session_token")
+   
     vendors = VendorObj.get_all_vendors(db_session=db_session)
     return render_template("shop/shops.html", vendors=vendors)
 
 
 @shop_bp.route("/logout")
-@session_set
 @bp_error_logger(LOG.SHOP_LOGGER,500)
+@session_set
 def logout():
     session.clear()
     return "Logged out"
 
 
 @shop_bp.route("/complete-payment")
-@session_set
 @bp_error_logger(LOG.SHOP_LOGGER,500)
+@session_set
 def process_payment():
     cartdata =  session.get('cart' ,None)
     if  cartdata:
@@ -154,6 +142,7 @@ def add_to_cart():
   
     if not product_id or not quantity:
         return jsonify({"success": False, "error": "Invalid data"}), 400
+    
     result = session_manager.add_to_cart(session_token, product_id, int(quantity))
     status = result['status']
     if status == "error":
@@ -175,7 +164,7 @@ def remove_from_cart():
 
     if all ((session_manager ,product_id)):
         session_manager.remove_from_cart(session_token=session_token, product_id=product_id)
-    return jsonify({"success": False})
+    return jsonify({"success": True})
 
 
 @shop_bp.route("/cart")
@@ -189,8 +178,9 @@ def view_cart():
     cart_items = session_manager.get_cartitems(cart_id=cart_id)
    
     subtotal =sum([i.quantity*i.product.price for i in cart_items])
+    shiping_fee = 300 ## to be implimented
   
-    return render_template("shop/cart.html", cart_items=cart_items , subtotal=subtotal)
+    return render_template("shop/cart.html", cart_items=cart_items , subtotal=subtotal,shiping_fee = shiping_fee)
 
 
 @shop_bp.route("/update_cart", methods=["POST"])
@@ -231,7 +221,6 @@ def checkout():
     session['cart']=cart_summary
    
     return render_template("shop/checkout2.html", cart_summary = cart_summary)
-
 
 
 @shop_bp.route("/api-pay" , methods = ['POST'])
@@ -283,8 +272,8 @@ def api_process_payment():
                                         category=PaymentCategory.PRODUCT_SALE,
                                         description="Products from order id {} sold at {}".format(order.order.id ,
                                                                                                   float(amount)))
-        return jsonify({"message": "success"}) , 200
-    return jsonify({"message": f"Payment request sent for ksh: {amount} to +{phone}."}) , 200
+        return jsonify({"message": "success" ,'data':"Payment inititated"}) , 200
+    return jsonify({"message":"warning", "data":f"Could not initiate payment"}) , 200
 
 
 
