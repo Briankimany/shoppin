@@ -18,6 +18,9 @@ from flask_wtf.csrf import CSRFError
 from app.routes.extensions import csrf
 from config.envrion_variables import IN_DEVELOPMENT
 
+from .views.vendor import SubmitContact
+
+
 config = JSONConfig('config.json')
 
 engine = create_engine(f"sqlite:///{config.database_url.absolute()}")
@@ -26,6 +29,8 @@ db_session = Session()
 
 
 vendor_bp = Blueprint("vendor", __name__, url_prefix="/vendor")
+vendor_bp.add_url_rule("submit-contact",view_func=SubmitContact.as_view("submit_contact"))
+
 
 @vendor_bp.before_request
 def load_current_user():
@@ -55,21 +60,15 @@ def inject_user():
     return {
         'current_user': user,
         'is_authenticated': user is not None,
-        'now': datetime.now()
+        'now': datetime.now(),
+        'platform_email':"playpit800@gmail.com",
+        'platform_phone': "793536684"
     }
-
-@vendor_bp.route("/temp")
-def test_base():
-    return render_template("vendor/base2.html")
 
 @vendor_bp.route("/login")
 @session_set
 def login():
-    session['IS_VENDOR'] = True
-    if  'vendor_id' not in session:
-        return redirect(url_for("user.login"))
-    else:
-        return redirect(url_for("vendor.dashboard"))
+    return redirect(url_for("user.login"))
 
 @vendor_bp.route("/login/<vendoid>")
 @session_set

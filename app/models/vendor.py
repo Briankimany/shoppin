@@ -1,25 +1,49 @@
 # vendor.py
 from sqlalchemy import Column, Integer, String, Boolean, Text, DateTime ,ForeignKey ,TIMESTAMP ,DECIMAL ,Enum as SQLENUM
-from datetime import datetime
+from datetime import datetime ,timezone
 from sqlalchemy.sql import func
 from .base import Base
 from .model_utils import PaymentMethod
-
+from sqlalchemy.orm import relationship
+from sqlalchemy.ext.hybrid import hybrid_property
 
 
 class Vendor(Base):
     __tablename__ = 'vendors'
     id = Column(ForeignKey("user_table.id"), primary_key=True)
-    name = Column(String, nullable=False)
-    email = Column(String, unique=True, nullable=False)
-    phone = Column(String, unique=True, nullable=False)
+ 
     store_name = Column(String, unique=True, nullable=False)
     store_logo = Column(String , unique=False , nullable=False)
-    payment_type = Column(String ,nullable = False)
+    payment_type = Column(String ,nullable = False) # post/pre delivery
     store_description = Column(Text)
     verified = Column(Boolean, default=False)
+
     created_at = Column(TIMESTAMP, server_default=func.now())
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
+
+    user = relationship("UserProfile", back_populates="vendor")
+
+    @hybrid_property
+    def name(self):
+        return self.user.name
+    @name.setter
+    def name(self ,value):
+        self.user.name = value
+
+    @hybrid_property
+    def email(self):
+        return self.user.email
+    @email.setter
+    def email(self ,value):
+        self.user.email = value
+
+    @hybrid_property
+    def phone(self):
+        return self.user.phone
+    @phone.setter
+    def phone(self ,value):
+        self.user.phone = value
+    
 
     def __repr__(self):
         return (

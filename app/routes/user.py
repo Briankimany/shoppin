@@ -219,13 +219,14 @@ def logout():
 
 
 @user_bp.route("/profile")
+@bp_error_logger(logger=LOG.USER_LOGGER ,raise_exeption=True)
 @meet_user_requirements
 @session_set
 def profile():
     """User profile page"""
+    id_ =int(session['user_id'] or session['vendor_id'])
 
-    user_obj.reload_object(user=int(session['user_id']))
-    return render_template("user/profile.html", user=user_obj.user)
+    return render_template("user/profile.html", user=UserManager(db_session,id_).user)
 
 
 @user_bp.route("/edit-profile" , methods = ["POST"])
@@ -273,10 +274,7 @@ def orders():
 @session_set
 def get_order_items(order_id):
     items = user_obj.get_my_previous_order_items(order_id)
-
-    from pprint import pprint
-    pprint(items)
-
+    
     return jsonify(items)
 
 

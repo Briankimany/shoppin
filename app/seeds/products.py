@@ -1,16 +1,14 @@
+
 from sqlalchemy.orm import Session
 
-from models.user_profile import UserProfile
-from models.vendor import Vendor
-from models.product import Product
+from app.models.vendor import Vendor
+from app.models.product import Product
 from app.routes.vendor import sessionmaker , engine
-
-
 from config.config import JSONConfig
-from pathlib import Path
+
 from typing import List
-from app.create_database import init_db
 import csv
+
 
 DbSession = sessionmaker(bind=engine)
 conf = JSONConfig("config.json")
@@ -21,19 +19,6 @@ def get_urls_from_csv(csv_path: str) -> list[str]:
         reader = csv.reader(file)
         return ([row[0] for row in reader if row] )[1:] 
 
-def set_urls(extra_products:List[Product] ,image_urls):
-    if image_urls:
-        result = []
-        for i, product in enumerate(extra_products):
-            url_index = int((i / len(extra_products)) * len(image_urls))
-            product.image_url = image_urls[url_index]
-        
-            product.stock = product.vendor_id *10
-            result.append(product)
-        return result
-    return extra_products
-
-    
 
 def add_muliple_prodct(db_session:Session,p:list[Product]):
 
@@ -53,119 +38,17 @@ def add_muliple_prodct(db_session:Session,p:list[Product]):
         db_session.commit()
 
 
-
-vendor_data = {
-
-    "vendor1": {
-        "user": {
-            "name": "TechMaster",
-            "email": "tech@example.com",
-            "phone": "1234567001",
-            "password_hash": "tech_hash_123"
-        },
-        "vendor": {
-            "id":1,
-            "name": "TechMaster Inc.",
-            "email": "tech@example.com",
-            "phone": "1234567001",
-            "store_name": "Tech Haven",
-            "store_logo": "https://res.cloudinary.com/dqmqwijyf/image/upload/c_pad,w_300,h_300/v1743681390/b470ZdEWk3d2kQWT.webp",
-            "payment_type": "Stripe",
-            "store_description": "Gadgets, gaming gear, and cutting-edge tech",
-            "verified": True
-        }
-    },
-
-    # Vendor 2 (Fashion)
-    "vendor2": {
-        "user": {
-            "name": "FashionGuru",
-            "email": "fashion@example.com",
-            "phone": "1234567002",
-            "password_hash": "fashion_hash_123"
-        },
-        "vendor": {
-            "id":2,
-            "name": "FashionGuru Styles",
-            "email": "fashion@example.com",
-            "phone": "1234567002",
-            "store_name": "Urban Threads",
-            "store_logo": "https://res.cloudinary.com/dqmqwijyf/image/upload/c_pad,w_300,h_300/v1743517291/samples/outdoor-woman.jpg",
-            "payment_type": "PayPal",
-            "store_description": "Trendy apparel and accessories",
-            "verified": True
-        }
-    },
-
-    # Vendor 3 (Home Goods)
-    "vendor3": {
-        "user": {
-            "name": "HomeKing",
-            "email": "home@example.com",
-            "phone": "1234567003",
-            "password_hash": "home_hash_123"
-        },
-        "vendor": {
-            "id":3,
-            "name": "HomeKing Supplies",
-            "email": "home@example.com",
-            "phone": "1234567003",
-            "store_name": "Domestic Bliss",
-            "store_logo": "https://res.cloudinary.com/dqmqwijyf/image/upload/c_pad,w_300,h_300/v1743517284/samples/food/spices.jpg",
-            "payment_type": "Bank Transfer",
-            "store_description": "Everything for your home and kitchen",
-            "verified": True
-        }
-    },
-
-    # Vendor 4 (Services)
-    "vendor4": {
-        "user": {
-            "name": "ServicePro",
-            "email": "services@example.com",
-            "phone": "1234567004",
-            "password_hash": "services_hash_123"
-        },
-        "vendor": {
-            "id":4,
-            "name": "ServicePro Solutions",
-            "email": "services@example.com",
-            "phone": "1234567004",
-            "store_name": "Digital Services Hub",
-            "store_logo": "https://res.cloudinary.com/dqmqwijyf/image/upload/c_pad,w_300,h_300/v1743691066/tech_support_zafgsj.webp",
-            "payment_type": "Crypto",
-            "store_description": "IT, AI, and cloud services",
-            "verified": True
-        }
-    }
-}
-
-
-def create_users(db_session:Session):
-    user_list =[]
-    for vendor_key, data in vendor_data.items():
-        user = UserProfile(**data["user"])
-        existing_user = db_session.query(UserProfile).filter(UserProfile.email == user.email).first()
-        if existing_user:
-            print(f"User with email {user.email} already exists, skipping.")
-            continue
-        user_list.append(user)
-    db_session.add_all(user_list)
-    db_session.commit()
-    db_session.flush()
-
-def create_vendors(db_session:Session):
-    vendor_list = []
-    print('Adding vendors')
-    for vendor_key, data in vendor_data.items():
-        vendor = Vendor(**data["vendor"])
-        existing_vendor = db_session.query(Vendor).filter(Vendor.email == vendor.email).first()
-        if existing_vendor:
-            print(f"Vendor with email {vendor.email} already exists, skipping.")
-            continue        
-        vendor_list.append(vendor)
-    db_session.add_all(vendor_list)
-    db_session.commit()
+def set_urls(extra_products:List[Product] ,image_urls):
+    if image_urls:
+        result = []
+        for i, product in enumerate(extra_products):
+            url_index = int((i / len(extra_products)) * len(image_urls))
+            product.image_url = image_urls[url_index]
+        
+            product.stock = product.vendor_id *10
+            result.append(product)
+        return result
+    return extra_products
 
 
 def add_products(db_session:Session):
@@ -276,41 +159,3 @@ def add_products(db_session:Session):
     add_muliple_prodct(db_session ,p=set_urls(extra_products2 , image_urls))
     add_muliple_prodct(db_session,p=set_urls(extra_products3 , image_urls))
     add_muliple_prodct(db_session,p=set_urls(extra_products4 , image_urls))
-
-def main():
-    with DbSession() as db_session:
-    
-        try:
-            create_users(db_session)
-        except Exception as e:
-            print(f"Error creating users: {e}")
-            db_session.rollback()
-            return
-        try:
-            create_vendors(db_session)
-        except Exception as e:  
-            print(f"Error creating vendors: {e}")
-            db_session.rollback()
-            return
-        
-        try:
-            add_products(db_session)
-            print("Done adding products")
-        except Exception as e:
-            db_session.rollback()
-            print(f"Error adding products: {e}")
-
-
-if __name__ == "__main__":
-   
-    if not Path(conf.database_url).exists():
-       print("No db found")
-       init_db()
-       print("Done creating db")
-    else:
-        print('using existing db')
-    main()
-
-    
-
-

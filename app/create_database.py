@@ -1,23 +1,11 @@
 from sqlalchemy import create_engine ,inspect
 from sqlalchemy.orm import sessionmaker
-from app.models.base import Base
 from config.config import JSONConfig
 from sqlalchemy import text
 
-from app.models.session_tracking import SessionTracking
-from app.models.user_profile import UserProfile ,ResetToken ,UserBalance
-from app.models.vendor import Vendor , VendorPayout
-from app.models.product import Product 
-from app.models.order import Order 
-from app.models.cart import Cart , CartItem
-from app.models.order_item import OrderItem
-from app.models.images import ImageUpload
-from app.models.payment import Payment
-from app.models.client_access_history import ClientAccessLog
-
+from app.models import *
 
 config = JSONConfig("config.json")
-
 
 
 def reset_table( table_name: str):

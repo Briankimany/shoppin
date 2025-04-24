@@ -38,7 +38,8 @@ def get_or_create_session():
         update_data = {"user_id": user_obj.user.id,
                     'expires_at':datetime.now(timezone.utc)+timedelta(hours=24*config.session_days)}
         LOG.SESSIONS_LOGGER.debug(f"[sess-update] Updating session data {update_data}")
-        user_obj.self_update_session(data=update_data)
+        if user_obj.session_tkn == None:
+            user_obj.self_update_session(data=update_data)
     
     LOG.SESSIONS_LOGGER.debug(f"Session initialized. User ID: {session.get('user_id')}")
     LOG.SESSIONS_LOGGER.info("-"*35)
@@ -92,12 +93,19 @@ def inject_user_data():
 
     user_obj.reload_object(user_id)
     is_vendor = user_obj.is_vendor() != None
-    return {
+
+    basic_data= {
         'current_user': user,
         'is_authenticated':True,
         'now': datetime.now(),
         'is_vendor':is_vendor,
         'ip_updated':'true' if ip_updated else 'false'
     }
+    if is_vendor:
+        basic_data.update(
+            user_obj.user.vendor.to_dict()
+        )
+    print(basic_data)
+    return basic_data
 
 

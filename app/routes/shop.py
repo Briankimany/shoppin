@@ -96,7 +96,6 @@ def process_payment():
         return redirect(url_for('shop.view_cart'))
 
 
-
 @shop_bp.route("/<vendor_id>")
 @bp_error_logger(LOG.SHOP_LOGGER,500 ,'errors.html')
 def vendor_products(vendor_id):
@@ -260,7 +259,7 @@ def api_process_payment():
 
     if status == 'paid':
         
-        cart_status = session_manager.update_cart(cart_id=cart_id , attribute="is_active" , new_value=False)
+        session_manager.update_cart(cart_id=cart_id , attribute="is_active" , new_value=False)
         order.update_stock(order_id = order.order.id)
         vendor_data =order.divide_to_vendors(order_id=order.order.id)
         

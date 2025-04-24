@@ -16,7 +16,7 @@ venv
 *.DB
 *.csv
 *.pkl
-/migrations
+/migrations/versions
 *.ini
 /md-files
 .venv2/

@@ -30,3 +30,19 @@ def privacy():
 def contact():
     content = load_markdown("contact.md")
     return render_template('info/contact.html' , content=content)
+
+@info_bp.route("/shipings")
+def shipping():
+    return "shipping terms"
+@info_bp.route("cookies")
+def cookies():
+    return "cookies policy"
+@info_bp.route("returns")
+def returns ():
+    return "Returns policy"
+@info_bp.route("index")
+def index():
+    return "index"
+@info_bp.route("faq")
+def faq():
+    return "faq"

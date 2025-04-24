@@ -160,17 +160,17 @@ class UserManager:
     
     @staticmethod
     def update_session_value(db_session:Session , session_tkn ,data:dict):
-        session = db_session.query(SessionTracking).filter(SessionTracking.token == session_tkn).first()
-        if session:
-            for k , v in data.items():
-                if hasattr(session , k):
-                    setattr(session , k , v)
-           
-        else:
-            return "no session found"
+        with session_scope(logger=LOG.SESSIONS_LOGGER ,func=UserManager.update_session_value) as db_session:
+            session = db_session.query(SessionTracking).filter(SessionTracking.token == session_tkn).first()
+            if session:
+                for k , v in data.items():
+                    if hasattr(session , k):
+                        setattr(session , k , v)
+            else:
+                return "no session found"
 
-        db_session.commit()
-        return "Done"
+            db_session.commit()
+            return "Done"
     
     @staticmethod
     def get_k_latest_orders(db_session: Session, k: int, user_id=None, session_tkn: str=None):
