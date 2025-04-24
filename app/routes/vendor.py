@@ -302,6 +302,7 @@ def upload_image():
 
 
 @vendor_bp.route("/payouts", methods=['GET', 'POST'])
+@bp_error_logger(logger = LOG.VENDOR_LOGGER ,raise_exeption=True)
 @meet_vendor_requirements
 @session_set
 def payouts():

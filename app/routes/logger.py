@@ -41,7 +41,7 @@ class LOG:
     SESSIONS_LOGGER = LoggerManager(parent_dir/"sessions.log" ,logger_name='SESSION').get_logger()
 
 
-def bp_error_logger(logger:LOG, status_code=400 ,return_template = None):
+def bp_error_logger(logger:LOG, status_code=400 ,return_template = None ,raise_exeption=False):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -59,6 +59,9 @@ def bp_error_logger(logger:LOG, status_code=400 ,return_template = None):
                
                 error_message = f"Error in {func.__name__}: id=({error_id}) {str(e.args)} :args={args} ,kwargs={kwargs}"
                 logger.error(error_message)
+
+                if raise_exeption:
+                    raise Exception(e)
 
                 if return_template:
                     message = str(e) if IN_DEVELOPMENT else None

@@ -44,15 +44,15 @@ def log_geo_data(ip_addr):
 def fetch_data():
 
     ip_addr = get_user_ip()
-
-    print(f'ip is {ip_addr}')
+    
     geo_info = get_geo_info(ip_addr)
 
     user_agent = request.headers.get('User-Agent', '')
     ua_info = parse_user_agent(user_agent)
-    LOG.IP_BP.info("-"*50)
-    LOG.IP_BP.info(f"Geo data: {geo_info}")
-    LOG.IP_BP.info(f"User-Agent data: {ua_info}")
+
+    LOG.IP_BP.debug("-"*50)
+    LOG.IP_BP.debug(f"Geo data: {geo_info}")
+    LOG.IP_BP.debug(f"User-Agent data: {ua_info}")
 
     user_data = ClientAccessManager.get_recent(limit=50)
     return jsonify({"message": "success", "data": user_data}), 200
@@ -63,15 +63,21 @@ def fetch_data():
 def update():
     data = request.get_json()
     ip_addr = data.get('ip') if data else None
+
+    LOG.IP_BP.info("-"*50)
+
     if not ip_addr:
         ip_addr =get_user_ip()
 
-    geo = get_geo_info(ip_addr)
-    LOG.IP_BP.info(f"Geo data: {geo}")
-
     ip_exists = ClientAccessManager.get_by_ip(ip_addr) !=None
     if ip_exists:
+        LOG.IP_BP.info(f"[Ip-duplicate] Ip already recorded {ip_addr}")
         return jsonify({"message":"failed to update ip-exists" ,"data":None})
+    
+    LOG.IP_BP.info(f"[ip-update] Recornding {ip_addr}")
+
+    geo = get_geo_info(ip_addr)
+    LOG.IP_BP.info(f"Geo data: {geo}")
 
     log_geo_data(ip_addr)
     return jsonify({"message": "success" ,"data":geo}), 200
