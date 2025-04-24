@@ -216,20 +216,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const response = await fetch('/ips/update', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: getHeaders(),
                 body: JSON.stringify({ ip: ip })
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                showToast('errror',`HTTP error! status: ${response.status}`);
             }
-
-            const data = await response.json();
             
+            const data = await response.json();
+            showToast(data.message ,data.data);
             if (data.message !== 'success') {
-                throw new Error(data.message || 'Failed to add IP');
+                showToast('error' ,data.message || 'Failed to add IP');
             }
 
             showToast('Success', 'IP address added successfully', 'success');
