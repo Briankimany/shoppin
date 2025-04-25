@@ -7,6 +7,7 @@ from app.create_database import init_db
 
 from app.seeds.products import add_products 
 from app.seeds.users_vendors import create_users ,create_vendors ,ClearanceLevel
+from app.models.vendor_plans import VendorPlan
 
 DbSession = sessionmaker(bind=engine)
 conf = JSONConfig("config.json")
@@ -27,7 +28,11 @@ def main():
             db_session.rollback()
             return
         try:
-            create_vendors(db_session)
+            plan = db_session.query(
+                VendorPlan
+            ).filter(VendorPlan.id == 1).first()
+            assert plan !=None
+            create_vendors(db_session ,plan)
         except Exception as e:  
             print(f"Error creating vendors: {e}")
             db_session.rollback()

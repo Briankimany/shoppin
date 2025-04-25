@@ -2,7 +2,7 @@ from sqlalchemy import Column, String, Boolean, DateTime, Integer
 from datetime import datetime
 from typing import Dict, Any
 
-from .base import Base
+from .base import Base ,get_time
 
 class ClientAccessLog(Base):
     __tablename__ = 'client_access_logs'
@@ -23,7 +23,7 @@ class ClientAccessLog(Base):
     os = Column(String(100), nullable=True)
 
     consent_given = Column(Boolean, default=False)
-    accessed_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    accessed_at = Column(DateTime, default=get_time(), nullable=False)
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert the model instance to a dictionary.

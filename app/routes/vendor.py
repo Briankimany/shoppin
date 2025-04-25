@@ -18,7 +18,7 @@ from flask_wtf.csrf import CSRFError
 from app.routes.extensions import csrf
 from config.envrion_variables import IN_DEVELOPMENT
 
-from .views.vendor import SubmitContact
+from .views.vendor import SubmitContact ,HomeView
 
 
 config = JSONConfig('config.json')
@@ -29,7 +29,12 @@ db_session = Session()
 
 
 vendor_bp = Blueprint("vendor", __name__, url_prefix="/vendor")
-vendor_bp.add_url_rule("submit-contact",view_func=SubmitContact.as_view("submit_contact"))
+
+vendor_bp.add_url_rule("submit-contact",
+                       view_func=SubmitContact.as_view("submit_contact"))
+vendor_bp.add_url_rule('/',
+                       view_func=HomeView.as_view("home"))
+
 
 
 @vendor_bp.before_request
@@ -53,6 +58,9 @@ def handle_csrf_error(error):
 vendor_bp.register_error_handler(CSRFError ,handle_csrf_error)
 
 
+
+
+
 @vendor_bp.context_processor
 def inject_user():
    
@@ -62,7 +70,9 @@ def inject_user():
         'is_authenticated': user is not None,
         'now': datetime.now(),
         'platform_email':"playpit800@gmail.com",
-        'platform_phone': "793536684"
+        'platform_phone': "793536684",
+        'in_development':True
+
     }
 
 @vendor_bp.route("/login")
@@ -90,11 +100,6 @@ def register():
     session['vendor_register'] = True
     return redirect (url_for('user.register'))
 
-
-@vendor_bp.route("/")
-@session_set
-def vendorhome():
-    return render_template("vendor/home.html")
 
 @vendor_bp.route("/update-details" , methods = ['POST' , "GET"])
 @bp_error_logger(logger=LOG.VENDOR_LOGGER)

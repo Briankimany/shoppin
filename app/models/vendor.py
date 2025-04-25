@@ -18,10 +18,13 @@ class Vendor(Base):
     store_description = Column(Text)
     verified = Column(Boolean, default=False)
 
+    plan_id = Column(Integer , ForeignKey("vendor_plans.id") ,nullable=False)
+
     created_at = Column(TIMESTAMP, server_default=func.now())
     updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 
     user = relationship("UserProfile", back_populates="vendor")
+    plan = relationship("VendorPlan" ,back_populates='vendors')
 
     @hybrid_property
     def name(self):

@@ -12,6 +12,7 @@ from app.models.payment import Payment
 from app.models.client_access_history import ClientAccessLog
 from app.models.vendor_plans import PlanFeature, VendorPlan
 from app.models.clearance import ClearanceLevel, clearance_user_association
+from app.models.vendor_submits import VendorSubmit
 from app.models.base import Base
 
 __all__ = [

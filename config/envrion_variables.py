@@ -21,7 +21,6 @@ class StatusCodes:
 
     CONTACT_ADMIN = ["TP105", "TC108", "TF106"]
 
-    
 
 
 class StatusNames:
@@ -29,3 +28,5 @@ class StatusNames:
     FAILED = "failed"
     COMPLETED = "completed"
     CONTACT_ADMIN = "Contact admin"
+
+

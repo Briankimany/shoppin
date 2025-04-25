@@ -14,6 +14,7 @@ class Product(Base):
     price = Column(Numeric(10, 2), nullable=False)
     stock = Column(Integer, default=0 , nullable=True)
     category = Column(String)
+    sub_category = Column(String ,nullable=False,)
     image_url = Column(String)
     preview_url = Column(String)
 

@@ -16,7 +16,9 @@ class VendorPlan(Base):
     description = Column(Text)
 
     features = relationship("PlanFeature", back_populates="plan", cascade="all, delete-orphan")
-
+    vendors = relationship("Vendor",back_populates='plan',lazy='dynamic')
+    vendorrequest=relationship("VendorSubmit" ,back_populates='plan')
+    
     def to_dict(self):
         return {
             "commision_percent":self.commission_percent,
@@ -32,5 +34,4 @@ class PlanFeature(Base):
     feature_text = Column(Text, nullable=False)
 
     plan = relationship("VendorPlan", back_populates="features")
-
-
+ 

@@ -5,6 +5,7 @@ from app.models.vendor import Vendor
 from app.routes.vendor import sessionmaker , engine
 from config.config import JSONConfig
 from app.models.clearance import ClearanceLevel
+from app.models.vendor_plans import VendorPlan
 
 
 DbSession = sessionmaker(bind=engine)
@@ -106,8 +107,7 @@ def create_users(db_session:Session ,level:ClearanceLevel):
     db_session.commit()
 
 
-
-def create_vendors(db_session:Session):
+def create_vendors(db_session:Session ,plan:VendorPlan):
     vendor_list = []
     print('Adding vendors')
     for vendor_key, data in vendors_data.items():
@@ -115,7 +115,8 @@ def create_vendors(db_session:Session):
         existing_vendor = db_session.query(Vendor).filter(Vendor.id==data['id']).first()
         if existing_vendor:
             print(f"Vendor with email {vendor.email} already exists, skipping.")
-            continue        
+            continue     
+        vendor.plan=plan   
         vendor_list.append(vendor)
     db_session.add_all(vendor_list)
     db_session.commit()
