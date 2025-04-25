@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Join our premium vendor network to showcase and sell your products to thousands of customers">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Vendor Registration | Premium Marketplace Platform</title>
     
     <!-- Favicon -->
@@ -21,9 +22,108 @@
     <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
-    <script src="{{ url_for('static', filename='js/vendor/dashboard2.js') }}"></script>
-
 </head>
+
+<style>
+    /* Modern Notification System */
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        width: 320px;
+        padding: 18px;
+        border-radius: 8px;
+        background: white;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        transform: translateX(calc(100% + 30px));
+        transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        z-index: 9999;
+        opacity: 0;
+        border-left: 4px solid;
+    }
+
+    .notification.show {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .notification.success {
+        border-left-color: #4CAF50;
+    }
+
+    .notification.error {
+        border-left-color: #F44336;
+    }
+
+    .notification.warning {
+        border-left-color: #FF9800;
+    }
+
+    .notification-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        color: white;
+        flex-shrink: 0;
+    }
+
+    .notification.success .notification-icon {
+        background-color: #4CAF50;
+    }
+
+    .notification.error .notification-icon {
+        background-color: #F44336;
+    }
+
+    .notification.warning .notification-icon {
+        background-color: #FF9800;
+    }
+
+    .notification-content {
+        flex-grow: 1;
+        font-size: 14px;
+        line-height: 1.4;
+        color: #333;
+    }
+
+    .notification-close {
+        margin-left: 15px;
+        cursor: pointer;
+        opacity: 0.6;
+        transition: opacity 0.2s;
+        color: #666;
+        flex-shrink: 0;
+    }
+
+    .notification-close:hover {
+        opacity: 1;
+    }
+
+    /* Scroll-aware Navigation Bar */
+    .navbar {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        background: white;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+        z-index: 1000;
+    }
+
+    .navbar.hide {
+        transform: translateY(-100%);
+    }
+
+    .navbar.show {
+        transform: translateY(0);
+    }
+</style>
 
 <body>
     <!-- Header with Navigation -->
@@ -50,6 +150,17 @@
             </nav>
         </div>
     </header>
+
+    <!-- Notification HTML -->
+    <div id="notification" class="notification">
+        <div class="notification-icon">
+            <i id="notification-icon" class="fas fa-check"></i>
+        </div>
+        <div class="notification-content" id="notification-content"></div>
+        <div class="notification-close" id="notification-close">
+            <i class="fas fa-times"></i>
+        </div>
+    </div>
 
     <!-- Hero Section -->
     <section class="vendor-hero">
@@ -308,91 +419,249 @@
         </div>
     </section>
 
+    <style>
+        /* Professional Contact Section */
+        .contact-section {
+            padding: 3rem 0;
+        }
+        
+        .contact-content {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 3rem;
+            align-items: start;
+        }
+        
+        .contact-info {
+            position: sticky;
+            top: 2rem;
+        }
+        
+        .contact-methods {
+            margin-top: 2rem;
+            display: grid;
+            gap: 1.5rem;
+        }
+        
+        .contact-method {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .contact-method i {
+            font-size: 1.25rem;
+            color: var(--primary-color);
+            margin-top: 0.25rem;
+        }
+        
+        /* Elegant Form Styles */
+        .contact-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.85rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+            outline: none;
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin: 2rem 0;
+        }
+        
+        .checkbox-group input {
+            width: auto;
+            margin-right: 0.75rem;
+        }
+        
+        /* Responsive Layout */
+        @media (max-width: 992px) {
+            .contact-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .contact-info {
+                position: static;
+                order: 2;
+                margin-top: 3rem;
+            }
+            
+            .contact-form-container {
+                order: 1;
+            }
+        }
+        
+        /* Smart Field Grouping */
+        .form-field-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+        
+        /* Enhanced Notification System */
+        .notification {
+            width: 320px;
+            padding: 1.25rem;
+            font-size: 0.95rem;
+        }
+    </style>
+    
     <!-- Contact Section -->
     <section class="contact-section" id="contact">
         <div class="container">
             <div class="contact-content">
                 <div class="contact-info" data-aos="fade-right">
-                    <h2>Ready to Grow Your Business?</h2>
-                    <p class="lead">Contact our vendor team to discuss joining our marketplace.</p>
+                    <h2 class="section-title">Ready to Grow Your Business?</h2>
+                    <p class="lead-text">Contact our vendor team to discuss joining our premium marketplace platform.</p>
                     
                     <div class="contact-methods">
                         <div class="contact-method">
                             <i class="fas fa-envelope"></i>
                             <div>
-                                <h4>Email Us</h4>
-                                <a href="mailto:{{platform_email}}">{{platform_email}}</a>
+                                <h4 class="method-title">Email Support</h4>
+                                <a href="mailto:{{platform_email}}" class="method-link">{{platform_email}}</a>
                             </div>
                         </div>
                         
                         <div class="contact-method">
                             <i class="fas fa-phone-alt"></i>
                             <div>
-                                <h4>Call Us</h4>
-                                <a href="tel:+254{{platfortm_phone}}">+254 {{platform_phone}}</a>
-                                <small>Vendor support line: Mon-Fri, 9AM-5PM EST</small>
+                                <h4 class="method-title">Phone Assistance</h4>
+                                <a href="tel:+254{{platfortm_phone}}" class="method-link">+254 {{platform_phone}}</a>
+                                <small class="method-hours">Mon-Fri, 9AM-5PM EST</small>
                             </div>
                         </div>
                         
+                        <div class="contact-method">
+                            <i class="fas fa-comments"></i>
+                            <div>
+                                <h4 class="method-title">Quick Response</h4>
+                                <p class="method-text">We typically respond within 24 hours</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
                 <div class="contact-form-container" data-aos="fade-left">
                     <div class="contact-form">
-                        <h3>Vendor Application Form</h3>
-                        <p>Fill out this form and our team will contact you within 2 business days.</p>
+                        <div class="form-header">
+                            <h3>Vendor Application</h3>
+                            <p>Complete this form to begin your onboarding process</p>
+                        </div>
                         
-                        <form id="vendorContactForm" action="{{ url_for('vendor.submit_contact') }}" method="POST">
-                            <div class="form-group">
-                                <label for="name">First Name</label>
-                                <input type="text" id="name" name="name" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="name">Second name</label>
-                                <input type="text" id="name" name="name" required>
+                        <form id="vendorContactForm">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            
+                            <div class="form-field-group">
+                                <div class="form-group">
+                                    <label for="first_name">First Name</label>
+                                    <input type="text" id="first_name" name="first_name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="second_name">Last Name</label>
+                                    <input type="text" id="second_name" name="second_name" required>
+                                </div>
                             </div>
                             
                             <div class="form-group">
-                                <label for="business">Business Name</label>
-                                <input type="text" id="business" name="business" required>
+                                <label for="store_name">Business Name</label>
+                                <input type="text" id="store_name" name="store_name" required>
+                            </div>
+                            
+                            <div class="form-field-group">
+                                <div class="form-group">
+                                    <label for="email">Email Address</label>
+                                    <input type="email" id="email" name="email" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="phone">Phone Number</label>
+                                    <input type="tel" id="phone" name="phone" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-field-group">
+                                <div class="form-group">
+                                    <label for="payment_type">Payment Terms</label>
+                                    <select id="payment_type" name="payment_type" required>
+                                        <option value="">Select...</option>
+                                        <option value="post_delivery">Post-Delivery</option>
+                                        <option value="pre_delivery">Pre-Delivery</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="plan_id">Business Plan</label>
+                                    <select id="plan_id" name="plan_id" required>
+                                        <option value="">Select...</option>
+                                        {% for plan in vendor_plans %}
+                                        <option value="{{ plan.id }}">{{ plan.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
                             </div>
                             
                             <div class="form-group">
-                                <label for="email">Email Address</label>
-                                <input type="email" id="email" name="email" required>
+                                <label for="store_description">Business Description</label>
+                                <textarea id="store_description" name="store_description" placeholder="Briefly describe your products/services..."></textarea>
                             </div>
                             
-                            <div class="form-group">
-                                <label for="phone">Phone Number</label>
-                                <input type="tel" id="phone" name="phone">
+                            <div class="form-actions">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="terms" name="terms" required>
+                                    <label for="terms">I agree to the <a href="{{ url_for('info.terms') }}">Terms of Service</a> and <a href="{{ url_for('info.privacy') }}">Privacy Policy</a></label>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i> Submit Application
+                                </button>
+                                
+                                {% if in_development %}
+                                <button type="button" id="fillDummyData" class="btn btn-outline-secondary mt-2">
+                                    <i class="fas fa-magic"></i> Fill Test Data
+                                </button>
+                                {% endif %}
                             </div>
-                            
-                            <div class="form-group">
-                                <label for="products">Describe Your Products</label>
-                                <textarea id="products" name="products" rows="4" required></textarea>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="volume">Estimated Monthly Sales Volume</label>
-                                <select id="volume" name="volume">
-                                    <option value="">Select...</option>
-                                    <option value="0-5k">Ksh 0 - Ksh5,000</option>
-                                    <option value="5k-20k">Ksh 5,001 - Ksh20,000</option>
-                                    <option value="20k-50k">Kah 20,001 - Ksh50,000</option>
-                                    <option value="50k+">Ksh 50,000+</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group checkbox-group">
-                                <input type="checkbox" id="terms" name="terms" required>
-                                <label for="terms">I agree to the <a href="{{ url_for('info.terms') }}">Terms of Service</a> and <a href="{{ url_for('info.privacy') }}">Privacy Policy</a></label>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary btn-block">
-                                <i class="fas fa-paper-plane"></i> Submit Application
-                            </button>
                         </form>
+                        
+            
                     </div>
                 </div>
             </div>
@@ -559,10 +828,6 @@
             once: true
         });
         
-        // Initialize other scripts from home.js
-        document.addEventListener('DOMContentLoaded', function() {
-            // Your custom scripts will run from home.js
-        });
     </script>
 </body>
 </html>
