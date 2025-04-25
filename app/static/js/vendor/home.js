@@ -1,12 +1,92 @@
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize notification system
+    const notification = document.getElementById('notification');
+    const notificationContent = document.getElementById('notification-content');
+    const notificationIcon = document.getElementById('notification-icon');
+    const notificationClose = document.getElementById('notification-close');
+
+    // Close notification when X is clicked
+    notificationClose.addEventListener('click', hideNotification);
 
 
-document.addEventListener('mouseout', (e) => {
-    if (e.clientY < 0) {
-      showModal('Wait! Get priority review by applying now.');
+    // Enhanced Notification System
+    function showNotification(type, message,duration=3500) {
+        const notification = document.getElementById('notification');
+        const notificationIcon = document.getElementById('notification-icon');
+        const notificationContent = document.getElementById('notification-content');
+        
+        // Reset and set notification type
+        notification.className = 'notification';
+        notification.classList.add(type);
+        
+        // Set icon based on type
+        switch(type) {
+            case 'success':
+                notificationIcon.className = 'fas fa-check';
+                break;
+            case 'error':
+                notificationIcon.className = 'fas fa-exclamation';
+                break;
+            case 'warning':
+                notificationIcon.className = 'fas fa-exclamation-triangle';
+                break;
+        }
+        
+        notificationContent.textContent = message;
+        notification.classList.add('show');
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, duration);
     }
-  });
 
-  document.addEventListener('DOMContentLoaded', function() {
+    // Close notification when X is clicked
+    document.getElementById('notification-close').addEventListener('click', function() {
+        document.getElementById('notification').classList.remove('show');
+    });
+
+    // Scroll-aware Navigation Bar
+    document.addEventListener('DOMContentLoaded', function() {
+        const navbar = document.querySelector('.navbar');
+        let lastScroll = 0;
+        
+        window.addEventListener('scroll', function() {
+            const currentScroll = window.pageYOffset;
+            
+            if (currentScroll <= 0) {
+                // At top of page
+                navbar.classList.remove('hide');
+                navbar.classList.add('show');
+                return;
+            }
+            
+            if (currentScroll > lastScroll && !navbar.classList.contains('hide')) {
+                // Scrolling down
+                navbar.classList.remove('show');
+                navbar.classList.add('hide');
+            } else if (currentScroll < lastScroll && navbar.classList.contains('hide')) {
+                // Scrolling up
+                navbar.classList.remove('hide');
+                navbar.classList.add('show');
+            }
+            
+            lastScroll = currentScroll;
+        });
+    });
+
+
+    function hideNotification() {
+        notification.classList.remove('show');
+    }
+
+    // Exit intent notification
+    document.addEventListener('mouseout', (e) => {
+        if (e.clientY < 0) {
+            showNotification('warning','Wait! Get priority review by applying now.');
+        }
+    });
+
     // FAQ Accordion Functionality
     const faqItems = document.querySelectorAll('.faq-item');
     
@@ -92,39 +172,124 @@ document.addEventListener('mouseout', (e) => {
         });
     }
 
-});
-
-document.addEventListener('DOMContentLoaded', function() {
+    // Mobile menu toggle
     const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
     const navLinks = document.querySelector('.nav-links');
     
     if (mobileMenuBtn && navLinks) {
-      mobileMenuBtn.addEventListener('click', function() {
-        // Toggle menu visibility
-        navLinks.classList.toggle('active');
-        
-        // Change icon
-        const icon = this.querySelector('i');
-        if (navLinks.classList.contains('active')) {
-          icon.classList.remove('fa-bars');
-          icon.classList.add('fa-times');
-          
-          // Prevent body scroll when menu is open
-          document.body.style.overflow = 'hidden';
-        } else {
-          icon.classList.remove('fa-times');
-          icon.classList.add('fa-bars');
-          document.body.style.overflow = '';
-        }
-      });
-      
-      // Close menu when clicking on links
-      navLinks.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-          navLinks.classList.remove('active');
-          mobileMenuBtn.querySelector('i').classList.replace('fa-times', 'fa-bars');
-          document.body.style.overflow = '';
+        mobileMenuBtn.addEventListener('click', function() {
+            // Toggle menu visibility
+            navLinks.classList.toggle('active');
+            
+            // Change icon
+            const icon = this.querySelector('i');
+            if (navLinks.classList.contains('active')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+                
+                // Prevent body scroll when menu is open
+                document.body.style.overflow = 'hidden';
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+                document.body.style.overflow = '';
+            }
         });
-      });
+        
+        // Close menu when clicking on links
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+                mobileMenuBtn.querySelector('i').classList.replace('fa-times', 'fa-bars');
+                document.body.style.overflow = '';
+            });
+        });
     }
-  });
+
+    // CSRF Token helper
+    function getCsrfToken() {
+        return document.querySelector('meta[name="csrf-token"]').content;
+    }
+
+    // Fill form with dummy data
+    document.getElementById('fillDummyData')?.addEventListener('click', function() {
+        const dummyData = {
+            name: "John Doe",
+            first_name: "John",
+            second_name: "Doe",
+            store_name: "Doe's Fresh Produce",
+            email: "john.doe@example.com",
+            phone: "0712345678",
+            payment_type: "post_delivery",
+            store_description: "We specialize in fresh organic fruits and vegetables sourced directly from local farmers.",
+            plan_id: "1",  // Assuming this is a valid plan ID
+            terms: "on"
+        };
+
+        // Fill in all form fields
+        for (const [key, value] of Object.entries(dummyData)) {
+            const element = document.querySelector(`[name="${key}"]`);
+            if (!element) continue;
+
+            if (element.type === 'checkbox') {
+                element.checked = true;
+            } else if (element.tagName === 'SELECT') {
+                element.value = value;
+            } else {
+                element.value = value;
+            }
+        }
+        showNotification('success', 'Dummy data filled');
+    });
+
+    // Form submission
+    const form = document.getElementById('vendorContactForm');
+    if (form) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            const submitButton = form.querySelector('button[type="submit"]');
+            
+            // Disable submit button to prevent multiple submissions
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            
+            try {
+                const response = await fetch("submit-contact", {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        "X-CSRFToken": getCsrfToken()
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.message === 'success') {
+                    showNotification('success', 'Application submitted successfully! Redirecting...',6000);
+
+                } else if (data.message === 'warning') {
+            
+                    data.data.forEach(msg => {
+                        showNotification('warning',msg,10000);
+                    });
+                   
+                } else {
+                    // showNotification('error', data.data || 'There was an error processing your application.',10000);
+                    data.data.forEach(msg => {
+                        showNotification('warning',msg,10000);
+                    });
+                }
+                
+            } catch (error) {
+                showNotification('error', 'Network error occurred. Please try again.');
+                console.error('Error:', error);
+            } finally {
+                // Re-enable submit button
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Application';
+            }
+        });
+    }
+});
