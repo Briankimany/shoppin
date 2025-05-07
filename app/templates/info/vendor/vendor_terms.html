@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Soft UI App{% endblock %}</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
+
+  <!-- Soft UI & Nucleo Icons -->
+  <link href="{{ url_for('static', filename='assets/css/nucleo-icons.css') }}" rel="stylesheet" />
+  <link href="{{ url_for('static', filename='assets/css/nucleo-svg.css') }}" rel="stylesheet" />
+  <link href="{{ url_for('static', filename='assets/css/soft-design-system.css') }}" rel="stylesheet" />
+
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-100">
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg bg-white shadow-sm">
+    <div class="container">
+      <a class="navbar-brand font-weight-bold text-dark" href="#">Soft UI App</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarMain">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="container py-5">
+    <div class="container mt-5">
+        <div class="card shadow-lg p-4">
+          <h4 class="text-gradient text-primary mb-3">📄 Vendor Terms and Agreement</h4>
+          <p class="text-muted text-sm">Effective Date: <strong>[Insert Date]</strong></p>
+          <p class="text-sm mb-1"><strong>Vendor Plan:</strong> TechMaster</p>
+          <p class="text-sm mb-3"><strong>Vendor Name:</strong> Tech Haven (<code>tech@example.com</code>)</p>
+      
+          <hr class="horizontal dark my-3">
+      
+          <h6 class="text-dark">1. Product Pricing and Platform Charges</h6>
+          <ul class="text-sm ps-3">
+            <li><strong>Minimum Price Threshold:</strong> If a product is priced below ₹800, a flat fee of ₹120 is added (not deducted from vendor earnings).</li>
+            <li><strong>Fee Sharing:</strong> Vendors can optionally share this flat fee via <code>vendor_commission_coverage</code>.</li>
+            <li><strong>Commission Above Threshold:</strong> Products priced ≥ ₹800 incur a 15% platform commission. Sharing this is also vendor-configurable.</li>
+          </ul>
+      
+          <h6 class="text-dark mt-4">2. Commission Distribution</h6>
+          <p class="text-sm">
+            Commission charges are split based on <code>vendor_commission_coverage</code>. For example, if set to 70:
+          </p>
+          <ul class="text-sm ps-3">
+            <li>70% of the commission is paid by the vendor.</li>
+            <li>30% is deducted from product earnings.</li>
+          </ul>
+      
+          <h6 class="text-dark mt-4">3. Payout Terms</h6>
+          <ul class="text-sm ps-3">
+            <li><strong>Scheduled Payouts:</strong> Processed monthly after reaching a ₹350 threshold.</li>
+            <li><strong>Unscheduled Withdrawals:</strong> Not available under the TechMaster plan.</li>
+          </ul>
+      
+          <h6 class="text-dark mt-4">4. Responsibility and Control</h6>
+          <ul class="text-sm ps-3">
+            <li>Vendors can configure commission coverage per product to optimize pricing.</li>
+            <li>The platform never deducts commission unless the vendor chooses to share.</li>
+          </ul>
+      
+          <div class="form-check mt-4">
+            <input class="form-check-input" type="checkbox" id="agreement" required>
+            <label class="form-check-label text-sm" for="agreement">
+              I agree to the terms outlined above and accept the conditions of the TechMaster plan.
+            </label>
+          </div>
+      
+          <button type="submit" class="btn btn-primary w-100 mt-3">Accept Terms & Continue</button>
+        </div>
+      </div>
+      
+    
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer py-4 bg-white text-center">
+    <div class="container">
+      <span class="text-muted">© 2025 Your Company</span>
+    </div>
+  </footer>
+
+  <!-- JS Files -->
+  <script src="{{ url_for('static', filename='assets/js/core/popper.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='assets/js/core/bootstrap.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='assets/js/plugins/perfect-scrollbar.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='assets/js/plugins/parallax.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='assets/js/plugins/prism.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='assets/js/soft-design-system.min.js') }}"></script>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

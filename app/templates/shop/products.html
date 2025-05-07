@@ -9,24 +9,9 @@
 <script src="{{ url_for('static', filename='js/shop/products.js') }}"></script>
 {% endblock %}
 {% block content %}
+<link rel="stylesheet"  href="{{ url_for('static', filename='css/shop/products.css') }}">
 <div class="ecommerce-container">
-    <!-- Category Navigation -->
-    <div class="category-nav">
-        <div class="category-scroll">
-  
-            {% for category in categories %}
-            <button class="category-btn {% if loop.first %}active{% endif %}" 
-                    data-category="{{ category.id }}">
-                
-                <a class="link-name" href="#category-title-id-{{ category.name }}"><p>{{ category.name }}</p></a>
-            </button>
-            {% endfor %}
-        </div>
-    </div>
-
-
-
-    <!-- Products by Category -->
+   
     <div class="products-by-category">
         {% for category in categories %}
         <section class="product-category active" 
@@ -49,7 +34,7 @@
                     <div class="product-info">
                         <h3 class="product-name">{{ product.name }}</h3>
                         <div class="price-container">
-                            <span class="current-price">Ksh{{ "%.2f"|format(product.price) }}</span>
+                            <span class="current-price">Ksh{{ "%.2f"|format(product.final_price) }}</span>
                             {% if product.original_price %}
                             <span class="original-price">Ksh{{ "%.2f"|format(product.original_price) }}</span>
                             {% endif %}
@@ -61,7 +46,7 @@
                                        id="quantity-{{ product.id }}" value="1" min="1">
                                 <button class="qty-btn plus">+</button>
                             </div>
-                            <button class="add-to-cart-btn" 
+                            <button class="add-to-cart-btn btn bg-gradient-success w-auto me-2" 
                                     data-product-id="{{ product.id }}">
                                 <i class="bi bi-cart-plus"></i> Add
                             </button>
@@ -81,4 +66,5 @@
 <div id="cart-notification" class="cart-notification">
     <span id="notification-message"></span>
 </div>
+
 {% endblock %}

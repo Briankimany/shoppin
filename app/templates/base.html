@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>{% block title %}Premium Product Catalog{% endblock %}</title>
+  <meta name="description" content="Discover our premium product collection">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="/static/assets/img/favicon.ico" type="image/x-icon">
+  
+  <!-- CSS -->
+  <link href="/static/assets/css/nucleo-icons.css" rel="stylesheet" />
+  <link href="/static/assets/css/nucleo-svg.css" rel="stylesheet" />
+  <link href="/static/assets/css/soft-design-system.css?v=1.0.1" rel="stylesheet" />
+  <link  href="/static/css/shop/products_grid.css" rel="stylesheet" />
+  {% block extra_css %}{% endblock %}
+</head>
+
+
+<body class="bg-gray-100">
+
+
+  <!-- Skip to content -->
+  <a href="#main-content" class="skip-to-content">Skip to main content</a>
+  
+  <div class="d-flex flex-column min-vh-100">
+    {% include 'includes/hybrid-nav.html' %}
+    
+    
+    <main id="main-content" class="flex-grow-1">
+      {% block content %}{% endblock %}
+      <div class="end-page" id="end-page"></div>
+    </main>
+    
+    {% include 'footer.html' %}
+    
+  </div>
+
+  <!-- Modals -->
+  {% include 'shop/components/modals/quick_view.html' %}
+  {% include 'shop/components/modals/filters.html' %}
+
+  <!-- JS -->
+  <script src="/static/assets/js/core/popper.min.js"></script>
+  <script src="/static/assets/js/core/bootstrap.min.js"></script>
+  <script src="/static/assets/js/plugins/perfect-scrollbar.min.js"></script>
+  <script src="/static/assets/js/soft-design-system.min.js?v=1.0.1"></script>
+  
+  <!-- NoUI Slider -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.0/nouislider.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.0/nouislider.min.css">
+
+  <!-- Core Modules -->
+  <script src="/static/js/products/productRenderer.js"></script>
+  <script src="/static/js/products/filterManager.js"></script>
+  <script src="/static/js/products/main.js"></script>
+ 
+  
+  <!-- Page Specific JS -->
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

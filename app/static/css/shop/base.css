@@ -57,6 +57,7 @@ header {
     align-items: center;
     flex-wrap: wrap;
     gap: 1rem;
+    z-index: 100000;
 }
 
 .nav-container-links{
@@ -218,34 +219,6 @@ main {
 }
 
 /* ========== Responsive Adjustments ========== */
-@media (max-width: 600px) {
-    .nav-container-links {
-        /* flex-direction: column;
-        padding: 1rem; */
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 16px;
-    }
-    
-    #search-form {
-        width: 100%;
-        margin: 0.5rem 0;
-    }
-    
-    .nav-links {
-        gap: 1rem;
-    }
-    
-    .dropdown-menu {
-        right: auto;
-        left: 50%;
-        transform: translate(-50%, 10px);
-    }
-    
-    .dropdown:hover .dropdown-menu {
-        transform: translate(-50%, 0);
-    }
-}
 
 /* ========== E-commerce Product Grid Compatibility ========== */
 .ecommerce-container {

@@ -1,5 +1,5 @@
 
-from flask import session , redirect , url_for ,request ,g
+from flask import redirect , url_for ,request ,g
 
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
@@ -8,8 +8,9 @@ from functools import wraps
 from app.data_manager.session_manager import SessionManager ,timedelta
 from config.config import JSONConfig
 from app.data_manager.users_manager import UserManager
-from app.routes.logger import LOG , bp_error_logger
-
+from app.routes.logger import LOG 
+from app.routes.extensions import session
+from .logger import bp_error_logger
 from datetime import datetime ,timezone
 
 config = JSONConfig('config.json')
@@ -32,15 +33,18 @@ def get_or_create_session():
             raise Exception("Token not set")
         session["session_token"] = token
     if "user_id" in session:
-        user_obj.session_tkn = session["session_token"]
-        user_obj.reload_object(session["user_id"])
-
-        update_data = {"user_id": user_obj.user.id,
+        user = UserManager(db_session , user=session["user_id"])
+        print("in route utils the user id is ",session['user_id'])
+        
+        user.session_tkn = session["session_token"]
+        assert user.user !=None
+        update_data = {"user_id": user.user.id,
                     'expires_at':datetime.now(timezone.utc)+timedelta(hours=24*config.session_days)}
         LOG.SESSIONS_LOGGER.debug(f"[sess-update] Updating session data {update_data}")
         if user_obj.session_tkn == None:
             user_obj.self_update_session(data=update_data)
-    
+        del user 
+
     LOG.SESSIONS_LOGGER.debug(f"Session initialized. User ID: {session.get('user_id')}")
     LOG.SESSIONS_LOGGER.info("-"*35)
     return session["session_token"]
@@ -82,8 +86,10 @@ def session_set(func):
 
 
 def inject_user_data():
-    user = getattr(g, 'current_user', None)
     user_id = session.get('user_id') or session.get('vendor_id')
+    user_obj.reload_object(user=user_id)
+    g.current_user = user_obj.user
+    user = getattr(g, 'current_user', None)
 
     ip_updated = session.get("last_ip") == get_user_ip() and 3==5
     session['last_ip'] = get_user_ip()
@@ -93,19 +99,22 @@ def inject_user_data():
 
     user_obj.reload_object(user_id)
     is_vendor = user_obj.is_vendor() != None
-
+ 
+    enable_search = 'test' in request.path
     basic_data= {
         'current_user': user,
         'is_authenticated':True,
         'now': datetime.now(),
         'is_vendor':is_vendor,
-        'ip_updated':'true' if ip_updated else 'false'
+        'ip_updated':'true' if ip_updated else 'false',
+        'enable_search':enable_search
     }
-    if is_vendor:
-        basic_data.update(
-            user_obj.user.vendor.to_dict()
-        )
-    print(basic_data)
+   
+    # if is_vendor:
+    #     basic_data.update(
+    #         user_obj.user.vendor.to_dict()
+    #     )
+    
     return basic_data
 
 

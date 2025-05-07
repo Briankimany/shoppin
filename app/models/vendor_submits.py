@@ -21,7 +21,7 @@ class VendorSubmit(TimeStampedBase):
     phone = Column(String , nullable=False)
     
     store_name = Column(String, unique=True, nullable=False)
-    payment_type = Column(String ,nullable = False) # post/pre delivery
+    payment_type = Column(String ,nullable = False) 
     store_description = Column(Text)
 
     plan_id = Column(Integer , ForeignKey("vendor_plans.id") ,nullable=False)

@@ -9,10 +9,9 @@ from app.seeds.products import add_products
 from app.seeds.users_vendors import create_users ,create_vendors ,ClearanceLevel
 from app.models.vendor_plans import VendorPlan
 
+
 DbSession = sessionmaker(bind=engine)
 conf = JSONConfig("config.json")
-
-
 
 def main():
     with DbSession() as db_session:
@@ -43,6 +42,7 @@ def main():
             print("Done adding products")
         except Exception as e:
             db_session.rollback()
+            raise Exception(e)
             print(f"Error adding products: {e}")
 
 

@@ -11,7 +11,7 @@ class Cart(Base):
     __tablename__ = "carts"
     
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey(UserProfile.id), nullable=True)  
+    user_id = Column(Integer, ForeignKey('users_table.id'), nullable=True)  
     session_tkn = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)  
     created_at = Column(TIMESTAMP, server_default=func.now())

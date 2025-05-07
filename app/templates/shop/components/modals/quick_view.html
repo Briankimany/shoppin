@@ -1,0 +1,46 @@
+<div class="modal fade" id="quickViewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body p-4">
+        <button type="button" class="btn-close float-end" data-bs-dismiss="modal" aria-label="Close"></button>
+        
+        <div class="row">
+          <!-- Product Gallery -->
+          <div class="col-md-6">
+            <div id="quickViewGallery"></div>
+          </div>
+          
+          <!-- Product Details -->
+          <div class="col-md-6 ps-md-4 mt-4 mt-md-0">
+            <h3 id="quickViewTitle" class="mb-2"></h3>
+            
+            <!-- Pricing -->
+            <div id="quickViewPricing" class="d-flex align-items-center mb-3"></div>
+            
+            <!-- Attributes -->
+            <div class="mb-4">
+              <h6 class="text-sm mb-2">Specifications:</h6>
+              <div id="quickViewAttributes"></div>
+            </div>
+            
+            <!-- Description -->
+            <p class="text-sm mb-4" id="quickViewDescription"></p>
+            
+            <!-- Add to Cart -->
+            <div id="quickViewAddToCart"></div>
+            
+            <!-- Product Links -->
+            <div class="d-flex justify-content-between mt-4">
+              <a href="#" class="text-sm" onclick="event.preventDefault(); addToWishlist()">
+                <i class="fas fa-heart me-1"></i> Add to Wishlist
+              </a>
+              <a href="#" id="quickViewFullDetails" class="text-sm">
+                <i class="fas fa-info-circle me-1"></i> View Full Details
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -10,7 +10,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 
 class Vendor(Base):
     __tablename__ = 'vendors'
-    id = Column(ForeignKey("user_table.id"), primary_key=True)
+    id = Column(Integer ,ForeignKey("users_table.id"), primary_key=True)
  
     store_name = Column(String, unique=True, nullable=False)
     store_logo = Column(String , unique=False , nullable=False)
@@ -24,8 +24,18 @@ class Vendor(Base):
     updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 
     user = relationship("UserProfile", back_populates="vendor")
-    plan = relationship("VendorPlan" ,back_populates='vendors')
+    _plan = relationship("VendorPlan" ,back_populates='vendors')
+    custom_plan = relationship("CustomVendorPlan",backref='vendor',uselist=False)
+    
+    products = relationship("Product" ,back_populates='vendor',lazy='dynamic')
+    charges = relationship("VendorCharge", back_populates="vendor")
 
+    @hybrid_property
+    def plan(self):
+        if self.custom_plan:
+            return self.custom_plan
+        return self._plan
+    
     @hybrid_property
     def name(self):
         return self.user.name

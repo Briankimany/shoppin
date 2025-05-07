@@ -1,115 +1,89 @@
+<!--
+=========================================================
+* Soft UI Design System - v1.0.1
+=========================================================
+
+* Product Page: https://www.creative-tim.com/product/soft-ui-design-system
+* Copyright 2021 Creative Tim (https://www.creative-tim.com)
+
+Coded by www.creative-tim.com
+
+ =========================================================
+
+* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="apple-touch-icon" sizes="76x76" href="/static/assets/img/apple-icon.png">
+  <link rel="icon" type="image/png" href="/static/assets/img/favicon.png">
+  <link rel="canonical" href="https://appseed.us/ui-kit/soft-ui-design-system"/>
 
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="ip-updated" content='{{ip_updated}}'>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <meta name="ip-updated" content='{{ip_updated}}'>
+
+  <title>{% block title %}Playpit Shop{% endblock %}</title>
   
-    <title>{% block title %}Playpit Shop{% endblock %}</title>
-    
-    <script src="{{ url_for('static', filename='js/shop/base.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/user-ips/user_ips.js') }}"></script>
-   
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/shop/base.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/ips/consent.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/user_notification.css') }}">
+  <script src="{{ url_for('static', filename='js/shop/base.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/user-ips/user_ips.js') }}"></script>
+ 
 
-    {% block styles %}{% endblock %}
-    {% block scripts %}{% endblock %}
-    
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/ips/consent.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/user_notification.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/shop/base.css') }}">
+  
+
+
+  <!--     Fonts and icons     -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
+  <!-- Nucleo Icons -->
+  <link href="/static/assets/css/nucleo-icons.css" rel="stylesheet" />
+  <link href="/static/assets/css/nucleo-svg.css" rel="stylesheet" />
+  <!-- Font Awesome Icons -->
+  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+  <link href="/static/assets/css/nucleo-svg.css" rel="stylesheet" />
+  <!-- CSS Files -->
+  <link id="pagestyle" href="/static/assets/css/soft-design-system.css?v=1.0.1" rel="stylesheet" />
+
+  
+  {% block styles %}{% endblock %}
+  {% block scripts %}{% endblock %}
+  
+  {% block stylesheets %}{% endblock stylesheets %}
 
 </head>
-<body>
-    <div id="alert-container" class="alert-container"></div>
+<body class="{% block body_class %} page-headers-sections {% endblock body_class %}">
+  <div id="alert-container" class="alert-container"></div>
+    {% include "includes/navigation-light.html" %}
+    {% block content %}{% endblock content %}
+  
+   
+
+    {% include "includes/scripts.html" %}
+    {% include "footer.html" %}
     
+    {% block javascripts %}
 
-    <div class="main-content">
-    <header>
-        <div class="nav-container">
-           
-            <form id="search-form">
-                <input type="text" id="search-input" placeholder="Search products..." disabled>
-                <button type="submit" id="search-btn">Search</button>
-            </form>
-            <p id="search-message" style="display: none; color: red;">🔍 Search is coming soon!</p>
-        
-            <nav>
-
-                <ul class="nav-links">
-                    <div class="nav-container-links">
-                        <div>
-                            <li><a href="{{ url_for('shop.shop_home') }}">Shops</a></li>
-
-                        </div>
-                        <div>
-                           
-                            <li class="dropdown">
-                                <a href="#">Account ▼</a>
-                                <nav class="auth-nav">
-                                    <ul class="dropdown-menu">
-                                        <li><a href="{{ url_for('user.orders') }}">Orders</a></li>
-                                        
-                                        {% if current_user %}
-                                        <li><a href="{{ url_for('user.profile') }}">Profile</a></li>
-                                        <li><a href="{{ url_for('user.logout') }}">Logout</a></li>
-                                        {% endif %}
-
-                                        {% if is_vendor %}
-                                        <li><a href="{{ url_for('vendor.dashboard') }}">Vendor Portal</a></li>
-                                        {% endif %}
-                                    </ul>
-                                </nav>
-                                
-                            </li>
-                        </div>
-                        <div>
-                            <li><a href="{{ url_for('shop.view_cart') }}">Cart &#128722</a></li>
-                        </div>
-                        <div>
-                            <li><a href="{{ url_for('shop.checkout') }}">Checkout</a></li>
-                        </div>
-                        
-                        {% if not current_user %}
-                            <div>
-                                <li><a href="{{ url_for('user.login') }}">Login</a></li>
-                            </div>
-                            <div>
-                                <li><a href="{{ url_for('user.register') }}">Sign Up</a></li>
-                            </div>  
-                        {% endif %}
-                     
-                    </div>
-                    
-                </ul>
-            </nav>
-        </div>
-    </header>
-
-    <main>
-        {% block content %}{% endblock %}
-    </main>
-</div>
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-links">
-                <a href="{{ url_for('info.about') }}">About</a>
-                <a href="{{ url_for('info.contact') }}">Contact</a>
-                <a href="{{ url_for('info.terms') }}">Terms</a>
-                <a href="{{ url_for('info.privacy') }}">Privacy</a>
-            </div>
-            
-            <div class="social-icons">
-                <a href="#"><img src="{{ url_for('static', filename='images/facebook.png') }}" alt="Facebook"></a>
-                <a href="#"><img src="{{ url_for('static', filename='images/whatsapp.png') }}" alt="Twitter"></a>
-                <a href="#"><img src="{{ url_for('static', filename='images/instagram.png') }}" alt="Instagram"></a>
-            </div>
-
-            <p>&copy; 2025 Playpit. All rights reserved.</p>
-        </div>
-    </footer>
+    <script src="/static/assets/js/soft-design-system.min.js?v=1.0.1" type="text/javascript"></script>
+    <script>
+      if (document.getElementById('typed')) {
+        var typed = new Typed("#typed", {
+          stringsElement: '#typed-strings',
+          typeSpeed: 70,
+          backSpeed: 50,
+          backDelay: 200,
+          startDelay: 500,
+          loop: true
+        });
+      }
+    </script>
+  
+  {% endblock javascripts %}
 
 </body>
 </html>

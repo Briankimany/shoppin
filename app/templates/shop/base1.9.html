@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="ip-updated" content='{{ip_updated}}'>
+  
+    <title>{% block title %}Playpit Shop{% endblock %}</title>
+    
+    <script src="{{ url_for('static', filename='js/shop/base.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/user-ips/user_ips.js') }}"></script>
+   
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shop/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ips/consent.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/user_notification.css') }}">
+
+
+
+    {% block styles %}{% endblock %}
+    {% block scripts %}{% endblock %}
+    
+
+</head>
+<body>
+    <div id="alert-container" class="alert-container"></div>
+    
+
+    <div class="main-content">
+    <header>
+        <div class="nav-container">
+           
+            <form id="search-form">
+                <input type="text" id="search-input" placeholder="Search products..." disabled>
+                <button type="submit" id="search-btn">Search</button>
+            </form>
+            <p id="search-message" style="display: none; color: red;">🔍 Search is coming soon!</p>
+        
+            <nav>
+
+                <ul class="nav-links">
+                    <div class="nav-container-links">
+                        <div>
+                            <li><a href="{{ url_for('shop.shop_home') }}">Shops</a></li>
+
+                        </div>
+                        <div>
+                           
+                            <li class="dropdown">
+                                <a href="#">Account ▼</a>
+                                <nav class="auth-nav">
+                                    <ul class="dropdown-menu">
+                                        <li><a href="{{ url_for('user.orders') }}">Orders</a></li>
+                                        
+                                        {% if current_user %}
+                                        <li><a href="{{ url_for('user.profile') }}">Profile</a></li>
+                                        <li><a href="{{ url_for('user.logout') }}">Logout</a></li>
+                                        {% endif %}
+
+                                        {% if is_vendor %}
+                                        <li><a href="{{ url_for('vendor.dashboard') }}">Vendor Portal</a></li>
+                                        {% endif %}
+                                    </ul>
+                                </nav>
+                                
+                            </li>
+                        </div>
+                        <div>
+                            <li><a href="{{ url_for('shop.view_cart') }}">Cart &#128722</a></li>
+                        </div>
+                        <div>
+                            <li><a href="{{ url_for('shop.checkout') }}">Checkout</a></li>
+                        </div>
+                        
+                        {% if not current_user %}
+                            <div>
+                                <li><a href="{{ url_for('user.login') }}">Login</a></li>
+                            </div>
+                            <div>
+                                <li><a href="{{ url_for('user.register') }}">Sign Up</a></li>
+                            </div>  
+                        {% endif %}
+                     
+                    </div>
+                    
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</div>
+{% include "footer.html" %}
+
+</body>
+</html>

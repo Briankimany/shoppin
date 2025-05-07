@@ -58,7 +58,7 @@ class Database:
     def verify_vendor(self, vendor_id):
         return self.update_vendor(vendor_id, {"verified": True})
 
-    def add_product(self, product_data):
+    def add_product(self, product_data ,charge):
         with session_scope() as db_session:
             new_product = ProductModel(**product_data)
             product_exist = db_session.query(ProductModel).filter(ProductModel == new_product).first()

@@ -6,7 +6,7 @@ from app.routes.vendor import sessionmaker , engine
 from config.config import JSONConfig
 from app.models.clearance import ClearanceLevel
 from app.models.vendor_plans import VendorPlan
-
+from app.data_manager.users_manager import UserManager
 
 DbSession = sessionmaker(bind=engine)
 conf = JSONConfig("config.json")
@@ -52,6 +52,44 @@ users_data = {
         "email": "services@example.com",
         "phone": "1234567004",
         "password_hash": "services_hash_123"
+    },
+    "user1": {
+        "name": "Milie",
+        "first_name": "Milliam",
+        "second_name": "Adjiambo",
+        "email": "Miliam@testmyemail.com",
+        "phone": "1234567004",
+        "password_hash": "millie123455"
+    }
+    ,
+    "user1": {
+        "name": "James",
+        "first_name": "James",
+        "second_name": "Kimani",
+        "email": "James@testmyemail.com",
+        "phone": "1234567004",
+        "password_hash": "james12345"
+    }
+
+}
+
+normal_users = {
+    "user1": {
+        "level":4,
+        "name": "Milie",
+        "first_name": "Milliam",
+        "second_name": "Adjiambo",
+        "email": "Miliam@testmyemail.com",
+        "phone": "1234567004",
+        "password_hash": "millie123455"
+    },
+    "user1": {
+        "name": "James",
+        "first_name": "James",
+        "second_name": "Kimani",
+        "email": "James@testmyemail.com",
+        "phone": "1234567004",
+        "password_hash": "james12345"
     }
 }
 
@@ -92,31 +130,45 @@ vendors_data = {
 }
 
 
-def create_users(db_session:Session ,level:ClearanceLevel):
-    user_list =[]
+def create_users(db_session: Session, level: ClearanceLevel):
     print("Creating users..")
     for vendor_key, data in users_data.items():
-        user = UserProfile(**data)
-        existing_user = db_session.query(UserProfile).filter(UserProfile.email == user.email).first()
+        existing_user = db_session.query(UserProfile).filter_by(email=data['email']).first()
         if existing_user:
-            print(f"User with email {user.email} already exists, skipping.")
+            print(f"User with email {data['email']} already exists, skipping.")
             continue
-        user.clearance.append(level)
-        user_list.append(user)
-    db_session.add_all(user_list)
+
+        user = UserProfile(**data)
+        db_session.add(user) 
+        user.clearance=level
+    
+    for _,user in normal_users.items():
+        existing_user = db_session.query(
+            UserProfile
+        ).filter(UserProfile.name == user['name']).first()
+        if existing_user:
+            continue
+
+        level = db_session.query(ClearanceLevel).filter(ClearanceLevel.level==user['level']).first()
+        if not level:
+            raise Exception(f"Invalid clearance level {user['level']}")
+        user.pop('level')
+        user =UserProfile(**user)
+        db_session.add(user)
+        user.clearance= level
+
     db_session.commit()
 
 
-def create_vendors(db_session:Session ,plan:VendorPlan):
-    vendor_list = []
+def create_vendors(db_session: Session, plan: VendorPlan):
     print('Adding vendors')
     for vendor_key, data in vendors_data.items():
-        vendor = Vendor(**data)
-        existing_vendor = db_session.query(Vendor).filter(Vendor.id==data['id']).first()
+        existing_vendor = db_session.query(Vendor).filter_by(id=data['id']).first()
         if existing_vendor:
-            print(f"Vendor with email {vendor.email} already exists, skipping.")
-            continue     
-        vendor.plan=plan   
-        vendor_list.append(vendor)
-    db_session.add_all(vendor_list)
+            print(f"Vendor with id {data['id']} already exists, skipping.")
+            continue
+
+        vendor = Vendor(**data)
+        db_session.add(vendor) 
+        vendor.plan = plan
     db_session.commit()

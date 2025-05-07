@@ -7,28 +7,31 @@ from config.config import JSONConfig
 import json
 import time
 
-from app.models.vendor import Vendor
-from app.routes.logger import LOG ,bp_error_logger
 
-from app.models.vendor import Vendor , VendorPayout
-from app.models.model_utils import PaymentMethod
-from app.models.user_profile import UserBalance
-from app.models.order_item import VendorOrder ,OrderItem
-from app.models.product import Product
+
+
+from app.models import (
+     Vendor , 
+     VendorPayout,
+     PaymentMethod,
+     UserBalance,
+     VendorOrder ,
+     OrderItem, 
+     Product)
 
 from config.envrion_variables import StatusCodes ,StatusNames
-from app.data_manager.vendor_transaction import VendorTransactionSystem
-
+from .vendor_transaction import VendorTransactionSystem
+from app.routes.logger import LOG
 
 from contextlib import contextmanager
-from config.envrion_variables import Session as ManagedSession
+from .scoped_session import session_scope ,Session as QuerySsesoin
 
 class VendorObj:
 
     @classmethod
     @contextmanager
     def _scoped_session(cls ,raise_exception = False):
-        db_session = ManagedSession()
+        db_session = QuerySsesoin()
         try:
             yield db_session
         except Exception as e:
@@ -335,52 +338,55 @@ class VendorObj:
 
 
     @classmethod
-    def is_allowed_withdraw(cls ,db_session:Session ,vendor_id ,needed_amount:float):
-
-        pending_withdraws = db_session.query(VendorPayout).filter(
-            VendorPayout.vendor_id == vendor_id,
-            VendorPayout.status == 'pending'
-        ).all()
-
-    
-        total_amount = float(sum([withdrawal.amount for withdrawal in pending_withdraws])) +needed_amount
-        vendor_balance = db_session.query(UserBalance).filter(UserBalance.id == vendor_id).first().balance
-
-        tomany_withdraws = len(pending_withdraws) >= cls.config.MAX_NUM_PENDING_WITHDRAWs 
-        amount_exceeds_balance = total_amount >= vendor_balance
-
-        if tomany_withdraws:
-            LOG.VENDOR_LOGGER.info(f"Vendor {vendor_id} has too many pending withdrawals.")
-            return {"message": "Too many pending withdrawals. Please resolve existing requests before submitting a new one."}
-
-        if amount_exceeds_balance:
-            LOG.VENDOR_LOGGER.info(f"Vendor {vendor_id} has insufficient balance for withdrawal.")
-            return {"message": "Withdrawal amount exceeds available balance."}
+    def is_allowed_withdraw(cls ,vendor_id ,needed_amount:float):
+        with session_scope(fun=cls.is_allowed_withdraw) as db_session:
+            pending_withdraws = db_session.query(VendorPayout).filter(
+                VendorPayout.vendor_id == vendor_id,
+                VendorPayout.status == 'pending'
+            ).all()
 
         
-        return {"success": True}   
+            total_amount = float(sum([withdrawal.amount for withdrawal in pending_withdraws])) +needed_amount
+            vendor_balance = db_session.query(UserBalance).filter(UserBalance.id == vendor_id).first().balance
 
-    @staticmethod
-    def create_vendor_payout_record(db_session:Session ,amount:float ,
+            tomany_withdraws = len(pending_withdraws) >= cls.config.MAX_NUM_PENDING_WITHDRAWs 
+            amount_exceeds_balance = total_amount >= vendor_balance
+
+            if tomany_withdraws:
+                LOG.VENDOR_LOGGER.info(f"Vendor {vendor_id} has too many pending withdrawals.")
+                return {"message": "Too many pending withdrawals. Please resolve existing requests before submitting a new one."}
+
+            if amount_exceeds_balance:
+                LOG.VENDOR_LOGGER.info(f"Vendor {vendor_id} has insufficient balance for withdrawal.")
+                return {"message": "Withdrawal amount exceeds available balance."}
+
+            
+            return {"success": True}   
+
+    @classmethod
+    def create_vendor_payout_record(cls,
+                                    amount:float ,
                                     payment_method:PaymentMethod ,
                                     vendor_id:int,
                                     batch_id:str,
                                     tracking_id:str,
                                     status:str = 'pending'):
         
-        payout = VendorPayout(
-            vendor_id= vendor_id,
-            method = payment_method,
-            amount=amount,
-            status = status,
-            batch_id = batch_id,
-            tracking_id = tracking_id
-        )
-       
-        db_session.add(payout)
-        db_session.commit()
-        LOG.VENDOR_LOGGER.info(f"withdrwal record initiated {payout}")
-        return {"success": True, "payout_id": payout.id}
+        
+        with session_scope(func=cls.create_vendor_payout_record) as db_session:
+            payout = VendorPayout(
+                vendor_id= vendor_id,
+                method = payment_method,
+                amount=amount,
+                status = status,
+                batch_id = batch_id,
+                tracking_id = tracking_id
+            )
+        
+            db_session.add(payout)
+            db_session.commit()
+            LOG.VENDOR_LOGGER.info(f"withdrwal record initiated {payout}")
+            return {"success": True, "payout_id": payout.id}
     
     
     @classmethod

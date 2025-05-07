@@ -142,7 +142,6 @@ class MultiUserSimulator:
             
             #4. Create order (your existing method)
             order = self.om.create_new_order(
-                db_session=self.db,
                 session_tkn=session_token,
                 phone_number=f"07123{i}4567",  # Fake unique phone
                 total_amount=total,
@@ -156,7 +155,7 @@ class MultiUserSimulator:
             if status == 'paid':
                 session_manager.update_cart(cart_id=cart_id , attribute="is_active" , new_value=False)
                 order.divide_to_vendors(order_id=order.order.id)
-                order.update_stock(order_id = order.order.id)
+                order.update_stock_after_order(order_id = order.order.id)
 
             # 6. Group by vendor
             for item in items:

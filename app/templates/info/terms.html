@@ -3,10 +3,15 @@
 {% block title %}Terms{% endblock %}
 
 {% block content %}
+<div>
+    PRODUCTS TERMS
+    <a href="{{url_for('info.serve_file',file='vendor_terms')}}"></a>
+</div>
     <div class="static-page">
         <h2>Terms Playpit Shop</h2>
         <div id="static-content">{{ content | safe }}</div>
     </div>
+
     <style>
         .static-page {
     max-width: 800px;

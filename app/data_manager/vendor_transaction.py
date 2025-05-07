@@ -6,10 +6,10 @@ from sqlalchemy.orm import Session
 from app.models.product import Product as ProductModel
 from app.models.order import Order as OrderModel
 from app.models.order_item import OrderItem , VendorOrder
-from app.models.user_profile import UserBalance
+from app.models.user_profile import UserBalance ,UserProfile
 from app.models.vendor import Vendor as VendorModel
 import humanize
-
+from .scoped_session import session_scope ,LOG
 
 
 
@@ -176,16 +176,34 @@ class VendorTransactionSystem:
         """Update vendor balance when orders are processed"""
 
         # Get or create balance record
-        balance = db_session.query(UserBalance).get(vendor_id)
-        if not balance:
+        user = db_session.query(UserProfile).filter_by(id=vendor_id).first()
+        if not user:
+            raise Exception("invalid user account.")
+   
+        if not user.balance:
             balance = UserBalance(id=vendor_id, balance=0)
-            db_session.add(balance)
 
-        balance.balance += amount
-        db_session.commit()
+            db_session.add(balance)
+            db_session.flush()
+
+            user.balance = balance
+
+        user.balance.balance += amount
+        return user.balance
+    
+    @classmethod
+    def update_vendors_accounts(cls,vendor_data:dict):
+        LOG.SHOP_LOGGER.debug(f"[SALES] Updating vendors account with data {vendor_data}")
+        
+        with session_scope() as db_session:
+            for vendor_id , amount in vendor_data.items():
+                balance = cls.update_vendor_balance(vendor_id, amount, db_session)
+
+            db_session.commit()
+
 
     @classmethod #done
-    def divide_order_to_vendors(cls, order_id: int, db_session: Session):
+    def divide_order_to_vendors(cls, order_id: int):
         """
         Distribute payment to vendors for a given order.
         
@@ -193,22 +211,17 @@ class VendorTransactionSystem:
             order_id (int): ID of the order to process.
             db_session (Session): Active SQLAlchemy session.
         """
-        # Get all vendor shares for this order
-        vendor_shares = db_session.query(
-            VendorOrder.vendorid,
-            func.sum(OrderItem.price_at_purchase * OrderItem.quantity).label('amount')
-        ).join(OrderItem, VendorOrder.orderitem == OrderItem.id
-        ).filter(VendorOrder.orderid == order_id
-        ).group_by(VendorOrder.vendorid).all()
+        with session_scope() as db_session:
+            vendor_shares = db_session.query(
+                VendorOrder.vendorid,
+                func.sum(OrderItem.price_at_purchase * OrderItem.quantity).label('amount')
+            ).join(OrderItem, VendorOrder.orderitem == OrderItem.id
+            ).filter(VendorOrder.orderid == order_id
+            ).group_by(VendorOrder.vendorid).all()
 
-
-        # Update each vendor's balance
-        vendor_data = {}
-        for vendor_id, amount in vendor_shares:
-            cls.update_vendor_balance(vendor_id, float(amount), db_session)
-        
-        for vendor_id , amount in vendor_shares:
-            vendor =db_session.query(VendorModel).filter(VendorModel.id == vendor_id).first()
-            vendor_data[vendor.phone]=amount
+            # Update each vendor's balance
+            vendor_data = {}
+            for vendor_id, amount in vendor_shares:
+                vendor_data[vendor_id]=amount
             
-        return len(vendor_shares)   ,vendor_data
+            return len(vendor_shares)   ,vendor_data

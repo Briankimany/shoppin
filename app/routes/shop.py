@@ -1,5 +1,5 @@
-from flask import Blueprint, render_template, request, session, redirect, url_for, flash ,jsonify ,g
 
+from app.routes.extensions import *
 from app.data_manager.session_manager import SessionManager 
 from app.data_manager.vendor import VendorObj
 from app.data_manager.cart_manager import OrderManager
@@ -12,12 +12,10 @@ from sqlalchemy import create_engine
 from functools import wraps
 from datetime import datetime
 
-from app.data_manager.payments import PaymentManager , PaymentCategory , PaymentMethod
-from app.routes.routes_utils import session_set ,get_user_ip ,inject_user_data
+from .views.shop.payment_api import PaymentAPI
+from app.routes.routes_utils import session_set ,inject_user_data
+from app.data_manager.scoped_session import Session
 
-config = JSONConfig("config.json")
-engine = create_engine(f"sqlite:///{config.database_url.absolute()}")
-Session = sessionmaker(bind=engine)
 db_session = Session()
 
 shop_bp = Blueprint("shop", __name__, url_prefix="/shop")
@@ -34,7 +32,7 @@ class Category:
 def vendor_selected(func):
     @wraps(func)
     def decorated_func(*args, **kwargs):
-        if "vendor_id" not in session:
+        if "shop_vendor_id" not in session:
             LOG.SHOP_LOGGER.warning("Vendor ID missing! Redirecting to shop home.")
             return redirect(url_for("shop.shop_home"))
         return func(*args, **kwargs) 
@@ -64,12 +62,19 @@ def inject_user():
 
 
 
+shop_bp.add_url_rule(
+    '/api-pay',
+    view_func=PaymentAPI.as_view('api_process_payment'),
+    methods=['POST','GET']
+)
+
+
+
 @shop_bp.route('/')
 @bp_error_logger(LOG.SHOP_LOGGER,500)
 @session_set
 def shop_home():
-    tkn = session.get("session_token")
-   
+    
     vendors = VendorObj.get_all_vendors(db_session=db_session)
     return render_template("shop/shops.html", vendors=vendors)
 
@@ -96,12 +101,12 @@ def process_payment():
         return redirect(url_for('shop.view_cart'))
 
 
-@shop_bp.route("/<vendor_id>")
+@shop_bp.route("/s/<vendor_id>")
 @bp_error_logger(LOG.SHOP_LOGGER,500 ,'errors.html')
 def vendor_products(vendor_id):
     """Displays products for a specific vendor."""
    
-    session['vendor_id']=vendor_id
+    session['shop_vendor_id']=vendor_id
     vendor = VendorObj(vendor_id=vendor_id, db_session=db_session)
     products = vendor.get_product("vendor_id", vendor_id, occurrence="all")
     final_data = {}
@@ -121,7 +126,7 @@ def vendor_products(vendor_id):
 @bp_error_logger(LOG.SHOP_LOGGER,500)
 def specific_product(product_id):
     """Displays a specific product."""
-    product = VendorObj(session.get("vendor_id"), db_session=db_session).get_product(
+    product = VendorObj(session.get("shop_vendor_id"), db_session=db_session).get_product(
         product_key="id", value=product_id, occurrence="first"
     )
     return render_template("shop/specific_product.html", product=product)
@@ -148,6 +153,7 @@ def add_to_cart():
          reason = result['reason']
          LOG.SHOP_LOGGER.error("error during add to cart product: {}  quantity: {} reason: {}".format(product_id , quantity , reason))
          return jsonify({"success": False})
+    
     return jsonify({"success": True})
 
 
@@ -176,10 +182,14 @@ def view_cart():
     cart_id = session_manager.get_cart(session_token)
     cart_items = session_manager.get_cartitems(cart_id=cart_id)
    
-    subtotal =sum([i.quantity*i.product.price for i in cart_items])
+    subtotal =sum([i.quantity*i.product.final_price for i in cart_items])
     shiping_fee = 300 ## to be implimented
   
-    return render_template("shop/cart.html", cart_items=cart_items , subtotal=subtotal,shiping_fee = shiping_fee)
+    return render_template(
+        "shop/cart.html", 
+        cart_items=cart_items ,
+        subtotal=subtotal,
+        shiping_fee = shiping_fee)
 
 
 @shop_bp.route("/update_cart", methods=["POST"])
@@ -222,57 +232,6 @@ def checkout():
     return render_template("shop/checkout2.html", cart_summary = cart_summary)
 
 
-@shop_bp.route("/api-pay" , methods = ['POST'])
-@bp_error_logger(LOG.SHOP_LOGGER,500)
-def api_process_payment():
-    data = request.get_json()
-    phone = data.get("phone")
-    amount = data.get("amount")
-
-    if phone[0] == "0":
-        phone = phone.replace("0" , "254")
-
-    if not phone or not amount:
-        return jsonify({"message": "Invalid data received."}), 400
-
-    session_manager =  SessionManager(db_session=db_session)
-    cart_id = session_manager.get_cart(session_token=session["session_token"])
-
-    items = [{"product_id":i.product_id , 
-              "quantity":i.quantity ,
-                "price_at_purchase":i.product.price} for i in session_manager.get_cartitems(cart_id=cart_id)]
-    
-
-    order= OrderManager.create_new_order(db_session=db_session,
-                                            session_tkn=session["session_token"],
-                                            phone_number=phone,
-                                            total_amount=amount,
-                                            cart_id=cart_id,
-                                            items=items
-                                            )
-    status = OrderManager.collect_payment(phone=phone, amount=amount , orderid=order.order.session)
-    LOG.SHOP_LOGGER.info("collected payment: phone {} status {} amount {} orderid {}".format(
-        phone , status , amount , order.order.session
-    ))
-    if status:
-        order.update_order(order.order.id , status =status)
-
-    if status == 'paid':
-        
-        session_manager.update_cart(cart_id=cart_id , attribute="is_active" , new_value=False)
-        order.update_stock(order_id = order.order.id)
-        vendor_data =order.divide_to_vendors(order_id=order.order.id)
-        
-        for vendor_phone , amount in vendor_data.items():
-            PaymentManager.record_payment(source= phone,
-                                        recipient=vendor_phone,
-                                        amount=amount ,
-                                        method=PaymentMethod.MPESA,
-                                        category=PaymentCategory.PRODUCT_SALE,
-                                        description="Products from order id {} sold at {}".format(order.order.id ,
-                                                                                                  float(amount)))
-        return jsonify({"message": "success" ,'data':"Payment inititated"}) , 200
-    return jsonify({"message":"warning", "data":f"Could not initiate payment"}) , 200
 
 
 

@@ -120,7 +120,9 @@ def login():
         verified = user_obj.verify_password(password=password , user=name)  
         LOG.USER_LOGGER.debug(f"[login] Verified = {verified}")
 
+        status_code = 403
         if verified:
+            status_code= 200
             user_obj.reload_object(user=name)
                 
             session["user_id"] = user_obj.user.id
@@ -158,7 +160,7 @@ def login():
             url = url_for("user.login",_external=False)
             data = {"message":"error" ,'data':"Invalid name/email or password",'url':url}
         LOG.USER_LOGGER.debug("-"*35)
-        return jsonify(data)
+        return jsonify(data)  ,status_code
     
     LOG.USER_LOGGER.debug("-"*35)
     return render_template("login/login.html")

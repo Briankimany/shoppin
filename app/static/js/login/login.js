@@ -32,15 +32,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers: getHeaders(false),
             });
 
-            if (!response.ok) {
-                const error = await response.json();
-                showAlert(error.data ,error.message ,3500);
-            }
             const data = await response.json();
-            showAlert(data.data,data.message ,3000)
-           
-            window.location.href = data.url;
-        
+            
+            if (!response.ok) {
+                showAlert(data.data ,data.message ,3500);
+            } else{
+                showAlert(data.data,data.message ,3000)
+                window.location.href = data.url;
+            }
+       
         } catch (error) {
             showAlert("Error "+error, type='error' ,duration = 3500);
             console.error('Login error:', error);

@@ -1,5 +1,6 @@
 
-from sqlalchemy import Column, Integer, ForeignKey, DECIMAL, TIMESTAMP , String
+from sqlalchemy import Column, Integer, ForeignKey, DECIMAL, TIMESTAMP 
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from .order import Order
@@ -19,6 +20,8 @@ class OrderItem(Base):
     price_at_purchase = Column(DECIMAL(10, 2), nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
 
+    product = relationship('Product',backref='orderitems')
+   
     def __repr__(self):
         return self.__str__()
     def __str__(self):

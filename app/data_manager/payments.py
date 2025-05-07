@@ -19,6 +19,7 @@ Session = sessionmaker(bind=engine)
 from contextlib import contextmanager
 from sqlalchemy.exc import SQLAlchemyError
 from typing import Dict, Any, Optional, List
+from .scoped_session import session_scope
 
 class PaymentManager:
 
@@ -70,6 +71,13 @@ class PaymentManager:
             raise ValueError(f"Invalid payment data: {str(e)}")
         except SQLAlchemyError as e:
             raise Exception(f"Database error: {str(e)}")
+    @classmethod
+    def record_payments_batch(cls,data:List[Dict] ):
+        payments = [Payment(**transaction,transaction_ref=generate_transaction_ref()) for transaction in data]
+        with cls._session_scope() as db_session:
+                db_session.add_all(payments)
+                db_session.commit()
+        return True 
 
     @classmethod
     def get_records(cls, filters: Dict[str, Any]) -> List[Payment]:
@@ -139,15 +147,4 @@ class PaymentManager:
 
 
 if __name__ == "__main__":
-    new_payment = PaymentManager.record_payment(
-        source="client_1234@example.com",
-        recipient="merchant_456@store.com",
-        amount=2499.99,
-        method=PaymentMethod.BANK, 
-        category=PaymentCategory.PRODUCT_SALE,
-        description="Premium annual subscription"
-    )
-
-    print(f"Recorded Payment ID: {new_payment.id}")
-    rec = PaymentManager.get_records({"method":PaymentMethod.BANK})
-    print(rec)
+    pass 

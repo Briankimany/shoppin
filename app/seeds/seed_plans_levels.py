@@ -1,10 +1,11 @@
 
 from app.models.vendor_plans import VendorPlan, PlanFeature
-from app.data_manager.client_access_manager import session_scope  ,LOG
+from app.data_manager.client_access_manager import session_scope
+from app.routes.logger import LOG 
 from sqlalchemy import exists
-
+from app.models.model_utils import PayoutFrequency
 from app.models.clearance import ClearanceLevel
-
+import platform_seeds
 
 def seed_clearance_levels():
     levels = {
@@ -29,10 +30,13 @@ def seed_vendor_plans():
     plans_data = [
         {
             "name": "Standard",
-            "commission_percent": 15.0,
-            "flat_fee": 120,
-            "min_price_threshold": 800,
-            "payout_frequency": "monthly",
+            "product_commission_percent": 15.0,
+            "products_flat_fee": 120,
+            "products_min_price_threshold": 800,
+            "payout_frequency": PayoutFrequency.MONTHLY,
+         
+            "min_payout_threshold": 350,  
+   
             "marketing_grace_period": False,
             "description": "Starter plan for individual or casual sellers.",
             "features": [
@@ -45,10 +49,13 @@ def seed_vendor_plans():
         },
         {
             "name": "Professional",
-            "commission_percent": 12.0,
-            "flat_fee": 110,
-            "min_price_threshold": 800,
-            "payout_frequency": "bi-weekly",
+            "product_commission_percent": 12.0,
+            "products_flat_fee": 110,
+            "products_min_price_threshold": 800,
+            "payout_frequency": PayoutFrequency.BI_WEEKLY,
+       
+            "min_payout_threshold": 400,
+  
             "marketing_grace_period": True,
             "description": "Ideal for vendors with structured product categories and moderate scale.",
             "features": [
@@ -61,10 +68,11 @@ def seed_vendor_plans():
         },
         {
             "name": "Enterprise",
-            "commission_percent": 10.0,
-            "flat_fee": 0,  # Assuming none
-            "min_price_threshold": 0,
-            "payout_frequency": "weekly",
+            "product_commission_percent": 10.0,
+            "products_flat_fee": 0,
+            "products_min_price_threshold": 0,
+            "payout_frequency": PayoutFrequency.WEEKLY,
+            "min_payout_threshold": 300, 
             "marketing_grace_period": True,
             "description": "For large-scale, structured vendors requiring maximum flexibility.",
             "features": [
@@ -74,10 +82,36 @@ def seed_vendor_plans():
                 "Premium analytics tools",
                 "Custom support and marketing partnerships"
             ]
-        }
-    ]
+        }]
+    plans_data[0]["unscheduled_withdrawal_percentage"] = 3.0
+    plans_data[0]["unscheduled_withdrawal_flat_fee"] = 17
+    plans_data[0]["max_unscheduled_withdrawal_fee"] = 175
 
-    with session_scope(commit=True,logger=LOG.MAIN_LOGGER ,func=seed_vendor_plans,raise_exception=True) as session:
+    plans_data[0]["scheduled_withdrawal_percentage"] = 2.0
+    plans_data[0]["scheduled_withdrawal_flat_fee"] = 10
+    plans_data[0]["max_scheduled_withdrawal_fee"] = 150
+
+    plans_data[1]["unscheduled_withdrawal_percentage"] = 4.0
+    plans_data[1]["unscheduled_withdrawal_flat_fee"] = 17
+    plans_data[1]["max_unscheduled_withdrawal_fee"] = 175
+
+    plans_data[1]["scheduled_withdrawal_percentage"] = 3.5
+    plans_data[1]["scheduled_withdrawal_flat_fee"] = 10
+    plans_data[1]["max_scheduled_withdrawal_fee"] = 150
+
+    plans_data[2]["unscheduled_withdrawal_percentage"] = 5
+    plans_data[2]["unscheduled_withdrawal_flat_fee"] = 17
+    plans_data[2]["max_unscheduled_withdrawal_fee"] = 175
+
+    plans_data[2]["scheduled_withdrawal_percentage"] = 5
+    plans_data[2]["scheduled_withdrawal_flat_fee"] = 10
+    plans_data[2]["max_scheduled_withdrawal_fee"] = 150
+
+    with session_scope(commit=True,
+                       logger=LOG.MAIN_LOGGER ,
+                       func=seed_vendor_plans
+                       ,raise_exception=True) as session:
+        
         for plan_data in plans_data:
             print("Seeding plans")
             exists_query = session.query(
@@ -85,21 +119,19 @@ def seed_vendor_plans():
             ).scalar()
             if exists_query:
                 continue
-
-            plan = VendorPlan(
-                name=plan_data["name"],
-                commission_percent=plan_data["commission_percent"],
-                flat_fee=plan_data["flat_fee"],
-                min_price_threshold=plan_data["min_price_threshold"],
-                payout_frequency=plan_data["payout_frequency"],
-                marketing_grace_period=plan_data["marketing_grace_period"],
-                description=plan_data["description"]
-            )
-            plan.features = [
+            features = [
                 PlanFeature(feature_text=f) for f in plan_data["features"]
             ]
+            plan_data.pop('features')
+      
+            plan = VendorPlan(**plan_data)
+            plan.features = features
             session.add(plan)
 
-if __name__ == "__main__":
+def main():
     seed_clearance_levels()
     seed_vendor_plans()
+    platform_seeds.main()
+    
+if __name__ == "__main__":
+    main()

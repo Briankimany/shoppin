@@ -7,8 +7,11 @@ from app.routes.logger import LOG
 from app.models.order import Order
 from app.models.order_item import OrderItem
 from app.models.product import Product
+from app.models import ClearanceLevel
+
 from .vendor import VendorObj
 from .client_access_manager import session_scope
+
 
 class UserManager:
     def __init__(self , db_session:Session , user = None):
@@ -20,7 +23,7 @@ class UserManager:
 
 
     def reload_object(self , user , token= None):
-
+        print("the user idis",user)
         if type(user) == str:
             if user.isdigit():
                 user = int(user)
@@ -132,8 +135,12 @@ class UserManager:
     
     
     @staticmethod
-    def register_user(db_session:Session , user_details:dict , return_self_instance = False):
+    def register_user(db_session:Session , user_details:dict , return_self_instance = False,
+                      level=4):
+        level = db_session.query(ClearanceLevel).filter_by(level=level).first()
+       
         user = UserProfile(**user_details)
+        user.clearance = level
         db_session.add(user)
         db_session.commit()
         if return_self_instance:
@@ -206,10 +213,7 @@ class UserManager:
     
     @staticmethod
     def get_user_(db_session, user):
-        
-        if isinstance(user, UserProfile):
-            return user
-
+ 
         query = None
         if isinstance(user, int): 
             query = db_session.query(UserProfile).filter(UserProfile.id == user)
@@ -221,7 +225,7 @@ class UserManager:
                     UserProfile.phone == user
                 )
             )
-
+        
         user_obj = query.first() if query else None
         return user_obj
     

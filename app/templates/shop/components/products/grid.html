@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Add this to your HTML to display product stats -->
+<div class="text-muted mb-3">
+  Showing <span id="products-rendered-count">0</span> of 
+  <span id="products-total-count">0</span> products
+</div>
+
+<!-- The tracker element (hidden) -->
+<div id="product-count-tracker" 
+     data-count="0" 
+     data-total="0" 
+     style="display: none;"></div>
+     
+     <div class="container-fluid py-4 px-2 px-md-4">
+      <div class="row g-4">
+
+        <div class="col-lg-3 order-lg-1 order-2 position-lg-sticky top-lg-0" style="height: fit-content; align-self: start;">
+          {% include 'shop/components/filters/sidebar2.html' %}
+        </div>
+        <!-- Products Grid (scrollable) -->
+        <div class="col-lg-9 order-lg-2 order-1">
+          {% include 'shop/components/products/empty_state.html' %}
+          
+          <div class="scrollable-products-container" style="max-height: calc(100vh - 120px); overflow-y: auto;">
+            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4" id="products-grid">
+              {% include 'shop/components/products/loading_state.html' %}
+            </div>
+            <div id="end-page"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <style>
+      /* Desktop behavior */
+      @media (min-width: 992px) {
+        .scrollable-products-container {
+          padding-right: 10px; /* Prevents scrollbar overlap */
+        }
+        
+        /* Custom scrollbar (optional) */
+        .scrollable-products-container::-webkit-scrollbar {
+          width: 6px;
+        }
+        .scrollable-products-container::-webkit-scrollbar-track {
+          background: #f8f9fa;
+        }
+        .scrollable-products-container::-webkit-scrollbar-thumb {
+          background: #dee2e6;
+          border-radius: 3px;
+        }
+      }
+    
+      /* Mobile behavior */
+      @media (max-width: 991.98px) {
+        .position-lg-sticky {
+          position: relative !important;
+        }
+        .scrollable-products-container {
+          max-height: none !important;
+          overflow-y: visible !important;
+        }
+      }
+    </style>
+{% include 'shop/components/modals/quick_view.html' %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/products/productMetaTracker.js"></script>
+<script src="/static/js/products/quickViewModal.js"></script>
+<script src="/static/js/products/infiniteScroll.js"></script>
+<!-- <script src="/static/js/products/categories2.js"></script> -->
+<script src="/static/js/products/search.js"></script>
+
+{% endblock %}

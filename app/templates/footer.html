@@ -1,0 +1,46 @@
+<!-- footer.html -->
+<footer class="footer py-4 bg-gradient-dark position-relative border-top border-light border-opacity-10">
+    <div class="container">
+      <div class="row align-items-center justify-content-between">
+        <!-- Left: Links -->
+        <div class="col-md-6 mb-3 mb-md-0">
+          <div class="d-flex flex-wrap gap-3">
+            <a href="{{ url_for('info.about') }}" class="text-white opacity-8 text-sm text-decoration-none hover-opacity-100">
+              About
+            </a>
+            <a href="{{ url_for('info.contact') }}" class="text-white opacity-8 text-sm text-decoration-none hover-opacity-100">
+              Contact
+            </a>
+            <a href="{{ url_for('info.terms') }}" class="text-white opacity-8 text-sm text-decoration-none hover-opacity-100">
+              Terms
+            </a>
+            <a href="{{ url_for('info.privacy') }}" class="text-white opacity-8 text-sm text-decoration-none hover-opacity-100">
+              Privacy
+            </a>
+          </div>
+        </div>
+        
+        <!-- Center: Social Icons -->
+        <div class="col-md-6 text-md-end">
+          <div class="d-flex justify-content-center justify-content-md-end gap-2">
+            <a href="#" class="btn btn-icon-only btn-link text-white opacity-8 hover-opacity-100">
+              <img src="{{ url_for('static', filename='assets/img/icons/facebook.png') }}" alt="Facebook" width="20">
+            </a>
+            <a href="#" class="btn btn-icon-only btn-link text-white opacity-8 hover-opacity-100">
+              <img src="{{ url_for('static', filename='assets/img/icons/whatsapp.png') }}" alt="WhatsApp" width="20">
+            </a>
+            <a href="#" class="btn btn-icon-only btn-link text-white opacity-8 hover-opacity-100">
+              <img src="{{ url_for('static', filename='assets/img/icons/instagram.png') }}" alt="Instagram" width="20">
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Copyright (centered on mobile) -->
+      <div class="row mt-3">
+        <div class="col-12 text-center text-sm text-white opacity-60">
+          &copy; <script>document.write(new Date().getFullYear())</script> Playpit. All rights reserved.
+        </div>
+      </div>
+    </div>
+  </footer>

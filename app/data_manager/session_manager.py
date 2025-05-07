@@ -12,11 +12,12 @@ import requests
 from app.models.user_profile import UserProfile
 
 from .client_access_manager import session_scope
+from .scoped_session import Session as DbSession
 from app.routes.logger import LOG
 
 class SessionManager:
     def __init__(self, db_session: Session):
-        self.db_session = db_session
+        self.db_session = DbSession()
 
     def create_new_session(self,user_id=None , expire_after:int = 24):
         """Creates a new session and ensures a cart is linked to it."""
@@ -136,7 +137,7 @@ class SessionManager:
             item_category = item.product.category
             if item_category not in results:
                 results[item_category] = []
-            itemprice = item.quantity*item.product.price
+            itemprice = item.quantity*item.product.final_price
             itemdata = {"product_id":item.product_id,"name":item.product.name , "quantity":item.quantity , "price":itemprice}
             results[item_category].append(itemdata)
 

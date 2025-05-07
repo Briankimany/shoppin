@@ -25,7 +25,7 @@ class VendorRegister:
                            func=cls.get_plans) as db_session: 
              
              plans = db_session.query(VendorPlan).all()
-             return [Plan_(p.name , p.id ,p.commission_percent) for p in plans]
+             return [Plan_(p.name , p.id ,p.product_commission_percent) for p in plans]
 
 
     @classmethod

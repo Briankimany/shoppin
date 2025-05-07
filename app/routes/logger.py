@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from functools import wraps
 from flask import jsonify ,render_template,session
-import os
+
 from uuid import uuid4
 from dotenv import load_dotenv
 from config.envrion_variables import IN_DEVELOPMENT
@@ -39,6 +39,8 @@ class LOG:
     IP_BP  = LoggerManager(parent_dir/"ip-address_logs.log" ,logger_name='IPS').get_logger()
     MAIL_LOGGER =  LoggerManager(parent_dir/"emails.log" ,logger_name='MAIL').get_logger()
     SESSIONS_LOGGER = LoggerManager(parent_dir/"sessions.log" ,logger_name='SESSION').get_logger()
+    DB = LoggerManager(parent_dir/"database.logs" ,logger_name='DB').get_logger()
+
 
 
 def bp_error_logger(logger:LOG, status_code=400 ,return_template = None ,raise_exeption=False):

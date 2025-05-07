@@ -388,14 +388,14 @@ def process_withdrawal():
         account_info = "254" + account_info[1:]
 
     if not all((amount,method,account_info)) :
-        raise ValueError("missing values from {} {} {}".format(amount,method,account_info))
+        raise Exception("Missing values from {} {} {}".format(amount,method,account_info))
     
     enum_instance = PaymentMethod[method]
 
     vendor = VendorObj(session['vendor_id'], db_session)
     
     LOG.VENDOR_LOGGER.debug("vendor {} is withdrawing {}".format(vendor , amount))
-    verified_to_withdraw = vendor.is_allowed_withdraw(db_session=db_session,vendor_id=session['vendor_id'] ,needed_amount=amount)
+    verified_to_withdraw = vendor.is_allowed_withdraw(vendor_id=session['vendor_id'] ,needed_amount=amount)
     LOG.VENDOR_LOGGER.debug("Verified to withdraw {}".format(verified_to_withdraw))
 
     if not "success" in verified_to_withdraw :

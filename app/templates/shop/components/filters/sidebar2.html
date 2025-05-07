@@ -1,0 +1,46 @@
+<!-- Desktop Filters -->
+<div class="card card-body blur shadow-blur h-100 position-sticky d-none d-lg-block" style="top: 1rem;">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0">Filters</h5>
+  </div>
+
+  <div id="filters-container" class="overflow-auto" style="max-height: 70vh;">
+    <div class="mb-4">
+      <label class="form-label">Price Range</label>
+      <div class="d-flex justify-content-between mb-2">
+        <span id="min-price-value">$0</span>
+        <span id="max-price-value">$1000</span>
+      </div>
+      <div id="price-slider" class="range-slider"></div>
+    </div>
+  </div>
+  <button id="apply-filters" class="btn bg-gradient-primary mt-3 w-100">Apply</button>
+</div>
+
+<!-- Mobile Filters Trigger -->
+<button class="btn btn-primary d-lg-none fixed-bottom mb-4 mx-4 rounded-pill shadow-lg" 
+        data-bs-toggle="modal" data-bs-target="#mobileFiltersModal" style="z-index: 1029;">
+  <i class="ni ni-filter me-2"></i> Filters
+</button>
+
+<!-- Mobile Filters Modal -->
+<div class="modal fade" id="mobileFiltersModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Filters</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="overflow-auto" style="max-height: 60vh;">
+          <div id="mobile-filters-container"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button id="mobile-apply-filters" class="btn btn-primary">Apply Filters</button>
+      </div>
+    </div>
+  </div>
+</div>
+

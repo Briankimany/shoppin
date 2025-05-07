@@ -11,6 +11,7 @@ from app.routes.info import info_bp
 from app.routes.mail import mail_bp
 from app.routes.admin import admin_bp
 from app.routes.users_ips import ip_bp
+from app.routes.products_route import blueprint
 
 from app.services.mail import mail
 from app.routes.extensions import csrf 
@@ -51,6 +52,7 @@ app.register_blueprint(info_bp)
 app.register_blueprint(mail_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(ip_bp)
+app.register_blueprint(blueprint)
 
 
 @app.route("/log")

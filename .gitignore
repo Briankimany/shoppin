@@ -7,6 +7,7 @@
 *.ipynb
 test/
 *.logs
+*.log
 /LOGS
 /tests
 venv
@@ -20,3 +21,5 @@ venv
 *.ini
 /md-files
 .venv2/
+*.Identifier
+notebooks/

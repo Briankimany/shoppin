@@ -1,7 +1,7 @@
 # base.py
 
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Integer , TIMESTAMP ,Column ,func
+from sqlalchemy.ext.declarative import declarative_base 
+from sqlalchemy import Integer , TIMESTAMP ,Column ,ForeignKey ,Table 
 from datetime import  datetime ,timezone
 import enum
 
@@ -23,3 +23,24 @@ class TimeStampedBase(Base):
 
        
 
+# ---- Association Tables ----
+product_attribute_values = Table(
+    'product_attribute_values',
+    Base.metadata,
+    Column('product_id', Integer, ForeignKey('products.id'), primary_key=True),
+    Column('attribute_value_id', Integer, ForeignKey('attribute_values.id'), primary_key=True)
+)
+
+product_attribute_link = Table(
+    'product_attribute_links',
+    Base.metadata,
+    Column('product_id', Integer, ForeignKey('products.id'), primary_key=True),
+    Column('attribute_id', Integer, ForeignKey('attributes.id'), primary_key=True)
+)
+
+attribute_value_link = Table(
+    'attribute_value_links',
+    Base.metadata,
+    Column('attribute_id', Integer, ForeignKey('attributes.id'), primary_key=True),
+    Column('value_id', Integer, ForeignKey('attribute_values.id'), primary_key=True)
+)

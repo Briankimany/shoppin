@@ -4,13 +4,21 @@ from pathlib import Path
 
 curr = Path().cwd() / "app"/"templates"
 
-info_bp = Blueprint("info", __name__, url_prefix="/info")
+info_bp = Blueprint("info", __name__,
+                     url_prefix="/info")
 
 def load_markdown(file):
     """Reads a Markdown file and converts it to HTML"""
 
     with open(curr/f"info/static_pages/{file}", "r", encoding="utf-8") as f:
         return markdown.markdown(f.read())
+
+@info_bp.route("/<file>")
+def serve_file(file):
+    
+    file_name ="info/vendor/"+ file+'.html'
+    print(file_name)
+    return render_template(file_name)
 
 @info_bp.route("/about")
 def about():

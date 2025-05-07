@@ -1,0 +1,125 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top {% if enable_search %}blur border-radius-xl mt-3 mx-2 mx-md-4 shadow{% else %}py-3 border-bottom{% endif %}" style="z-index: 1030;">
+  <div class="{% if enable_container_fluid %}container-fluid px-0{% else %}container{% endif %}">
+    <!-- Brand Logo -->
+    <a class="navbar-brand {% if enable_search %}me-4{% else %}me-lg-4{% endif %}" href="/">
+      {% if enable_search %}
+        <span class="fw-bold text-gradient text-primary">Premium</span>Shop
+      {% else %}
+        <span class="text-dark fw-bold">Your Logo</span>
+      {% endif %}
+    </a>
+
+    <!-- Desktop Categories -->
+    {% if enable_search %}
+    <div class="d-none d-lg-flex align-items-center ms-4" id="desktop-categories"></div>
+    {% endif %}
+
+    <!-- Right Section -->
+    <div class="d-flex align-items-center ms-auto">
+      {% if not enable_search %}
+      <button class="btn btn-link text-dark p-0 d-lg-none me-3" onclick="enableSearchMode()">
+        <i class="ni ni-zoom-split-in fs-5"></i>
+      </button>
+      {% endif %}
+
+      <button class="btn btn-outline-secondary d-lg-none ms-2" type="button"
+              data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
+              aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="ni ni-bullet-list-67 me-1"></i> Menu
+      </button>
+    </div>
+
+    <!-- Collapsible Content -->
+    <div class="collapse navbar-collapse mt-3 mt-lg-0" id="navbarCollapse">
+      {% if enable_search %}
+      <div class="d-flex ms-lg-auto my-2 my-lg-0 w-100" style="max-width: 500px;">
+        <div class="d-flex flex-column w-100">
+          <label for="search-input" class="form-label mb-1 fw-semibold">Search products...</label>
+          <input id="search-input" type="text" class="form-control" autocomplete="off">
+        </div>
+        <button id="search-btn" class="btn bg-gradient-primary mb-0 ms-2" type="button">
+          <i class="ni ni-zoom-split-in"></i>
+        </button>
+        <div id="search-suggestions" class="position-absolute w-100 mt-1 bg-white shadow-lg rounded overflow-auto" 
+             style="max-height: 400px; z-index: 2080; display: none;"></div>
+      </div>
+      {% endif %}
+
+      <ul class="navbar-nav navbar-nav-hover ms-lg-auto mt-3 mt-lg-0">
+        <li class="nav-item mx-lg-2">
+          <a class="nav-link text-dark fw-semibold" href="{{ url_for('shop.shop_home') }}">
+            <i class="ni ni-shop d-lg-none me-2"></i> Shops
+          </a>
+        </li>
+
+        <li class="nav-item dropdown dropdown-hover mx-lg-2">
+          <a class="nav-link text-dark fw-semibold d-flex align-items-center" id="dropdownMenuAccount" data-bs-toggle="dropdown">
+            <i class="ni ni-single-02 d-lg-none me-2"></i> Account
+            <img src="/static/assets/img/down-arrow-dark.svg" alt="▼" class="arrow ms-1">
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end p-3 border-radius-lg mt-0" aria-labelledby="dropdownMenuAccount">
+            <li><a class="dropdown-item border-radius-md" href="{{ url_for('user.orders') }}">Orders</a></li>
+            {% if current_user %}
+            <li><a class="dropdown-item border-radius-md" href="{{ url_for('user.profile') }}">Profile</a></li>
+            {% endif %}
+            {% if is_vendor %}
+            <li><a class="dropdown-item border-radius-md" href="{{ url_for('vendor.dashboard') }}">Vendor Portal</a></li>
+            {% endif %}
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger border-radius-md" href="{{ url_for('user.logout') }}">Logout</a></li>
+          </ul>
+        </li>
+
+        <li class="nav-item mx-lg-2">
+          <a class="nav-link text-dark fw-semibold position-relative" href="{{ url_for('shop.view_cart') }}">
+            <i class="ni ni-cart d-lg-none me-2"></i> Cart
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger text-xs mt-1 ms-1">
+              3 <span class="visually-hidden">items in cart</span>
+            </span>
+          </a>
+        </li>
+
+        {% if not current_user %}
+        <li class="nav-item mx-lg-2">
+          <a class="nav-link text-dark fw-semibold" href="{{ url_for('user.login') }}">
+            <i class="ni ni-key-25 d-lg-none me-2"></i> Login
+          </a>
+        </li>
+        <li class="nav-item mx-lg-2">
+          <a class="btn btn-sm btn-outline-dark mb-0" href="{{ url_for('user.register') }}">
+            Sign Up
+          </a>
+        </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+{% if enable_search %}
+<button class="btn btn-primary d-lg-none fixed-bottom mb-4 mx-4 rounded-pill shadow-lg" 
+        data-bs-toggle="modal" data-bs-target="#mobileFiltersModal" style="z-index: 1029;">
+  <i class="ni ni-filter me-2"></i> Filters
+</button>
+{% endif %}
+
+<style>
+  #search-suggestions {
+    max-width: 100vw;
+    overflow-x: auto;
+    overflow-y: auto;
+    white-space: normal;
+    box-sizing: border-box;
+  }
+  .search-suggestion-item {
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  }
+</style>
+
+<script>
+  function enableSearchMode() {
+    window.location.search = '?search_mode=1';
+  }
+</script>

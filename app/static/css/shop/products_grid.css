@@ -1,0 +1,344 @@
+
+/* == Used to hide triger div for infite scroll */
+.hidden {
+    display: none;
+  }
+  
+#search-suggestions {
+  position: absolute;
+  z-index: 1080;
+}
+.search-bar-container {
+  position: relative; /* Make sure the parent is positioned */
+  z-index: 1090; /* Ensure it's higher than others if needed */
+}
+
+
+
+/* Product Card Styles */
+.hover-scale {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-scale:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+}
+
+.card-img-container {
+  background-color: #f8f9fa;
+}
+
+.object-fit-cover {
+  object-fit: cover;
+  object-position: center;
+}
+
+.border-radius-top {
+  border-radius: 0.5rem 0.5rem 0 0 !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .card-img-container {
+    height: 160px !important;
+  }
+  
+  .card-title {
+    font-size: 1rem;
+  }
+}
+
+
+/* Search Suggestions */
+#search-suggestions {
+  border: 1px solid var(--bs-border-color);
+}
+
+.search-suggestion-item {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.search-suggestion-item:hover {
+  background-color: var(--bs-light) !important;
+}
+
+.search-suggestion-category {
+  font-size: 0.75rem;
+  color: var(--bs-gray-600);
+}
+
+/* Mobile optimization */
+@media (max-width: 768px) {
+  #search-suggestions {
+    max-height: 50vh;
+  }
+}
+
+  /* Empty State */
+.empty-state-icon {
+  width: 4rem;
+  height: 4rem;
+}
+
+/* Quick View Modal */
+#quick-view-carousel .carousel-item {
+  height: 400px;
+  background-color: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#quick-view-carousel img {
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.rating-stars {
+  color: #e9ecef;
+}
+
+.rating-stars .ni-star-fill,
+.rating-stars .ni-star-half {
+  color: #ffc107;
+}
+
+/* Skeleton Loading */
+.shimmer {
+  background: #f0f0f0;
+  background-image: linear-gradient(
+    to right,
+    #f0f0f0 0%,
+    #e0e0e0 20%,
+    #f0f0f0 40%,
+    #f0f0f0 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 800px 200px;
+  animation: shimmer 1.5s infinite linear;
+}
+
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.product-img-container.shimmer {
+  height: 200px;
+}
+    /* Base Styles */
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 999;
+  padding: 1rem;
+  background: white;
+}
+
+.skip-to-content:focus {
+  left: 0;
+}
+
+/* Mobile Filter Modal */
+.modal-bottom {
+  position: fixed;
+  bottom: 0;
+  margin: 0;
+  max-width: 100%;
+}
+
+.modal-bottom .modal-content {
+  border-radius: 1rem 1rem 0 0;
+  min-height: 60vh;
+}
+
+/* Filter Components */
+.collapse-card {
+  border: 1px solid #e9ecef;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.collapse-header {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  background-color: #f8f9fa;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+  .form-check-input {
+    transform: scale(1.2);
+    margin-right: 0.5rem;
+  }
+  
+  .form-check-label {
+    font-size: 1rem;
+  }
+}
+
+
+/* Product Card Animations */
+.product-item {
+position: relative;
+overflow: hidden;
+transition: transform 0.3s ease, box-shadow 0.3s ease;
+border-radius: 0.5rem;
+}
+
+.product-item:hover {
+transform: translateY(-6px) scale(1.01);
+box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* Subtle Pulse Animation on Hover */
+.product-item:hover::after {
+content: "";
+position: absolute;
+inset: 0;
+background: radial-gradient(circle, rgba(0, 123, 255, 0.05) 20%, transparent 80%);
+pointer-events: none;
+animation: pulse-fade 0.6s ease-out;
+}
+
+/* Product Image Fade-in */
+.card-img-container img {
+opacity: 0;
+transform: scale(1.05);
+animation: fadeInImg 0.6s forwards ease-in;
+}
+
+/* Attribute Badges */
+.attributes .badge {
+border-radius: 999px;
+background-color: #f0f2f5;
+color: #333;
+border: 1px solid #e0e0e0;
+font-weight: 500;
+font-size: 0.72rem;
+padding: 0.4em 0.8em;
+text-transform: capitalize;
+letter-spacing: 0.2px;
+}
+
+/* Price & Discount Badges */
+.badge.bg-dark {
+background: linear-gradient(135deg, #212529, #343a40);
+font-weight: 600;
+}
+
+.badge.bg-danger {
+background: linear-gradient(135deg, #e3342f, #cc1f1a);
+color: #fff;
+font-weight: 600;
+}
+
+/* Quick View Button Styling */
+.card .btn-dark {
+background-color: #212529;
+border: none;
+}
+
+.card .btn-dark:hover {
+background-color: #1a1d20;
+}
+
+/* Buttons General */
+.card .btn {
+font-size: 0.82rem;
+border-radius: 0.375rem;
+font-weight: 500;
+transition: background 0.2s ease;
+}
+
+/* Subtle shadow on buttons */
+.card .btn-outline-dark:hover {
+background-color: #f1f1f1;
+border-color: #d1d1d1;
+}
+
+/* Small icon bump */
+.card .btn i {
+transform: translateY(-1px);
+}
+
+/* Animations */
+@keyframes fadeInImg {
+to {
+opacity: 1;
+transform: scale(1);
+}
+}
+
+@keyframes pulse-fade {
+from {
+opacity: 0.4;
+}
+to {
+opacity: 0;
+}
+}
+
+/* Product Card Wrapper */
+.product-item {
+transition: transform 0.2s ease-in-out;
+cursor: pointer;
+}
+
+/* Hover Scale */
+.product-item:hover {
+transform: translateY(-5px);
+}
+
+/* Card Image Container */
+.card-img-container img {
+border-top-left-radius: 0.5rem;
+border-top-right-radius: 0.5rem;
+object-fit: cover;
+}
+
+/* Badge Styling */
+.card .badge {
+font-size: 0.75rem;
+padding: 0.4em 0.6em;
+border-radius: 0.25rem;
+}
+
+/* Strike-through Price */
+.badge.text-decoration-line-through {
+opacity: 0.6;
+font-size: 0.7rem;
+}
+
+/* Discount Badge */
+.badge.bg-danger {
+font-weight: 600;
+font-size: 0.75rem;
+}
+
+/* Attribute Badges */
+.attributes .badge {
+border: 1px solid #dee2e6;
+background-color: #f8f9fa;
+color: #212529;
+font-size: 0.75rem;
+}
+
+/* Buttons */
+.card .btn {
+font-size: 0.8rem;
+padding: 0.4rem 0.75rem;
+}
+
+/* Button Icons */
+.card .btn i {
+font-size: 0.85rem;
+vertical-align: middle;
+}
+

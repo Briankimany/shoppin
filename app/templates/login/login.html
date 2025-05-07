@@ -1,89 +1,106 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Login </title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/login/login.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/ips/consent.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/user_notification.css') }}">
+{% extends 'layouts/base-fullscreen.html' %}
 
-    <script src="{{ url_for('static', filename='js/shop/base.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/user-ips/user_ips.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/login/login.js') }}"></script>
+{% block title %} Sign IN {% endblock title %}
 
-</head>
-<body>
-    <div id="alert-container" class="alert-container"></div>
+{% block body_class %} sign-in {% endblock body_class %}
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ips/consent.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/user_notification.css') }}">
+{% endblock %}
+{% block content %}
 
-    <div class="login-container">
-        <div class="login-header">
-            <div class="login-logo">
-                <i class="fas fa-store"></i>
-            </div>
-            <h1 class="login-title">Welcome back</h1>
-            <p class="login-subtitle">Sign in to your account to continue</p>
-        </div>
 
-        <!-- Login Form -->
-        <form method="POST" class="login-form" id="loginForm">
-            <div class="form-group">
-                <label for="identifier" class="form-label">Email or Username</label>
-                <input 
-                    type="text" 
-                    id="identifier" 
-                    name="identifier" 
-                    class="form-input" 
-                    placeholder="you@example.com or username"
-                    autocomplete="username"
-                >
-                <div class="error-message" id="identifier-error">Please enter a valid email or username</div>
-            </div>
-
-            <div class="form-group">
-                <label for="password" class="form-label">Password</label>
-                <div class="password-container">
+  <section>
+    <div class="page-header section-height-100">
+      <div class="container">
+        <div class="row">
+          <div class="col-xl-4 col-lg-5 col-md-7 d-flex flex-column mx-lg-0 mx-auto">
+            <div class="card card-plain">
+              <div class="card-header pb-0 text-left">
+                <h4 class="font-weight-bolder">Welcome back</h4>
+                <p class="mb-0">Sign in to your account to continue</p>
+              </div>
+              <div id="alert-container" class="alert-container"></div>
+              <div class="card-body">
+                <form method="POST" class="login-form" id="loginForm" role="form">
+                  <div class="mb-3">
+                    <label for="identifier" class="form-label">Email or Username</label>
                     <input 
+                      type="text" 
+                      id="identifier" 
+                      name="identifier" 
+                      class="form-control form-control-lg" 
+                      placeholder="you@example.com or username"
+                      autocomplete="username"
+                    >
+                    <div class="error-message" id="identifier-error">Please enter a valid email or username</div>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <div class="password-container input-group">
+                      <input 
                         type="password" 
                         id="password" 
                         name="password" 
-                        class="form-input" 
+                        class="form-control form-control-lg" 
                         placeholder="Enter your password" 
                         required
                         autocomplete="current-password"
-                    >
-                    <button type="button" class="toggle-password" aria-label="Toggle password visibility">
+                      >
+                      <button type="button" class="btn btn-outline-secondary toggle-password" aria-label="Toggle password visibility">
                         <i class="fas fa-eye"></i>
+                      </button>
+                    </div>
+                    <div class="error-message" id="password-error">Please enter your password</div>
+                  </div>
+
+                  <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" name="remember" id="remember">
+                    <label class="form-check-label" for="remember">Remember me</label>
+                    <a href="{{ url_for('user.forgot_password') }}" class="float-end">Forgot password?</a>
+                  </div>
+
+                  <div class="text-center">
+                    <button type="submit" class="btn btn-lg bg-gradient-primary btn-lg w-100 mt-4 mb-0">
+                      <i class="fas fa-sign-in-alt me-2"></i>
+                      Sign In
                     </button>
-                </div>
-                <div class="error-message" id="password-error">Please enter your password</div>
+                  </div>
+                </form>
+              </div>
+              <div class="card-footer text-center pt-0 px-lg-2 px-1">
+                <p class="mb-4 text-sm mx-auto">
+                  Don't have an account?
+                  <a href="{{ url_for('user.register') }}" class="text-primary text-gradient font-weight-bold">Sign up</a>
+                </p>
+              </div>
             </div>
-
-            <div class="remember-forgot">
-                <label class="remember-me">
-                    <input type="checkbox" name="remember" id="remember">
-                    Remember me
-                </label>
-                <a href="{{ url_for('user.forgot_password') }}" class="forgot-password">Forgot password?</a>
+          </div>
+          <div class="col-6 d-lg-flex d-none h-100 my-auto pe-0 position-absolute top-0 end-0 text-center justify-content-center flex-column">
+            <div class="position-relative bg-gradient-primary h-100 m-3 px-7 border-radius-lg d-flex flex-column justify-content-center">
+              <img src="/static/assets/img/shapes/pattern-lines.svg" alt="pattern-lines" class="position-absolute opacity-4 start-0">
+              <div class="position-relative">
+                <img class="max-width-500 w-100 position-relative z-index-2" src="/static/assets/img/illustrations/chat.png">
+              </div>
+              <h4 class="mt-5 text-white font-weight-bolder">
+                Welcome to Our Platform
+              </h4>
+              <p class="text-white">
+                Sign in to access your personalized dashboard.
+              </p>
             </div>
-
-            <button type="submit" class="login-button">
-                <i class="fas fa-sign-in-alt"></i>
-                Sign In
-            </button>
-        </form>
-
-        <div class="login-footer">
-            Don't have an account? 
-            <a href="{{ url_for('user.register') }}" class="signup-link">Sign up</a>
+          </div>
         </div>
+      </div>
     </div>
+  </section>
 
+{% endblock content %}
 
-</body>
-</html>
+{% block javascripts %}
+  <script src="/static/assets/js/soft-design-system.min.js?v=1.0.1" type="text/javascript"></script>
+  <script src="{{ url_for('static', filename='js/shop/base.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/user-ips/user_ips.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/login/login.js') }}"></script>
+{% endblock javascripts %}

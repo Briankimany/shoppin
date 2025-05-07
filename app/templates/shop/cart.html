@@ -31,7 +31,7 @@
             <div class="product-details">
                 <h3 class="product-name">{{ item.product.name }}</h3>
                 <p class="product-category">{{ item.product.category }}</p>
-                <div class="price">ksh {{ "%.2f"|format(item.product.price) }}</div>
+                <div class="price">ksh {{ "%.2f"|format(item.product.final_price) }}</div>
             </div>
             
             <div class="quantity-controls">
@@ -43,7 +43,7 @@
             </div>
             
             <div class="item-subtotal">
-                ksh {{ "%.2f"|format(item.product.price * item.quantity) }}
+                ksh {{ "%.2f"|format(item.product.final_price * item.quantity) }}
             </div>
             
             <button class="remove-btn" data-product-id="{{ item.product.id }}" 
