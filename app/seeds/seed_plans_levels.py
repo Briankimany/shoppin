@@ -5,7 +5,7 @@ from app.routes.logger import LOG
 from sqlalchemy import exists
 from app.models.model_utils import PayoutFrequency
 from app.models.clearance import ClearanceLevel
-import platform_seeds
+from . import platform_seeds
 
 def seed_clearance_levels():
     levels = {

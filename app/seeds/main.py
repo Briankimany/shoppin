@@ -1,6 +1,6 @@
 
-import seed_users_vendors_products 
-import seed_plans_levels
+from . import seed_users_vendors_products 
+from . import seed_plans_levels
 
 import os 
 
