@@ -4,7 +4,7 @@
 *.pyc
 .vscode/
 *.db 
-*.ipynb
+
 test/
 *.logs
 *.log
@@ -15,11 +15,10 @@ venv
 /app/static/uploads
 *.json
 *.DB
-*.csv
+
 *.pkl
 /migrations/versions
 *.ini
-/md-files
+
 .venv2/
 *.Identifier
-notebooks/
