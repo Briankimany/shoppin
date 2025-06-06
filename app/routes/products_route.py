@@ -1,15 +1,27 @@
 from flask import Blueprint, jsonify, request ,render_template
-from app.data_manager.product_manager import ProductQuery
+from app.data_manager.product.product_query import ProductQuery
 from app.data_manager.scoped_session import Session 
-from .views.shop.products_list import ProductListView
+
+from .views.shop import (
+    ProductListView,
+    SpecificProduct)
+
 from .routes_utils import inject_user_data
 
 blueprint = Blueprint('blueprint', __name__)
 query = ProductQuery()
 
+def product_static_fields(_id):
+    from urllib.parse import urlencode
+    
+    data = {'category':'Electronics'}
+    return urlencode(data) 
+
 @blueprint.context_processor
 def inject():
-    return inject_user_data()
+    data= inject_user_data()
+    data['get_prod_static_fields'] = product_static_fields
+    return data 
 
 def error_response(message, status_code):
     return jsonify({"error": message}), status_code
@@ -20,17 +32,21 @@ blueprint.add_url_rule(
     view_func=ProductListView.as_view('product_list'),
     methods=['GET']
 )
-@blueprint.route('/test')
+blueprint.add_url_rule(
+    '/products/p/details',
+    view_func=SpecificProduct.as_view('specific_product'),
+    methods = ['GET']
+)
+
+@blueprint.route("/products/product/<_id>")
+def view_specific_product(_id):
+    return render_template(
+        'shop/components/products/specific_product.html',
+        _id=_id)
+
+@blueprint.route('/products/test')
 def test_t():
     return render_template('shop/components/products/grid.html')
-
-@blueprint.route('/products/details/<int:product_id>', methods=['GET'])
-def get_product_detail(product_id):
-    """Get detailed product information"""
-    product = query.get_product(product_id)
-    if not product:
-        return error_response("Product not found", 404)
-    return jsonify({"data": product})
 
 
 @blueprint.route('/products/filters', methods=['GET'])
@@ -59,7 +75,7 @@ def get_brands_summary():
 def suggestions():
     query_term = request.args.get('q')
     data= query.search(query_term,True)
-    print(data)
+
     return jsonify({"data":data})
 
 @blueprint.route('/products/search', methods=['GET'])

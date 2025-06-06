@@ -1,46 +1,18 @@
-from flask import request, jsonify
-from flask.views import MethodView
-from app.data_manager.product_manager import ProductQuery
+
+from .base import *
 
 
-class ProductListView(MethodView):
+class ProductListView(BaseView):
+
     def __init__(self):
-        self.query = ProductQuery()
-        self.default_per_page =6
-        self.special_args= ['page','offset']
-
-    def _error_response(self, message, status_code):
-        return jsonify({"error": message}), status_code
-
-    def _parse_filters(self):
-        """Parse and validate filter parameters"""
-        filters = {}
-        for key in request.args:
-            if key in self.special_args:
-                continue
-            filters.update({key:request.args.getlist(key)})
+        super().__init__()
         
-        return filters 
-
-    def _paginate_results(self, products, page, per_page):
-        """Paginate the product results"""
-        total_products = len(products)
-        return {
-            "data": products,
-            "meta": {
-                "total": total_products,
-                "page": page,
-                "per_page": per_page,
-                "total_pages": (total_products + per_page - 1) // per_page
-            }
-        }
-
+    
     def get(self):
         """Handle GET requests for product listing"""
         try:
-            # Parse pagination parameters
-            page = int(request.args.get('page', 1)) 
-            per_page = int(request.args.get('per_page', self.default_per_page))
+           
+            page ,per_page = self._extract_page_data()
 
             filters = self._parse_filters()
 
@@ -52,6 +24,8 @@ class ProductListView(MethodView):
             return jsonify(response_data)
 
         except ValueError as e:
+            self.logger.error(f"[PRODUCTS-LIST] Value error  {e}")
             return self._error_response(str(e), 400)
         except Exception as e:
+            self.logger.error(f"[PRODUCTS-LIST] Could not fetch products list {e}")
             return self._error_response(str(e), 500)

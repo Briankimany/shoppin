@@ -6,10 +6,22 @@ from pathlib import Path
 from abc import ABC, abstractmethod
 from dotenv import load_dotenv
 
-load_dotenv()
+
+ROOT_FOLDER  =Path(__file__).parent.parent
+
+APP_FOLDER = ROOT_FOLDER /'app'
+
+ENV_LOCATION = ROOT_FOLDER /".env"
+
+load_dotenv(ENV_LOCATION)
+
+DATABASE_NAME = "vendor_project.db"
+JSON_CONFIG_PATH = ROOT_FOLDER /"config.json"
+LOGGING_FOLDER = ROOT_FOLDER/ 'LOGS'
+
 DEFAULT_SETTINGS = {
     "MAX_NUM_PENDING_WITHDRAWs": 3,
-    "database_url": "vendor_project.db",
+    "database_url": DATABASE_NAME,
     "log_file": "/var/logs/vendor_project.log",
     "debug": True,
     "uploads_dir_path": "uploads",
@@ -61,7 +73,7 @@ class Config(ABC):
         self.default_data = default_data if default_data else DEFAULT_SETTINGS 
         self.authkey = os.getenv("AUTHKEY")
 
-        self.UPLOAD_DIR = str(Path().cwd()/"app/static/uploads")
+        self.UPLOAD_DIR = str(APP_FOLDER/"static/uploads")
         self.allowed_extensions = ['jpg', 'jpeg', 'png', 'webp' ,'svg']
         self.UPLOAD_IMAGES_DIRECTLY = os.getenv("UPLOAD_IMAGES_DIRECTLY","false") == "true"
 
@@ -72,14 +84,13 @@ class Config(ABC):
         self.MAX_NUM_PENDING_WITHDRAWs = self.default_data.get("MAX_NUM_PENDING_WITHDRAWs", 3)
 
         
-
         if not self.json_path.exists():
             self.__save__(self.default_data)
             self._load_attributes(self.default_data)
         else:
             self.__load__()
 
-        self.SQLITE_DATABASE_URL = f"sqlite:///{self.database_url.absolute()}"
+        self.SQLITE_DATABASE_URL = f"sqlite:///{(ROOT_FOLDER /self.database_url).absolute()}"
 
     @abstractmethod
     def __load__(self):

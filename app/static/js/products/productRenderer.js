@@ -60,7 +60,7 @@ class ProductRenderer {
                class="btn btn-sm btn-outline-dark flex-grow-1 me-2">
               <i class="ni ni-zoom-split me-1"></i> Details
             </a>
-            <button class="btn btn-sm btn-dark" onclick="openQuickView(${product.hiden_id})">
+            <button class="btn btn-sm btn-dark" onclick="window.quickView.open('${product.hiden_id}')">
               <i class="ni ni-album-2 me-1"></i> Quick View
             </button>
           </div>
@@ -82,6 +82,7 @@ class ProductRenderer {
     
     this.incrementProductCount(count);
     this.updateProductStats();
+    bindCartEvents();
     
     const trigger = document.getElementById('infinite-scroll-loader');
     if (trigger) trigger.classList.remove('hidden');
@@ -141,6 +142,26 @@ class ProductRenderer {
     const response = await fetch(url);
     const { data, meta } = await response.json();
     this.renderProducts(data);
-    // Pagination.render(meta);
+  }
+
+  static async  loadProducts() {
+
+    const response = await fetch('/products/q');
+    if (!response.ok) throw new Error(HTTP `${response.status}`);
+
+    const data = await response.json();
+    console.log(data.meta);
+
+    ProductRenderer.renderProducts(data.data);
+    ProductMetaTracker.update(data.meta);
+
   }
 }
+
+
+document.addEventListener('DOMContentLoaded', async () => {
+  window.prodRenderer = new ProductRenderer();
+
+  window.renderProducts = ProductRenderer.renderProducts;
+  await ProductRenderer.loadProducts();
+});

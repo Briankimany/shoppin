@@ -14,14 +14,6 @@
     <div class="d-none d-lg-flex align-items-center ms-4" id="desktop-categories"></div>
     {% endif %}
 
-    <!-- Right Section -->
-    <div class="d-flex align-items-center ms-auto">
-      {% if not enable_search %}
-      <button class="btn btn-link text-dark p-0 d-lg-none me-3" onclick="enableSearchMode()">
-        <i class="ni ni-zoom-split-in fs-5"></i>
-      </button>
-      {% endif %}
-
       <button class="btn btn-outline-secondary d-lg-none ms-2" type="button"
               data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
               aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,6 +23,7 @@
 
     <!-- Collapsible Content -->
     <div class="collapse navbar-collapse mt-3 mt-lg-0" id="navbarCollapse">
+      
       {% if enable_search %}
       <div class="d-flex ms-lg-auto my-2 my-lg-0 w-100" style="max-width: 500px;">
         <div class="d-flex flex-column w-100">
@@ -44,6 +37,14 @@
              style="max-height: 400px; z-index: 2080; display: none;"></div>
       </div>
       {% endif %}
+  
+      <!-- Right Section -->
+      <div class="d-flex align-items-center ms-auto">
+        {% if not enable_search %}
+        <button class="btn btn-link text-dark p-0 d-lg-none me-3" onclick="enableSearchMode()">
+          <i class="ni ni-zoom-split-in fs-5"></i>
+        </button>
+        {% endif %}
 
       <ul class="navbar-nav navbar-nav-hover ms-lg-auto mt-3 mt-lg-0">
         <li class="nav-item mx-lg-2">
@@ -96,12 +97,7 @@
   </div>
 </nav>
 
-{% if enable_search %}
-<button class="btn btn-primary d-lg-none fixed-bottom mb-4 mx-4 rounded-pill shadow-lg" 
-        data-bs-toggle="modal" data-bs-target="#mobileFiltersModal" style="z-index: 1029;">
-  <i class="ni ni-filter me-2"></i> Filters
-</button>
-{% endif %}
+
 
 <style>
   #search-suggestions {

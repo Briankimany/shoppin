@@ -6,15 +6,15 @@ from sqlalchemy import create_engine
 from functools import wraps
 
 from app.data_manager.session_manager import SessionManager ,timedelta
-from config.config import JSONConfig
+from config.config import JSONConfig ,JSON_CONFIG_PATH
 from app.data_manager.users_manager import UserManager
 from app.routes.logger import LOG 
 from app.routes.extensions import session
-from .logger import bp_error_logger
 from datetime import datetime ,timezone
 
-config = JSONConfig('config.json')
-engine = create_engine(f"sqlite:///{config.database_url.absolute()}")
+
+config = JSONConfig(JSON_CONFIG_PATH)
+engine = create_engine(config.SQLITE_DATABASE_URL)
 Session = sessionmaker(bind=engine)
 db_session = Session()
 session_manager = SessionManager(db_session)
@@ -34,10 +34,9 @@ def get_or_create_session():
         session["session_token"] = token
     if "user_id" in session:
         user = UserManager(db_session , user=session["user_id"])
-        print("in route utils the user id is ",session['user_id'])
-        
+
         user.session_tkn = session["session_token"]
-        assert user.user !=None
+
         update_data = {"user_id": user.user.id,
                     'expires_at':datetime.now(timezone.utc)+timedelta(hours=24*config.session_days)}
         LOG.SESSIONS_LOGGER.debug(f"[sess-update] Updating session data {update_data}")
@@ -100,7 +99,7 @@ def inject_user_data():
     user_obj.reload_object(user_id)
     is_vendor = user_obj.is_vendor() != None
  
-    enable_search = 'test' in request.path
+    enable_search = 'products' in request.path or 'shop' in request.path
     basic_data= {
         'current_user': user,
         'is_authenticated':True,

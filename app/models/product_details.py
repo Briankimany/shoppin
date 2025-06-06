@@ -28,8 +28,8 @@ class Attribute(Base):
 class AttributeValue(Base):
     __tablename__ = 'attribute_values'
     id = Column(Integer, primary_key=True)
-    value = Column(String, nullable=False)  # "red", "39-42", "XL"
-    unit = Column(String)  # "mm", "inches", "EU" (optional)
+    value = Column(String, nullable=False)  
+    unit = Column(String)  
     
     # Relationships
     attributes = relationship(

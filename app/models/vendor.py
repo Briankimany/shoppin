@@ -6,11 +6,13 @@ from .base import Base
 from .model_utils import PaymentMethod
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.hybrid import hybrid_property
-
+from .vendor_plans import VendorPlan 
+from .custom_vendor_plans import CustomVendorPlan
 
 class Vendor(Base):
+
     __tablename__ = 'vendors'
-    id = Column(Integer ,ForeignKey("users_table.id"), primary_key=True)
+    id = Column(Integer ,ForeignKey("users_table.id"), primary_key=True ,autoincrement=False)
  
     store_name = Column(String, unique=True, nullable=False)
     store_logo = Column(String , unique=False , nullable=False)
@@ -27,7 +29,7 @@ class Vendor(Base):
     _plan = relationship("VendorPlan" ,back_populates='vendors')
     custom_plan = relationship("CustomVendorPlan",backref='vendor',uselist=False)
     
-    products = relationship("Product" ,back_populates='vendor',lazy='dynamic')
+    products = relationship("Product" ,back_populates='vendor',lazy='dynamic',cascade='all,delete')
     charges = relationship("VendorCharge", back_populates="vendor")
 
     @hybrid_property
@@ -35,6 +37,14 @@ class Vendor(Base):
         if self.custom_plan:
             return self.custom_plan
         return self._plan
+    @plan.setter
+    def plan(self, value):
+        if isinstance(value ,VendorPlan):
+            self._plan =value
+        elif isinstance(value , CustomVendorPlan):
+            self.custom_plan = value 
+        else:
+            raise Exception("Invalid value for vendor.plan")
     
     @hybrid_property
     def name(self):

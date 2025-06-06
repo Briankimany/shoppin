@@ -3,13 +3,15 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from contextlib import contextmanager
 
-from config.config import JSONConfig
+from config.config import JSONConfig ,JSON_CONFIG_PATH
 from app.routes.logger import LOG
 from typing import Callable
 
 
-config = JSONConfig("config.json")
-engine = create_engine(f"sqlite:///{config.database_url.absolute()}")
+
+config = JSONConfig(JSON_CONFIG_PATH)
+
+engine = create_engine(config.SQLITE_DATABASE_URL)
 Session = sessionmaker(bind=engine)
 
 @contextmanager
@@ -17,7 +19,9 @@ def session_scope(commit=False , raise_exception=True , logger = LOG.DB,func:Cal
     session = Session()
     try:
         yield session
-        session.commit() if commit else None
+        if commit:
+            session.commit()
+
     except Exception as e:
         msg = f"Error in scoped session {e}"
         if func:

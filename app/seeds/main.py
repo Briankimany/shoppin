@@ -1,6 +1,6 @@
 
-from . import seed_users_vendors_products 
-from . import seed_plans_levels
+import app.seeds.seed_users_vendors_products as seed_users_vendors_products
+import app.seeds.seed_plans_levels as seed_plans_levels
 
 import os 
 

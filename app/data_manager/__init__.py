@@ -8,10 +8,12 @@ from .session_manager import SessionManager
 from .payment_collector import PaymentProcessor
 from .scoped_session import session_scope
 from .payments import PaymentManager
+from .product import ProductQuery 
 
 
 __all__ =[
     'OrderManager',
+    'ProductQuery',
     'PaymentManager',
     'session_scope',
     'PaymentProcessor',

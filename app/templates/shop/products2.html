@@ -58,11 +58,11 @@
                             <div class="quantity-selector">
                                 <button class="qty-btn minus">-</button>
                                 <input type="number" class="quantity-input" 
-                                       id="quantity-{{ product.id }}" value="1" min="1">
+                                       id="quantity-{{ product.hiden_id }}" value="1" min="1">
                                 <button class="qty-btn plus">+</button>
                             </div>
                             <button class="add-to-cart-btn" 
-                                    data-product-id="{{ product.id }}">
+                                    data-product-id="{{ product.hiden_id }}">
                                 <i class="bi bi-cart-plus"></i> Add
                             </button>
                         </div>

@@ -3,9 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>{% block title %}Premium Product Catalog{% endblock %}</title>
+  <title>{% block title %} Shoppin {% endblock %}</title>
   <meta name="description" content="Discover our premium product collection">
-  
+  <meta name="ip-updated" content='{{ip_updated}}'>
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <!-- Favicon -->
   <link rel="icon" href="/static/assets/img/favicon.ico" type="image/x-icon">
   
@@ -13,13 +14,16 @@
   <link href="/static/assets/css/nucleo-icons.css" rel="stylesheet" />
   <link href="/static/assets/css/nucleo-svg.css" rel="stylesheet" />
   <link href="/static/assets/css/soft-design-system.css?v=1.0.1" rel="stylesheet" />
-  <link  href="/static/css/shop/products_grid.css" rel="stylesheet" />
+
+  <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/ips/consent.css') }}"> -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/user_notification.css') }}"> 
+
   {% block extra_css %}{% endblock %}
 </head>
 
 
 <body class="bg-gray-100">
-
+  <div id="alert-container" class="alert-container"></div>
 
   <!-- Skip to content -->
   <a href="#main-content" class="skip-to-content">Skip to main content</a>
@@ -39,7 +43,7 @@
 
   <!-- Modals -->
   {% include 'shop/components/modals/quick_view.html' %}
-  {% include 'shop/components/modals/filters.html' %}
+
 
   <!-- JS -->
   <script src="/static/assets/js/core/popper.min.js"></script>
@@ -51,13 +55,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.0/nouislider.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.0/nouislider.min.css">
 
-  <!-- Core Modules -->
-  <script src="/static/js/products/productRenderer.js"></script>
-  <script src="/static/js/products/filterManager.js"></script>
-  <script src="/static/js/products/main.js"></script>
- 
-  
-  <!-- Page Specific JS -->
+  <script src="{{ url_for('static', filename='js/shop/base.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/user-ips/user_ips.js') }}"></script>
+   
   {% block extra_js %}{% endblock %}
 </body>
 </html>

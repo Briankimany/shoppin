@@ -261,6 +261,7 @@ sample_products = [
 def add_products(db_session:Session):
     
     for product_data in sample_products:
+        product_data['vendor_id']=product_data['vendor_id']+1
         vendor = db_session.query(Vendor).filter_by(id=product_data['vendor_id']).first()
         assert vendor !=None 
         assert vendor.plan !=None 
