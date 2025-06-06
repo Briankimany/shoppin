@@ -6,6 +6,8 @@ from .vendor import Vendor
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.hybrid import hybrid_property
 
+from app.models_utils import IdHider
+from decimal import Decimal
 
 class Product(Base):
     __tablename__ = 'products'
@@ -20,12 +22,13 @@ class Product(Base):
     image_url = Column(String)
     preview_url = Column(String)
     _category = Column('category',String)
+    _description = Column('description',String)
 
     is_active = Column(Boolean ,server_default=text("TRUE") ,nullable=False)
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
     updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 
-    discount = relationship(
+    _discount = relationship(
         'Discount',
         back_populates='products'
     )
@@ -54,7 +57,40 @@ class Product(Base):
         secondary=product_attribute_values,
         back_populates='products'
     )
-
+    @hybrid_property
+    def description(self):
+        if self._description:
+            return self._description
+        return "DEFAULT DESCRIPTION COMING UP"
+    @description.setter
+    def description(self,value):
+        self._description = value
+    
+    @hybrid_property
+    def discount(self):
+        """
+        A hybrid parameter representing the percentage discount for a certain  product.
+        Returns:
+            Integer: percentage discount eg 15
+        """
+        if not self._discount or self._discount < 15:
+            return 15
+        return self._discount
+    
+    @hybrid_property
+    def after_discount(self):
+        """_summary_
+        Hybrid parameter that applies the discount to a products and 
+        returns the final price.
+        Returns:
+            Decimal: The final price after discount
+        """
+        return self.final_price - Decimal((self.discount/100))*self.final_price,
+    
+    @hybrid_property
+    def hiden_id(self):
+        return IdHider.encode(self.id)
+    
     @hybrid_property
     def category(self):
         return self._category
@@ -74,7 +110,7 @@ class Product(Base):
         if self.charge:
             return self.price+ self.commission
         else:
-            raise Exception(f"Invalid product record {self}")
+            raise Exception(f"Invalid product record {self.name}")
         
     @hybrid_property
     def vendor_commision(self):
@@ -91,4 +127,4 @@ class Product(Base):
     )
 
     def __str__(self):
-        return self.__repr__()
+        return  f"{self.name}"

@@ -4,7 +4,7 @@ from config.config import JSONConfig
 from app.routes.logger import LOG
 import time 
 from app.data_manager import OrderManager
-from app.models.model_utils import ObfuscateId
+from app.models_utils import IdHider
 from requests  import ConnectionError ,ConnectTimeout
 
 class PaymentProcessor:
@@ -107,7 +107,7 @@ class PaymentProcessor:
             invoice_id = order.tracking_id 
         else:
             LOG.ORDER_LOGGER.info(f"Making a new payment reques for order {order}")
-            invoice_id = cls.initiate_payment(phone, amount, ObfuscateId.encode(orderid))
+            invoice_id = cls.initiate_payment(phone, amount, IdHider.encode(orderid))
 
             if not invoice_id:
                 return None

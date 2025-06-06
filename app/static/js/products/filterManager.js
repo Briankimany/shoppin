@@ -75,3 +75,26 @@ class FilterManager {
     }
     
 }
+
+async function applyFilters() {
+ 
+  const params = new URLSearchParams();
+  document.querySelectorAll('#filters-container input:checked').forEach(input => {
+    params.append(input.id.split('-')[0], input.value);
+  });
+  const url = `/products/q?${params.toString()}`;
+  const response = await fetch(url);
+  const { data, meta } = await response.json();
+  ProductRenderer.renderProducts(data);
+
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await FilterManager.loadFilters();
+
+  const btn = document.getElementById('apply-filters');
+  if (btn) {
+    btn.addEventListener('click', applyFilters);
+  }
+
+});

@@ -14,6 +14,6 @@ class Discount(Base):
     valid_until = Column(TIMESTAMP, nullable=False)
 
     products = relationship(
-        'Products',
-        back_populates = 'discount'
+        'Product',
+        back_populates = '_discount'
     )

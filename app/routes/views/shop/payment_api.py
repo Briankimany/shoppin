@@ -1,22 +1,13 @@
 
-from flask.views import MethodView
-from app.services.payment_processor import PaymentProcessorService
-from app.data_manager import OrderManager, SessionManager ,VendorTransactionSystem ,PaymentProcessor
-from app.routes.logger import bp_error_logger
-from app.routes.routes_utils import session_set
-from app.routes.logger import LOG
-from flask.views import MethodView
-from flask import request ,session ,jsonify
+from app.data_manager import OrderManager ,VendorTransactionSystem ,PaymentProcessor
+from .base import *
+from flask import session 
 
-
-class PaymentAPI(MethodView):
+class PaymentAPI(BaseView):
     """Handles payment processing endpoint with status checking"""
-    
-    decorators = [bp_error_logger(LOG.ORDER_LOGGER, 500), session_set]
-    
+ 
     def __init__(self):
-        self.processor = PaymentProcessorService()
-        self.session_manager = SessionManager(db_session=None)
+        super().__init__()
         self.logger = LOG.ORDER_LOGGER
 
     def get(self):

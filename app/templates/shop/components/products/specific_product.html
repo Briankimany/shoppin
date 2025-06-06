@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div id="current-product-id" data-value="{{_id}}"></div>
+<div id="specific-product-fields" data-value="{{get_prod_static_fields(_id)}}" style="display: none;"></div>
+
+<div class="container py-4">
+    <div class="row">
+        <!-- Sidebar Benefits -->
+        <div class="col-lg-3 order-lg-1 order-2">
+            <div class="sticky-top" style="top: 20px;">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="mb-3 text-dark">Why Choose Us</h5>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-3 d-flex align-items-center">
+                                <div class="bg-light rounded-circle p-2 me-3">
+                                    <i class="fas fa-shipping-fast text-primary"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 text-dark">Fast Shipping</h6>
+                                    <small class="text-muted">Delivered in 2-3 days</small>
+                                </div>
+                            </li>
+                            <li class="mb-3 d-flex align-items-center">
+                                <div class="bg-light rounded-circle p-2 me-3">
+                                    <i class="fas fa-shield-alt text-primary"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 text-dark">Secure Checkout</h6>
+                                    <small class="text-muted">256-bit encryption</small>
+                                </div>
+                            </li>
+                            <li class="d-flex align-items-center">
+                                <div class="bg-light rounded-circle p-2 me-3">
+                                    <i class="fas fa-headset text-primary"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 text-dark">24/7 Support</h6>
+                                    <small class="text-muted">Dedicated team</small>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Trust Badges -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="d-flex justify-content-center mb-3">
+                            <img src="/static/images/trust-badges.png" alt="Trust badges" class="img-fluid" style="max-height: 80px;">
+                        </div>
+                        <small class="text-muted">100% Satisfaction Guaranteed</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-lg-9 order-lg-2 order-1">
+            <!-- Product Details Section -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <div class="row g-4" id="product-details-container">
+                        <!-- Loading State -->
+                        <div class="col-12 text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Product Tabs Section -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-0">
+                    <ul class="nav nav-tabs" id="productTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab">Description</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="specs-tab" data-bs-toggle="tab" data-bs-target="#specs" type="button" role="tab">Specifications</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab">Reviews</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content p-4" id="productTabsContent">
+                        <div class="tab-pane fade show active" id="description" role="tabpanel">
+                            <p class="mb-0">Product description will be loaded here...</p>
+                        </div>
+                        <div class="tab-pane fade" id="specs" role="tabpanel">
+                            <p class="mb-0">Technical specifications will be loaded here...</p>
+                        </div>
+                        <div class="tab-pane fade" id="reviews" role="tabpanel">
+                            <p class="mb-0">Customer reviews will be loaded here...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recommended Products Section -->
+            <section class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="h5 mb-0 text-dark">Recommended For You</h2>
+                    <a href="#" class="small text-primary">View All</a>
+                </div>
+                
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3" id="suggested-products-grid">
+                    <!-- Loading placeholders -->
+                    {% for _ in range(3) %}
+                    <div class="col">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="placeholder-glow">
+                                <div class="card-img-top placeholder" style="height: 200px;"></div>
+                                <div class="card-body">
+                                    <h5 class="card-title placeholder-glow">
+                                        <span class="placeholder col-8"></span>
+                                    </h5>
+                                    <p class="card-text placeholder-glow">
+                                        <span class="placeholder col-6"></span>
+                                    </p>
+                                    <a class="btn btn-outline-primary disabled placeholder col-4"></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<!-- Product count metadata -->
+<div id="specific-product-count-tracker" 
+     data-count="0"
+     data-total="0"
+     style="display: none;">
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/products/search.js"></script>
+<script src="/static/js/products/specificProduct.js"></script>
+<script src="/static/js/products/main.js"></script>
+<script src="{{ url_for('static', filename='js/shop/products.js') }}"></script>
+{% endblock %}

@@ -96,7 +96,7 @@ normal_users = {
 
 vendors_data = {
     "vendor1": {
-        "id": 1,
+        "id": 2,
         "store_name": "Tech Haven",
         "store_logo": get_image("vendor1"),
         "payment_type": "pre",
@@ -104,7 +104,7 @@ vendors_data = {
         "verified": True
     },
     "vendor2": {
-        "id": 2,
+        "id": 3,
         "store_name": "Urban Threads",
         "store_logo": get_image("vendor2"),
         "payment_type": "post",
@@ -112,7 +112,7 @@ vendors_data = {
         "verified": True
     },
     "vendor3": {
-        "id": 3,
+        "id": 4,
         "store_name": "Domestic Bliss",
         "store_logo": get_image("vendor3"),
         "payment_type": "pre",
@@ -120,7 +120,7 @@ vendors_data = {
         "verified": True
     },
     "vendor4": {
-        "id": 4,
+        "id": 5,
         "store_name": "Digital Services Hub",
         "store_logo": get_image("vendor4"),
         "payment_type": "pre",

@@ -29,6 +29,35 @@ document.addEventListener("DOMContentLoaded", function() {
  });
 });
 
+function addToCart(btn){
+    const productId = btn.getAttribute('data-product-id');
+    const quantityInput = document.getElementById(`quantity-${productId}`);
+    const quantity = quantityInput.value;
+    console.log("jkkkhjhnjkhjh");
+    disableButtonWithSpinner(btn);
+    fetch("/shop/add_to_cart", {
+        method: "POST",
+        headers:getHeaders(),
+        body: JSON.stringify({
+            product_id: productId,
+            quantity: quantity
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert("Added to cart successfully!");
+        } else {
+            showAlert("Failed to add to cart: " + data.error, 'error');
+        }
+    })
+    .catch(error => {
+        showAlert("An error occurred " , 'error');
+    })
+    .finally(() => {
+        enableButton(btn); 
+    });
+}
 
 document.addEventListener("DOMContentLoaded", function() {
     // Category Navigation
@@ -67,39 +96,10 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
     
-
- 
     document.querySelectorAll('.add-to-cart-btn').forEach(button => {
         button.addEventListener('click', function(e) {
             e.stopPropagation();
-            const productId = this.getAttribute('data-product-id');
-            const quantityInput = document.getElementById(`quantity-${productId}`);
-            const quantity = quantityInput.value;
-            
-            disableButtonWithSpinner(this);
-            fetch("/shop/add_to_cart", {
-                method: "POST",
-                headers:getHeaders(),
-                body: JSON.stringify({
-                    product_id: productId,
-                    quantity: quantity
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showAlert("Added to cart successfully!");
-                } else {
-                    showAlert("Failed to add to cart: " + data.error, 'error');
-                }
-            })
-            .catch(error => {
-                showAlert("An error occurred " , 'error');
-            })
-            .finally(() => {
-                enableButton(this); 
-            });
-           
+            addToCart(this);
         });
     });
     
@@ -108,3 +108,29 @@ document.addEventListener("DOMContentLoaded", function() {
         el.style.position = 'relative';
     });
 });
+
+function bindCartEvents() {
+    document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.productId;
+        addToCart(btn);
+      });
+    });
+  
+    document.querySelectorAll('.qty-btn.plus').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const input = btn.closest('.quantity-selector').querySelector('.quantity-input');
+        input.value = parseInt(input.value) + 1;
+      });
+    });
+  
+    document.querySelectorAll('.qty-btn.minus').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const input = btn.closest('.quantity-selector').querySelector('.quantity-input');
+        if (parseInt(input.value) > 1) input.value = parseInt(input.value) - 1;
+      });
+    });
+  }
+  
+
+  

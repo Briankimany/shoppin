@@ -19,6 +19,9 @@ venv
 *.pkl
 /migrations/versions
 *.ini
-
+/notebooks
 .venv2/
 *.Identifier
+.idea/
+
+*.ipynb

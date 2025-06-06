@@ -6,6 +6,7 @@ from flask import jsonify ,render_template,session
 from uuid import uuid4
 from dotenv import load_dotenv
 from config.envrion_variables import IN_DEVELOPMENT
+from config import LOGGING_FOLDER
 
 load_dotenv()
 
@@ -26,7 +27,8 @@ class LoggerManager:
         return self.logger
 
 class LOG:
-    parent_dir = Path().cwd() / "LOGS"
+    parent_dir = LOGGING_FOLDER
+    
     parent_dir.mkdir(parents=True , exist_ok= True)
 
     USER_LOGGER = LoggerManager(parent_dir/"user_bp.logs", logger_name="USER").get_logger()

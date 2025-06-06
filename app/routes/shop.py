@@ -15,6 +15,8 @@ from datetime import datetime
 from .views.shop.payment_api import PaymentAPI
 from app.routes.routes_utils import session_set ,inject_user_data
 from app.data_manager.scoped_session import Session
+from app.models_utils import IdHider
+
 
 db_session = Session()
 
@@ -69,14 +71,20 @@ shop_bp.add_url_rule(
 )
 
 
+@shop_bp.route('/v1')
+@bp_error_logger(LOG.SHOP_LOGGER,500)
+@session_set
+def shop_homev1():
+    vendors = VendorObj.get_all_vendors(db_session=db_session)
+    return render_template("shop/shops.html", vendors=vendors)
 
+
+@shop_bp.route('/home')
 @shop_bp.route('/')
 @bp_error_logger(LOG.SHOP_LOGGER,500)
 @session_set
 def shop_home():
-    
-    vendors = VendorObj.get_all_vendors(db_session=db_session)
-    return render_template("shop/shops.html", vendors=vendors)
+    return render_template('shop/components/products/grid.html')
 
 
 @shop_bp.route("/logout")
@@ -141,7 +149,7 @@ def add_to_cart():
         return jsonify({"success": False, "error": "Session expired. Please refresh and try again."}), 400
 
     data = request.get_json()
-    product_id = data.get("product_id")
+    product_id = IdHider.decode(data.get("product_id"))[0]
     quantity = data.get("quantity")
   
     if not product_id or not quantity:

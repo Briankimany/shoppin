@@ -77,3 +77,4 @@ document.addEventListener('DOMContentLoaded', function() {
       `<span class="search-suggestion-highlight">${match}</span>`
     );
   }
+

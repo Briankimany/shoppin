@@ -1,42 +1,32 @@
 <div class="modal fade" id="quickViewModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
-      <div class="modal-body p-4">
-        <button type="button" class="btn-close float-end" data-bs-dismiss="modal" aria-label="Close"></button>
-        
-        <div class="row">
-          <!-- Product Gallery -->
-          <div class="col-md-6">
-            <div id="quickViewGallery"></div>
+      <div class="modal-header">
+        <h5 class="modal-title" id="quickViewTitle"></h5>
+        <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">hhjj</button> -->
+        <button type="button" class="btn-close btn-secondary" data-bs-dismiss="modal">Close</button>
+
+      </div>
+      <div class="modal-body">
+        <!-- Loading state -->
+        <div class="quick-view-loader" style="display: none; min-height: 300px;" 
+             class="d-flex justify-content-center align-items-center">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
           </div>
-          
-          <!-- Product Details -->
-          <div class="col-md-6 ps-md-4 mt-4 mt-md-0">
-            <h3 id="quickViewTitle" class="mb-2"></h3>
-            
-            <!-- Pricing -->
-            <div id="quickViewPricing" class="d-flex align-items-center mb-3"></div>
-            
-            <!-- Attributes -->
-            <div class="mb-4">
-              <h6 class="text-sm mb-2">Specifications:</h6>
-              <div id="quickViewAttributes"></div>
+        </div>
+        
+        <!-- Content will be injected here -->
+        <div class="quick-view-content">
+          <div class="row">
+            <div class="col-md-6">
+              <div id="quickViewGallery"></div>
             </div>
-            
-            <!-- Description -->
-            <p class="text-sm mb-4" id="quickViewDescription"></p>
-            
-            <!-- Add to Cart -->
-            <div id="quickViewAddToCart"></div>
-            
-            <!-- Product Links -->
-            <div class="d-flex justify-content-between mt-4">
-              <a href="#" class="text-sm" onclick="event.preventDefault(); addToWishlist()">
-                <i class="fas fa-heart me-1"></i> Add to Wishlist
-              </a>
-              <a href="#" id="quickViewFullDetails" class="text-sm">
-                <i class="fas fa-info-circle me-1"></i> View Full Details
-              </a>
+            <div class="col-md-6">
+              <div id="quickViewPricing" class="mb-3"></div>
+              <div id="quickViewAttributes" class="mb-4"></div>
+              <div id="quickViewAddToCart" class="mb-4"></div>
+              <div id="quickViewDescription"></div>
             </div>
           </div>
         </div>
@@ -44,3 +34,24 @@
     </div>
   </div>
 </div>
+<style>
+  /* Smooths quantity input styling */
+.quantity-input::-webkit-outer-spin-button,
+.quantity-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.quantity-input {
+  -moz-appearance: textfield;
+  font-weight: 500;
+  height: 100%;
+}
+
+/* Force height consistency inside input group */
+.input-group .btn,
+.input-group .form-control {
+  height: 100%;
+  line-height: 1.25;
+}
+
+</style>
