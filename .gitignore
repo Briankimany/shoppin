@@ -4,7 +4,7 @@
 *.pyc
 .vscode/
 *.db 
-
+winPython/
 test/
 *.logs
 *.log
@@ -25,3 +25,6 @@ venv
 .idea/
 
 *.ipynb
+current_reqs.txt 
+reqs_diff.txt 
+script_log.txt 

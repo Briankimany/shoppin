@@ -123,7 +123,7 @@ class ProductQuery:
             
             if limit:
                 query = query.offset(offset).limit(limit)
-            
+           
             return [self._product_to_dict(p) for p in query.all()]
 
     def get_filter_options(self):

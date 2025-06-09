@@ -2,8 +2,8 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 
 from app.data_manager.users_manager import UserManager
 
-from app.routes.routes_utils import session_set  ,meet_user_requirements ,inject_user_data ,db_session ,bp_error_logger
-from app.routes.logger import LOG
+from app.routes.routes_utils import session_set  ,meet_user_requirements ,inject_user_data ,db_session 
+from app.routes.logger import LOG ,bp_error_logger
 from app.routes.mail import MailService
 from app.data_manager.token_manager import ResetTokenManager ,AcctivationTokenManager
 from functools import wraps

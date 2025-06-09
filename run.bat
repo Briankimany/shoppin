@@ -88,9 +88,6 @@ if not exist "%REQ_FILE%" (
     goto :cleanup_with_pause
 )
 
-
-
-
 :: ==== PART 2: Virtual Environment Setup ====
 echo %GREEN%PART 2: Virtual Environment Setup%RESET%
 if not exist "%VENV_DIR%" (
@@ -149,7 +146,7 @@ if "%RAW_ERROR%" == "0" (
 ) else if "%RAW_ERROR%" == "1" (
     call :log "Missing packages detected"
     echo %YELLOW%Installing requirements...%RESET%
-    pip install -r requirements.txt --upgrade || (
+    pip install -r reqs_diff.txt --upgrade || (
         call :log "Install failed" "ERROR"
         echo %RED%Installation failed%RESET%
         goto :cleanup_with_pause
@@ -165,11 +162,46 @@ call :log "Starting Flask server"
 echo %GREEN%Starting Flask server...%RESET%
 set "PYTHONPATH=%PROJECT_ROOT%"
 
-:: Use venv Python explicitly
-call :log "Using Python from venv: %VENV_DIR%\Scripts\python.exe"
-"%VENV_DIR%\Scripts\python.exe" -c "from app.main import app; app.run(debug=True)"
-start "" http://localhost:5000/shop
+:: Default values
+set HOST=127.0.0.1
+set PORT=5000
+set DEBUG=1
 
+:: Loop over all arguments
+:parse_args
+if "%~1"=="" goto after_args
+
+:: Check if argument starts with "host=" or "port="
+if /i "%~1"=="host" (
+    set HOST=%~2
+    shift
+) else if /i "%~1"=="port" (
+    set PORT=%~2
+    shift
+) else (
+    :: Fallback: Try parsing as key=value
+    for /f "tokens=1,2 delims==" %%A in ("%~1") do (
+        if /i "%%A"=="host" set HOST=%%B
+        if /i "%%A"=="port" set PORT=%%B
+    )
+)
+shift
+goto parse_args
+
+
+
+:after_args
+:: Run Python script with parsed args
+:: Determine browser host
+set "BROWSER_HOST=%HOST%"
+if "%HOST%"=="0.0.0.0" (
+    set "BROWSER_HOST=localhost"
+)
+:: Open browser
+start "" http://%BROWSER_HOST%:%PORT%/shop
+"%VENV_DIR%\Scripts\python.exe" "%~dp0main.py" %HOST% %PORT% %DEBUG%
+
+:: Check if main.py exited with error
 if %errorlevel% neq 0 (
     call :log "Flask server crashed" "ERROR"
     echo %RED%Flask crash details:%RESET%
@@ -181,6 +213,7 @@ if %errorlevel% neq 0 (
     )
     goto :cleanup_with_pause
 )
+
 
 :cleanup_with_pause
 call :log "Script paused due to error"

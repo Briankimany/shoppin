@@ -16,6 +16,7 @@ logging.basicConfig(
 def normalize(line):
     try:
         normalized = re.sub(r'[<>=~!].*', '', line.strip()).lower()
+        normalized= re.sub(r'[-.]+', '_', normalized.lower())
         logging.debug(f"Normalized '{line.strip()}' to '{normalized}'")
         return normalized
     except Exception as e:
@@ -41,10 +42,13 @@ if __name__ == "__main__":
         
         # Process files
         with open(reqs_file) as f1, open(current_file) as f2:
-            reqs = {normalize(line) for line in f1 if line.strip() and not line.startswith('#')}
-            installed = {normalize(line) for line in f2}
-        
+            reqs_d = {normalize(line):line.strip() for line in f1 if line.strip() and not line.startswith('#')}
+            installed_d = {normalize(line):line.strip() for line in f2 if line.strip() and not line.startswith('#')}
+        reqs = reqs_d.keys()
+        installed = installed_d.keys()
         missing = reqs - installed
+        missing = [reqs_d[library] for library in missing]
+   
         logging.info(f"Found {len(missing)} missing packages:")
         
         # Write output
