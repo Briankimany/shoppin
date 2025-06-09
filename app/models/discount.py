@@ -15,5 +15,4 @@ class Discount(Base):
 
     products = relationship(
         'Product',
-        back_populates = '_discount'
-    )
+        back_populates = '_discount')
